@@ -1,4 +1,6 @@
-﻿using Elements.Core.Systems;
+﻿using Elements.Core;
+using Elements.Core.Systems;
+using SFML.Graphics;
 using System.Diagnostics;
 
 public class KProgram
@@ -98,22 +100,7 @@ public class KProgram
 
     private static void Load()
     {
-        var contents = File.ReadAllText("texture_data.txt").Split(',', '\n');
 
-        for (int i = 0; i < contents.Length; i++)
-        {
-            var token = contents[i];
-            Console.WriteLine($"{i}:{token}");
-            switch (token)
-            {
-                case "-s":
-
-                    break;
-
-                default:
-                    break;
-            }
-        }
     } 
 
     private static void Update(in ulong currentUpdate)

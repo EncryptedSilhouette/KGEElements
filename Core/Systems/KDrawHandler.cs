@@ -8,9 +8,10 @@ namespace Elements.Core.Systems
         private KTextureData _masterAtlas;
         private List<KDrawLayer> _drawLayers;
 
-        public KDrawHandler(KWindowManager windowManager)
+        public KDrawHandler(KWindowManager windowManager, KTextureData atlas)
         {
             _window = windowManager.Window;
+            _masterAtlas = atlas;
             _drawLayers = new();
         }
 
@@ -23,10 +24,7 @@ namespace Elements.Core.Systems
             _window.Display();
         }
 
-        public void CreateLayer()
-        {
-            _drawLayers.Add(new(256, _window.Size.X, _window.Size.Y, _masterAtlas));
-        }
+        public void CreateLayer() => _drawLayers.Add(new(256, _window.Size.X, _window.Size.Y, _masterAtlas));
     }
 
     public struct KDrawLayer
