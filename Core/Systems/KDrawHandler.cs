@@ -4,39 +4,64 @@ namespace Elements.Core.Systems
 {
     public struct KDrawHandler
     {
-        private RenderWindow _window;
-        private KTextureAtlas _masterAtlas;
-        private KRenderLayer[] _drawLayers;
+        public RenderWindow Window;
+        public RenderStates RenderStates;
+        public KDrawLayer[] DrawLayers;
 
-        public int DrawLayerCount => _drawLayers.Length;
+        public int DrawLayerCount => DrawLayers.Length;
 
-        public KDrawHandler(KWindowManager windowManager, KTextureAtlas atlas)
+        public KDrawHandler(KWindowManager windowManager, KTextureAtlas atlas, int layers = 8)
         {
-            _window = windowManager.Window;
-            _masterAtlas = atlas;
-            _drawLayers = new KRenderLayer[8] 
+            Window = windowManager.Window;
+            DrawLayers = new KDrawLayer[4];
+            RenderStates = RenderStates.Default;
+            RenderStates.Texture = atlas.Texture;
+
+            for (int i = 0; i < layers; i++) 
             {
-                new KRenderLayer(),
-                new KRenderLayer(),
-                new KRenderLayer(),
-                new KRenderLayer(),
-                new KRenderLayer(),
-                new KRenderLayer(),
-                new KRenderLayer(),
-                new KRenderLayer(),
-            };
+                DrawLayers[i] = new KDrawLayer(Window.Size.X, Window.Size.Y, 256, RenderStates);
+            }
         }
 
         public void DrawFrame()
         {
-            _window.Clear();
+            Vertex[] vertices =
+            [
+                new Vertex()
+                {
+                    Color = Color.White,
+                    TexCoords = new(0, 0),
+                    Position = new(0, 0)
+                },
+                new Vertex()
+                {
+                    Color = Color.White,
+                    TexCoords = new(RenderStates.Texture.Size.X, 0),
+                    Position = new(Window.Size.X, 0)
+                },
+                new Vertex()
+                {
+                    Color = Color.White,
+                    TexCoords = new(RenderStates.Texture.Size.X, RenderStates.Texture.Size.Y),
+                    Position = new(Window.Size.X, Window.Size.Y)
+                },
+                new Vertex()
+                {
+                    Color = Color.White,
+                    TexCoords = new(0, RenderStates.Texture.Size.Y),
+                    Position = new(0, Window.Size.Y)
+                }
+            ];
 
-            foreach (var layer in _drawLayers)
+            Window.Clear();
+
+            for (int i = 0; i < DrawLayers.Length; i++)
             {
-                
+                RenderStates.Texture = DrawLayers[i].DrawFrame().Texture;
+                Window.Draw(vertices, PrimitiveType.Quads, RenderStates);
             }
 
-            _window.Display();
+            Window.Display();
         }
 
         public void SubmitDraw(int layer, in KDrawData drawData, in KTransform transform)
@@ -53,27 +78,23 @@ namespace Elements.Core.Systems
         public void SubmitDraw(int layer , in KDrawData drawData, in KRectangle rectangle)
         {
             if (layer > DrawLayerCount - 1) layer = DrawLayerCount - 1;
-
-            _drawLayers[layer].SubmitDraw(drawData, rectangle);
+            DrawLayers[layer].SubmitDraw(drawData, rectangle);
         }
     }
 
-    public struct KRenderLayer
+    public struct KDrawLayer
     {
-        private uint _bufferOffset;
-        private KTextureAtlas _atlas;
-        private RenderStates _renderStates;
-        private VertexBuffer _buffer;
+        private uint _bufferOffset = 0;
 
-        public RenderTexture RenderTexture { get; private set; }
+        public VertexBuffer Buffer;
+        public RenderStates RenderStates;
+        public RenderTexture RenderTexture;
 
-        public KRenderLayer(in uint width, in uint height, in uint bufferSize, in RenderStates renderStates, KTextureAtlas atlas) 
+        public KDrawLayer(in uint width, in uint height, in uint bufferSize, in RenderStates renderStates) 
         {
+            Buffer = new(bufferSize, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic);
             RenderTexture = new(width, height);
-            _buffer = new(bufferSize, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic);
-            _renderStates = renderStates;
-            _atlas = atlas;
-            _renderStates.Texture = _atlas.Texture;
+            RenderStates = renderStates;
         }
 
         public void SubmitDraw(in KDrawData dat, in KRectangle rec)
@@ -105,14 +126,18 @@ namespace Elements.Core.Systems
                     Position = rec.BottomLeft
                 }
             ];
-            _buffer.Update(vertices, 4, _bufferOffset);
+            Buffer.Update(vertices, 4, _bufferOffset);
             _bufferOffset += 4;
         }
 
-        public void DrawFrame()
+        public RenderTexture DrawFrame()
         {
-            _buffer.Draw(RenderTexture, 0, _bufferOffset, _renderStates);
+            RenderTexture.Clear(Color.White);
+            Buffer.Draw(RenderTexture, 0, _bufferOffset, RenderStates);
+            RenderTexture.Display();
+
             _bufferOffset = 0;
+            return RenderTexture;
         }
     }
 }

@@ -20,6 +20,13 @@ namespace Elements.Core.Systems
 
         SCROLL_UP = 1 << 10,
         SCROLL_DOWN = 1 << 11,
+
+        PRESSED_ONLY_FILTER =
+            M1_PRESSED |
+            M2_PRESSED |
+            M3_PRESSED |
+            M4_PRESSED |
+            M5_PRESSED
     }
 
     [Flags]
@@ -54,9 +61,9 @@ namespace Elements.Core.Systems
         private static void RegisterMouseButtonPress(object? ignored, MouseButtonEventArgs e) =>
             KProgram.InputManager.MouseStates |= (KMouseStates)(1 << (int)e.Button); //Converts Button enum to bitflag.
 
-        //Converts Button enum to bitflag.
-        private static void RegisterMouseButtonRelease(object? ignored, MouseButtonEventArgs e) =>
-            KProgram.InputManager.MouseStates |= ~(KMouseStates)(1 << (int)e.Button); //Converts Button enum to bitflag.
+        ////Converts Button enum to bitflag.
+        //private static void RegisterMouseButtonRelease(object? ignored, MouseButtonEventArgs e) =>
+        //    KProgram.InputManager.MouseStates &= ~(KMouseStates)(1 << (int)e.Button); //Converts Button enum to bitflag.
 
         private static void UpdateTextBuffer(object? ignored, TextEventArgs e) =>
             KProgram.InputManager._stringBuilder.Append(e.Unicode);
@@ -81,14 +88,14 @@ namespace Elements.Core.Systems
         public int MousePosY;
         public float ScrollDelta;
         public KMouseStates MouseStates;
-        public KMouseStates PreviousMouseStates;
 
         public KInputManager()
         {
-            _keyboardStates = new KKeyboardStates[(int) Keyboard.Key.KeyCount];
-            _stringBuilder = new(128);
             MousePosX = MousePosY = 0;
-            MouseStates = PreviousMouseStates = 0;
+            _stringBuilder = new(128);
+            _keyboardStates = new KKeyboardStates[(int) Keyboard.Key.KeyCount];
+            
+            for (int i = 0; i < _keyboardStates.Length; i++) _keyboardStates[i] = 0;
         }
 
         public void Init(in KWindowManager windowManager)
@@ -96,7 +103,7 @@ namespace Elements.Core.Systems
             windowManager.Window.MouseMoved += UpdateMousePosition;
             windowManager.Window.MouseWheelScrolled += UpdateScrollDelta;
             windowManager.Window.MouseButtonPressed += RegisterMouseButtonPress;
-            windowManager.Window.MouseButtonReleased += RegisterMouseButtonRelease;
+            //windowManager.Window.MouseButtonReleased += RegisterMouseButtonRelease;
             windowManager.Window.TextEntered += UpdateTextBuffer;
             windowManager.Window.KeyPressed += RegisterKeyPress;
             windowManager.Window.KeyReleased += RegisterKeyRelease;
@@ -107,7 +114,7 @@ namespace Elements.Core.Systems
             windowManager.Window.MouseMoved -= UpdateMousePosition;
             windowManager.Window.MouseWheelScrolled -= UpdateScrollDelta;
             windowManager.Window.MouseButtonPressed -= RegisterMouseButtonPress;
-            windowManager.Window.MouseButtonReleased -= RegisterMouseButtonRelease;
+            //windowManager.Window.MouseButtonReleased -= RegisterMouseButtonRelease;
             windowManager.Window.TextEntered -= UpdateTextBuffer;
             windowManager.Window.KeyPressed -= RegisterKeyPress;
             windowManager.Window.KeyReleased -= RegisterKeyRelease;
@@ -121,18 +128,23 @@ namespace Elements.Core.Systems
         public void FrameUpdate()
         {
             _stringBuilder.Clear();
-
-            //preserve previous states
-            PreviousMouseStates = MouseStates;
+            PreservelastInputStates();
         }
 
         public bool CheckMouseState(KMouseStates mouseState) => (MouseStates & mouseState) == mouseState;
 
-        public bool CheckKeyState(KKeyboardStates keyState)
+        public bool CheckKeyState(Keyboard.Key key, KKeyboardStates keyState)
         {
-            
+            if (key > Keyboard.Key.KeyCount || key < 0) return false;
+            return _keyboardStates[(int) key].HasFlag(keyState);
         }
 
         public string ReadTextBuffer() => _stringBuilder.ToString();
+
+        private void PreservelastInputStates()
+        {
+            var previousStates = (int)(MouseStates & KMouseStates.PRESSED_ONLY_FILTER) << 5;
+            MouseStates = (KMouseStates)previousStates;
+        }
     }
 }
