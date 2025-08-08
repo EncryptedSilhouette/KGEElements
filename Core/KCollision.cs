@@ -1,5 +1,6 @@
 ﻿namespace Elements.Core
 {
+    //Untested
     public class KCollision
     {
         public static bool CheckCirclePointCollision(in float centerX, in float centerY, in float radius, in float posX, in float posY)
@@ -29,8 +30,8 @@
         public static bool CheckRectPointCollision(in KRectangle rectangle, in float posX, in float posY) =>
             //apply rotation to point
             CheckRectPointCollision(
-                rectangle.transform.posX, rectangle.transform.posY,
-                rectangle.width * rectangle.transform.scaleX, rectangle.height * rectangle.transform.scaleY,
+                rectangle.Transform.PosX, rectangle.Transform.PosY,
+                rectangle.Width * rectangle.Transform.ScaleX, rectangle.Height * rectangle.Transform.ScaleY,
                 posX, posY);
     }
 }

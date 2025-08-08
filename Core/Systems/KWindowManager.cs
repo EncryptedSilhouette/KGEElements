@@ -30,7 +30,7 @@ namespace Elements.Core.Systems
             BackgroundColor = Color.Black;
 
             Window = new(DesktopMode, _title);
-            DrawManager = new(this, KTextureData.Load("texture_data.txt"));
+            DrawManager = new(this, KTextureAtlas.Load("texture_data.txt"));
         }
 
         public void FrameUpdate()
