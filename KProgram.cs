@@ -18,7 +18,7 @@ public class KProgram
     static KProgram()
     {
         Running = false;
-        UpdateTarget = 60;
+        UpdateTarget = 30;
         UpdateInterval = MS_PER_SECOND / UpdateTarget;
         WindowManager = new();
         InputManager = new();
@@ -87,6 +87,7 @@ public class KProgram
 
     private static void Init()
     {
+        Console.WriteLine("init");
         WindowManager.Window.Closed += (_, _) => Running = false;
 
         WindowManager.Window.KeyPressed += (_, e) => 
@@ -94,7 +95,7 @@ public class KProgram
             Console.WriteLine($"Press:{e.Code}");
         };
 
-        WindowManager.Window.KeyPressed += (_, e) => 
+        WindowManager.Window.KeyReleased += (_, e) => 
         {
             Console.WriteLine($"Release:{e.Code}");
         };
@@ -121,6 +122,8 @@ public class KProgram
 
     private static void FrameUpdate(in ulong currentUpdate, in ulong currentFrame)
     {
+        Console.WriteLine($"frame:{currentUpdate}\n");
+
         InputManager.FrameUpdate();
         WindowManager.FrameUpdate();
     }

@@ -3,7 +3,7 @@ using SFML.Window;
 
 namespace Elements.Core.Systems
 {
-    public struct KWindowManager
+    public class KWindowManager
     {
         public static VideoMode DesktopMode = VideoMode.DesktopMode;
         public static VideoMode[] FullscreenModes = VideoMode.FullscreenModes;
