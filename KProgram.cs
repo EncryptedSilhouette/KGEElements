@@ -1,6 +1,4 @@
-﻿using Elements.Core;
-using Elements.Core.Systems;
-using SFML.Graphics;
+﻿using Elements.Core.Systems;
 using System.Diagnostics;
 
 public class KProgram
@@ -90,6 +88,17 @@ public class KProgram
     private static void Init()
     {
         WindowManager.Window.Closed += (_, _) => Running = false;
+
+        WindowManager.Window.KeyPressed += (_, e) => 
+        {
+            Console.WriteLine($"Press:{e.Code}");
+        };
+
+        WindowManager.Window.KeyPressed += (_, e) => 
+        {
+            Console.WriteLine($"Release:{e.Code}");
+        };
+
         InputManager.Init(WindowManager);
     }
 
@@ -105,6 +114,8 @@ public class KProgram
 
     private static void Update(in ulong currentUpdate)
     {
+
+        Console.WriteLine($"up:{currentUpdate}");
         InputManager.Update();
     }
 

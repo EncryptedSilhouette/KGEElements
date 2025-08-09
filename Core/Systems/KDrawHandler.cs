@@ -13,9 +13,9 @@ namespace Elements.Core.Systems
         public KDrawHandler(KWindowManager windowManager, KTextureAtlas atlas, int layers = 8)
         {
             Window = windowManager.Window;
-            DrawLayers = new KDrawLayer[4];
             RenderStates = RenderStates.Default;
             RenderStates.Texture = atlas.Texture;
+            DrawLayers = new KDrawLayer[layers];
 
             for (int i = 0; i < layers; i++) 
             {
@@ -53,7 +53,7 @@ namespace Elements.Core.Systems
                 }
             ];
 
-            Window.Clear();
+            Window.Clear(Color.White);
 
             for (int i = 0; i < DrawLayers.Length; i++)
             {
@@ -132,7 +132,7 @@ namespace Elements.Core.Systems
 
         public RenderTexture DrawFrame()
         {
-            RenderTexture.Clear(Color.White);
+            RenderTexture.Clear(Color.Black);
             Buffer.Draw(RenderTexture, 0, _bufferOffset, RenderStates);
             RenderTexture.Display();
 

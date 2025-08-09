@@ -33,20 +33,20 @@ namespace Elements.Core.UI
 
             OnHover?.Invoke();
 
-            if (KProgram.InputManager.CheckMouseState(KMouseStates.M1_PRESSED))
-            {
-                if (!_isDown)
-                {
-                    OnPressed?.Invoke();
-                    _isDown = true;
-                }
-                if (_isDown) OnHold?.Invoke();
-            }
-            else if (!KProgram.InputManager.CheckMouseState(KMouseStates.M1_PRESSED))
-            {
-                _isDown = false;
-                OnReleased?.Invoke();
-            }
+            //if (KProgram.InputManager.CheckMouseState(KMouseStates.M1_PRESSED))
+            //{
+            //    if (!_isDown)
+            //    {
+            //        OnPressed?.Invoke();
+            //        _isDown = true;
+            //    }
+            //    if (_isDown) OnHold?.Invoke();
+            //}
+            //else if (!KProgram.InputManager.CheckMouseState(KMouseStates.M1_PRESSED))
+            //{
+            //    _isDown = false;
+            //    OnReleased?.Invoke();
+            //}
         }
 
         public void FrameUpdate()

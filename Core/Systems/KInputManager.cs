@@ -47,26 +47,31 @@ namespace Elements.Core.Systems
     {
         #region Static 
 
-        private static void UpdateMousePosition(object? ignored, MouseMoveEventArgs e) =>
-            (KProgram.InputManager.MousePosX, KProgram.InputManager.MousePosY) = (e.X, e.Y);
+        private static void UpdateMousePosition(object? ignored, MouseMoveEventArgs e)
+        {
+
+        }
 
         private static void UpdateScrollDelta(object? ignored, MouseWheelScrollEventArgs e)
         {
-            KProgram.InputManager.ScrollDelta += e.Delta;
-            if (e.Delta == 0)       KProgram.InputManager.MouseStates |= ~KMouseStates.SCROLL_UP | ~KMouseStates.SCROLL_DOWN;
-            else if (e.Delta > 0)   KProgram.InputManager.MouseStates |= KMouseStates.SCROLL_UP | ~KMouseStates.SCROLL_DOWN;
-            else                    KProgram.InputManager.MouseStates |= ~KMouseStates.SCROLL_UP | KMouseStates.SCROLL_DOWN;
+            
         }
 
-        private static void RegisterMouseButtonPress(object? ignored, MouseButtonEventArgs e) =>
-            KProgram.InputManager.MouseStates |= (KMouseStates)(1 << (int)e.Button); //Converts Button enum to bitflag.
+        private static void RegisterMouseButtonPress(object? ignored, MouseButtonEventArgs e)
+        {
 
-        ////Converts Button enum to bitflag.
-        //private static void RegisterMouseButtonRelease(object? ignored, MouseButtonEventArgs e) =>
-        //    KProgram.InputManager.MouseStates &= ~(KMouseStates)(1 << (int)e.Button); //Converts Button enum to bitflag.
+        }
 
-        private static void UpdateTextBuffer(object? ignored, TextEventArgs e) =>
-            KProgram.InputManager._stringBuilder.Append(e.Unicode);
+        //Converts Button enum to bitflag.
+        private static void RegisterMouseButtonRelease(object? ignored, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private static void UpdateTextBuffer(object? ignored, TextEventArgs e)
+        {
+
+        }
 
         private static void RegisterKeyPress(object? ignored, KeyEventArgs e)
         {
@@ -81,7 +86,7 @@ namespace Elements.Core.Systems
 
         #endregion
        
-        private KKeyboardStates[] _keyboardStates;
+        //private KKeyboardStates[] _keyboardStates;
         private StringBuilder _stringBuilder;
 
         public int MousePosX;
@@ -93,31 +98,31 @@ namespace Elements.Core.Systems
         {
             MousePosX = MousePosY = 0;
             _stringBuilder = new(128);
-            _keyboardStates = new KKeyboardStates[(int) Keyboard.Key.KeyCount];
+            //_keyboardStates = new KKeyboardStates[(int) Keyboard.Key.KeyCount];
             
-            for (int i = 0; i < _keyboardStates.Length; i++) _keyboardStates[i] = 0;
+            //for (int i = 0; i < _keyboardStates.Length; i++) _keyboardStates[i] = 0;
         }
 
         public void Init(in KWindowManager windowManager)
         {
-            windowManager.Window.MouseMoved += UpdateMousePosition;
-            windowManager.Window.MouseWheelScrolled += UpdateScrollDelta;
-            windowManager.Window.MouseButtonPressed += RegisterMouseButtonPress;
+            //windowManager.Window.MouseMoved += UpdateMousePosition;
+            //windowManager.Window.MouseWheelScrolled += UpdateScrollDelta;
+            //windowManager.Window.MouseButtonPressed += RegisterMouseButtonPress;
             //windowManager.Window.MouseButtonReleased += RegisterMouseButtonRelease;
-            windowManager.Window.TextEntered += UpdateTextBuffer;
-            windowManager.Window.KeyPressed += RegisterKeyPress;
-            windowManager.Window.KeyReleased += RegisterKeyRelease;
+            //windowManager.Window.TextEntered += UpdateTextBuffer;
+            //windowManager.Window.KeyPressed += RegisterKeyPress;
+            //windowManager.Window.KeyReleased += RegisterKeyRelease;
         }
 
         public void Deinit(in KWindowManager windowManager)
         {
-            windowManager.Window.MouseMoved -= UpdateMousePosition;
-            windowManager.Window.MouseWheelScrolled -= UpdateScrollDelta;
-            windowManager.Window.MouseButtonPressed -= RegisterMouseButtonPress;
+            //windowManager.Window.MouseMoved -= UpdateMousePosition;
+            //windowManager.Window.MouseWheelScrolled -= UpdateScrollDelta;
+            //windowManager.Window.MouseButtonPressed -= RegisterMouseButtonPress;
             //windowManager.Window.MouseButtonReleased -= RegisterMouseButtonRelease;
-            windowManager.Window.TextEntered -= UpdateTextBuffer;
-            windowManager.Window.KeyPressed -= RegisterKeyPress;
-            windowManager.Window.KeyReleased -= RegisterKeyRelease;
+            //windowManager.Window.TextEntered -= UpdateTextBuffer;
+            //windowManager.Window.KeyPressed -= RegisterKeyPress;
+            //windowManager.Window.KeyReleased -= RegisterKeyRelease;
         }
 
         public void Update()
@@ -127,24 +132,13 @@ namespace Elements.Core.Systems
 
         public void FrameUpdate()
         {
-            _stringBuilder.Clear();
-            PreservelastInputStates();
+            //_stringBuilder.Clear();
         }
 
-        public bool CheckMouseState(KMouseStates mouseState) => (MouseStates & mouseState) == mouseState;
-
-        public bool CheckKeyState(Keyboard.Key key, KKeyboardStates keyState)
-        {
-            if (key > Keyboard.Key.KeyCount || key < 0) return false;
-            return _keyboardStates[(int) key].HasFlag(keyState);
-        }
+      
 
         public string ReadTextBuffer() => _stringBuilder.ToString();
 
-        private void PreservelastInputStates()
-        {
-            var previousStates = (int)(MouseStates & KMouseStates.PRESSED_ONLY_FILTER) << 5;
-            MouseStates = (KMouseStates)previousStates;
-        }
+        
     }
 }
