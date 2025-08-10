@@ -99,11 +99,6 @@ namespace Elements.Core.Systems
             }
         }
 
-        public void FrameUpdate()
-        {
-            _stringBuilder.Clear();
-        }
-
         private void UpdateMousePosition(object? ignored, MouseMoveEventArgs e) => 
             (MousePosX, MousePosY) = (e.X, e.Y);
 

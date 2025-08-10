@@ -9,6 +9,7 @@ public class KProgram
     public static bool Running;
     public static double UpdateTarget;
     public static double UpdateInterval;
+    public static KResourceManager ResourceManager;
     public static KWindowManager WindowManager;
     public static KInputManager InputManager;
 
@@ -20,6 +21,7 @@ public class KProgram
         Running = false;
         UpdateTarget = 30;
         UpdateInterval = MS_PER_SECOND / UpdateTarget;
+        ResourceManager = new();
         WindowManager = new();
         InputManager = new();
     }
@@ -73,7 +75,7 @@ public class KProgram
                 unprocessedTime -= UpdateInterval;
                 Update(currentUpdate);
             }
-            while (unprocessedTime >= UpdateInterval);
+            while (unprocessedTime >= UpdateInterval && Running);
 
             //Update and draw frame.
             fps++;
@@ -88,7 +90,8 @@ public class KProgram
     private static void Init()
     {
         Console.WriteLine("init");
-       
+
+        WindowManager.Init(ResourceManager);
         InputManager.Init(WindowManager);
     }
 
@@ -99,18 +102,17 @@ public class KProgram
 
     private static void Load()
     {
-
+        ResourceManager.Load();
     } 
 
     private static void Update(in uint currentUpdate)
     {
         InputManager.Update();  //Must update first, else inputs will be cleared immediately.
-        WindowManager.Update();
+        WindowManager.Update(); //Need to call dispatch events in case of game lagging.
     }
 
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame)
     {
-        InputManager.FrameUpdate();
         WindowManager.FrameUpdate();
     }
 }

@@ -4,23 +4,30 @@ namespace Elements.Core.Systems
 {
     public struct KDrawHandler
     {
+        public readonly static Texture DEFAULT_TEXTURE = new(new Image(16, 16, Color.Magenta));
+
         public RenderWindow Window;
         public RenderStates RenderStates;
         public KDrawLayer[] DrawLayers;
 
         public int DrawLayerCount => DrawLayers.Length;
 
-        public KDrawHandler(KWindowManager windowManager, KTextureAtlas atlas, int layers = 8)
+        public KDrawHandler(KWindowManager windowManager, int layers = 8)
         {
             Window = windowManager.Window;
             RenderStates = RenderStates.Default;
-            RenderStates.Texture = atlas.Texture;
+            RenderStates.Texture = DEFAULT_TEXTURE;
             DrawLayers = new KDrawLayer[layers];
 
             for (int i = 0; i < layers; i++) 
             {
                 DrawLayers[i] = new KDrawLayer(Window.Size.X, Window.Size.Y, 256, RenderStates);
             }
+        }
+
+        public void Init(KResourceManager resourceManager)
+        {
+
         }
 
         public void DrawFrame()

@@ -1,4 +1,6 @@
-﻿using SFML.Graphics;
+﻿#nullable disable
+
+using SFML.Graphics;
 using System.Diagnostics;
 
 namespace Elements.Core
@@ -40,8 +42,11 @@ namespace Elements.Core
             return new(texture, sprites);
         }
 
-        public Texture Texture { get; }
-        public List<KSprite> Sprites { get; }
+        public Texture Texture { get; init; }
+        public List<KSprite> Sprites { get; init; }
+
+        //Use with init block only
+        public KTextureAtlas() { }
 
         public KTextureAtlas(Texture texture, IEnumerable<KSprite> sprites)
         {

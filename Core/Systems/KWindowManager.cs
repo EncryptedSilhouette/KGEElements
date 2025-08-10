@@ -11,7 +11,7 @@ namespace Elements.Core.Systems
         private string _title;
 
         public Color BackgroundColor;
-        public KDrawHandler DrawManager;
+        public KDrawHandler DrawHandler;
         public RenderWindow Window;
 
         public string Title
@@ -30,7 +30,12 @@ namespace Elements.Core.Systems
             BackgroundColor = Color.Black;
 
             Window = new(DesktopMode, _title);
-            DrawManager = new(this, KTextureAtlas.Load("texture_data.txt"));
+            DrawHandler = new(this, KDrawHandler.DEFAULT_ATLAS);
+        }
+
+        public void Init(KResourceManager resourceManager)
+        {
+            DrawHandler.Init(resourceManager);
         }
 
         public void Update()
@@ -40,7 +45,7 @@ namespace Elements.Core.Systems
 
         public void FrameUpdate()
         {
-            DrawManager.DrawFrame();
+            DrawHandler.DrawFrame();
         }
     }
 }
