@@ -33,9 +33,13 @@ namespace Elements.Core.Systems
             DrawManager = new(this, KTextureAtlas.Load("texture_data.txt"));
         }
 
-        public void FrameUpdate()
+        public void Update()
         {
             Window.DispatchEvents();
+        }
+
+        public void FrameUpdate()
+        {
             DrawManager.DrawFrame();
         }
     }

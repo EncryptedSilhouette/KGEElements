@@ -17,7 +17,6 @@ namespace Elements.Core.Systems
     public enum KKeyStates : byte
     {
         PRESSED = 1 << 0,
-        PREVIOUS = 1 << 1,
         RELEASED = 1 << 2,
         SHIFT = 1 << 3,
         CONTROL = 1 << 4,
@@ -29,9 +28,9 @@ namespace Elements.Core.Systems
     {
         public record struct KKey(in byte KeyCode, in KKeyStates States);
 
-        private byte _activeKeyCount;
-        private StringBuilder _stringBuilder;
+        private byte _activeKeyCount; //The current amount of active keys.
         private KKey[] _activeKeys;
+        private StringBuilder _stringBuilder; 
 
         public int MousePosX;
         public int MousePosY;
@@ -45,7 +44,7 @@ namespace Elements.Core.Systems
             MouseStates = PreviousMouseStates = 0;
 
             _stringBuilder = new(128);
-            _activeKeys = new KKey[128];
+            _activeKeys = new KKey[128]; 
 
             for (int i = 0; i < _activeKeys.Length; i++)
             {
@@ -77,20 +76,38 @@ namespace Elements.Core.Systems
 
         public void Update()
         {
-         
+            //Clear text buffer.
+            _stringBuilder.Clear();
+
+            //Update Mouse.
+            ScrollDelta = 0;
+            PreviousMouseStates = MouseStates;
+
+            //Update active keys.
+            for (int i = 0; i < _activeKeyCount; i++)
+            {
+                //Remove any released keys. 
+                if (_activeKeys[i].States.HasFlag(KKeyStates.RELEASED))
+                {
+                    _activeKeys[i] = _activeKeys[_activeKeyCount - 1];
+                    _activeKeyCount--;
+                    break;
+                }
+                //Removes states.
+                //Key remains active until released, thus held state is a given, and no "held" state required.
+                _activeKeys[i].States = 0;
+            }
         }
 
         public void FrameUpdate()
         {
             _stringBuilder.Clear();
-            PreviousMouseStates = MouseStates;
-            UpdateActiveKeys();
         }
 
         private void UpdateMousePosition(object? ignored, MouseMoveEventArgs e) => 
             (MousePosX, MousePosY) = (e.X, e.Y);
 
-        private void UpdateScrollDelta(object? ignored, MouseWheelScrollEventArgs e) => ScrollDelta = e.Delta;
+        private void UpdateScrollDelta(object? ignored, MouseWheelScrollEventArgs e) => ScrollDelta += e.Delta;
 
         private void RegisterMouseButtonPress(object? ignored, MouseButtonEventArgs e) =>
             MouseStates |= (KMouseStates)(1 << (byte)e.Button);
@@ -103,69 +120,37 @@ namespace Elements.Core.Systems
 
         private void RegisterKeyPress(object? ignored, KeyEventArgs e)
         {
-            KKey key = new()
-            {
-                KeyCode = (byte)e.Code,
-                States = KKeyStates.PRESSED
-            };
-            if (e.Shift) key.States |= KKeyStates.SHIFT;
-            if (e.Control) key.States |= KKeyStates.CONTROL;
-            if (e.Alt) key.States |= KKeyStates.ALTERNATE;
-            if (e.System) key.States |= KKeyStates.SYSTEM;
+            KKeyStates states = KKeyStates.PRESSED;
+            if (e.Shift) states |= KKeyStates.SHIFT;
+            if (e.Control) states |= KKeyStates.CONTROL;
+            if (e.Alt) states |= KKeyStates.ALTERNATE;
+            if (e.System) states |= KKeyStates.SYSTEM;
 
-            AddActiveKey(key);
-        }
-
-        private void RegisterKeyRelease(object? ignored, KeyEventArgs e) => RemoveActiveKey((byte)e.Code);
-
-        private void AddActiveKey(in KKey key)
-        {
             for (int i = 0; i < _activeKeyCount; i++)
             {
-                if (_activeKeys[i].KeyCode == key.KeyCode) return;
+                //Checks if key is active.
+                if (_activeKeys[i].KeyCode == (byte)e.Code)
+                {
+                    _activeKeys[i].States = states;
+                    return;
+                }
             }
-            _activeKeys[_activeKeyCount] = key;
+            //If key is not active, add it.
+            _activeKeys[_activeKeyCount] = new((byte)e.Code, states);
             _activeKeyCount++;
         }
 
-        private void RemoveActiveKey(in byte keyCode)
+        private void RegisterKeyRelease(object? ignored, KeyEventArgs e)
         {
             for (int i = 0; i < _activeKeyCount; i++)
             {
-                if (_activeKeys[i].KeyCode == keyCode)
+                //Checks if key is active.
+                if (_activeKeys[i].KeyCode == (byte)e.Code)
                 {
+                    //Key will be removed when updated.
+                    //Released state will only exist for an update.
                     _activeKeys[i].States |= KKeyStates.RELEASED;
-                }
-            }
-        }
-
-        private void UpdateActiveKeys()
-        {
-            for (int i = 0; i < _activeKeys.Length; i++)
-            {
-                //Check if the key is valid.
-                if (_activeKeys[i].KeyCode == byte.MaxValue) return;
-
-                //Check if the key was released.
-                if (_activeKeys[i].States.HasFlag(KKeyStates.RELEASED))
-                {
-                    //Get item in last index and replace item to be removed.
-                    _activeKeys[i] = _activeKeys[_activeKeyCount - 1];
-                    //After last index is copied clear last index.
-                    _activeKeys[_activeKeyCount - 1] = new(byte.MaxValue, 0);
-                    _activeKeyCount--;
                     return;
-                }
-
-                //Set Previous state to current Pressed state.
-                if (_activeKeys[i].States.HasFlag(KKeyStates.PRESSED))
-                {
-                    //Get current Pressed state and bit shift it by one to batck bit allignment of Previous state.
-                    var newState = (KKeyStates)((int)(_activeKeys[i].States & KKeyStates.PRESSED) << 1);
-                    //Clear last Previous state.
-                    _activeKeys[i].States &= ~KKeyStates.PREVIOUS;
-                    //Set new Previous state.
-                    _activeKeys[i].States |= newState; 
                 }
             }
         }
@@ -180,10 +165,11 @@ namespace Elements.Core.Systems
         public bool IsMouseReleased(KMouseStates mouseStates) =>
             !MouseStates.HasFlag(mouseStates) && PreviousMouseStates.HasFlag(mouseStates);
 
-        public bool CheckKeyStates(in byte keyCode, in KMouseStates states)
+        public bool CheckKeyStates(in byte keyCode, in KKeyStates states)
         {
             for (int i = 0; i < _activeKeyCount; i++)
             {
+                //Checks if key exists, then checks flags.
                 if (_activeKeys[i].KeyCode == keyCode)
                 {
                     return _activeKeys[i].States.HasFlag(states);
@@ -191,5 +177,18 @@ namespace Elements.Core.Systems
             }
             return false;
         }
+
+        public bool IsKeyDown(in byte keyCode) => !CheckKeyStates(keyCode, KKeyStates.RELEASED);
+
+        public bool IsKeyPressed(in byte keyCode) => CheckKeyStates(keyCode, KKeyStates.PRESSED);
+
+        public bool IsKeyReleased(in byte keyCode) => CheckKeyStates(keyCode, KKeyStates.RELEASED);
+
+        //SFML support
+        public bool IsKeyDown(in Keyboard.Key key) => !CheckKeyStates((byte)key, KKeyStates.RELEASED);
+
+        public bool IsKeyPressed(in Keyboard.Key key) => CheckKeyStates((byte)key, KKeyStates.PRESSED);
+
+        public bool IsKeyReleased(in Keyboard.Key key) => CheckKeyStates((byte)key, KKeyStates.RELEASED);
     }
 }

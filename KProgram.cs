@@ -28,10 +28,10 @@ public class KProgram
     {
         _ = args; //gets rid of the warning
 
-        ulong ups = 0;
-        ulong fps = 0;
-        ulong currentUpdate = 0;
-        ulong currentFrame = 0;
+        uint ups = 0;
+        uint fps = 0;
+        uint currentUpdate = 0;
+        uint currentFrame = 0;
         double unprocessedTime = 0;
         double newTime = 0;
         
@@ -57,7 +57,7 @@ public class KProgram
             {
                 debugTimer.Restart();
 #if DEBUG
-                Console.WriteLine($"ups: {ups}, fps: {fps}");
+                //Console.WriteLine($"ups: {ups}, fps: {fps}");
 #endif
                 ups = fps = 0;
             }
@@ -88,18 +88,7 @@ public class KProgram
     private static void Init()
     {
         Console.WriteLine("init");
-        WindowManager.Window.Closed += (_, _) => Running = false;
-
-        WindowManager.Window.KeyPressed += (_, e) => 
-        {
-            Console.WriteLine($"Press:{e.Code}");
-        };
-
-        WindowManager.Window.KeyReleased += (_, e) => 
-        {
-            Console.WriteLine($"Release:{e.Code}");
-        };
-
+       
         InputManager.Init(WindowManager);
     }
 
@@ -113,17 +102,14 @@ public class KProgram
 
     } 
 
-    private static void Update(in ulong currentUpdate)
+    private static void Update(in uint currentUpdate)
     {
-
-        Console.WriteLine($"up:{currentUpdate}");
-        InputManager.Update();
+        InputManager.Update();  //Must update first, else inputs will be cleared immediately.
+        WindowManager.Update();
     }
 
-    private static void FrameUpdate(in ulong currentUpdate, in ulong currentFrame)
+    private static void FrameUpdate(in uint currentUpdate, in uint currentFrame)
     {
-        Console.WriteLine($"frame:{currentUpdate}\n");
-
         InputManager.FrameUpdate();
         WindowManager.FrameUpdate();
     }
