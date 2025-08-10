@@ -86,9 +86,9 @@ namespace Elements.Core.Systems
     {
         private uint _bufferOffset = 0;
 
-        public RenderStates RenderStates;
         public VertexBuffer Buffer;
         public RenderTexture RenderTexture;
+        public RenderStates RenderStates;
 
         public KDrawLayer(in uint width, in uint height, in uint bufferSize, in RenderStates renderStates) 
         {

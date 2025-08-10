@@ -1,8 +1,5 @@
 ﻿using SFML.Window;
 using System.Text;
-using static SFML.Graphics.Text;
-using static SFML.Window.Keyboard;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace Elements.Core.Systems
 {
