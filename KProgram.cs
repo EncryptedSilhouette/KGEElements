@@ -91,7 +91,6 @@ public class KProgram
     {
         Console.WriteLine("init");
 
-        WindowManager.Init(ResourceManager);
         InputManager.Init(WindowManager);
     }
 

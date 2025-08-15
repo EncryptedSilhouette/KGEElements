@@ -1,16 +1,20 @@
 ﻿namespace Elements.Core.UI
 {
-    public class KMainMenu
+    public struct KMainMenu
     {
         KDrawData drawData;
 
-        KButton[] buttons = new KButton[3]
-        {
-            new(),
-            new(),
-            new()
-        };
+        KButton[] buttons;
 
+        public void Init()
+        {
+            buttons = new KButton[3]
+            {
+                new(),
+                new(),
+                new()
+            };
+        }
         public void Exit()
         {
 

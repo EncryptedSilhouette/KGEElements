@@ -7,6 +7,5 @@ namespace Elements.Core
         public int Layer;
         public Color Color;
         public KSprite Sprite;
-        public KDrawData[] Children;
     }
 }

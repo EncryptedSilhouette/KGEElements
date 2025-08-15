@@ -1,6 +1,7 @@
 ﻿using SFML.Window;
 using System.Text;
 
+//FINALIZED
 namespace Elements.Core.Systems
 {
     [Flags]
