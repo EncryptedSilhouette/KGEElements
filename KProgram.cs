@@ -1,29 +1,35 @@
-﻿using Elements.Core.Systems;
+﻿using Elements.Systems;
 using System.Diagnostics;
 
 public class KProgram
 {
     //Using doubles for floating point precision.
     const double MS_PER_SECOND = 1000.0d;
-
     public static bool Running;
     public static double UpdateTarget;
     public static double UpdateInterval;
+    public static string Title;
     public static KResourceManager ResourceManager;
     public static KWindowManager WindowManager;
     public static KInputManager InputManager;
+    public static KGameManager GameManager;
 
     public static event Action? OnStart;
     public static event Action? OnStop;
 
     static KProgram()
     {
-        Running = false;
+        //configs
+        Title = "Elements";
         UpdateTarget = 30;
+        
+        //Defaults
+        Running = false;
         UpdateInterval = MS_PER_SECOND / UpdateTarget;
         ResourceManager = new();
-        WindowManager = new();
+        WindowManager = new(Title);
         InputManager = new();
+        GameManager = new();
     }
 
     public static void Main(string[] args)
@@ -38,7 +44,6 @@ public class KProgram
         double newTime = 0;
         
         Init();
-        Load();
         OnStart?.Invoke();
 
         Running = true;
@@ -59,7 +64,7 @@ public class KProgram
             {
                 debugTimer.Restart();
 #if DEBUG
-                //Console.WriteLine($"ups: {ups}, fps: {fps}");
+                Console.WriteLine($"ups: {ups}, fps: {fps}");
 #endif
                 ups = fps = 0;
             }
@@ -92,6 +97,8 @@ public class KProgram
         Console.WriteLine("init");
 
         InputManager.Init(WindowManager);
+        
+        Load();
     }
 
     private static void Deinit()
@@ -108,10 +115,14 @@ public class KProgram
     {
         InputManager.Update();  //Must update first, else inputs will be cleared immediately.
         WindowManager.Update(); //Need to call dispatch events in case of game lagging.
+        GameManager.Update(currentUpdate);
     }
 
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame)
     {
+        GameManager.FrameUpdate(currentUpdate, currentFrame, WindowManager);
+
+        //Draw
         WindowManager.FrameUpdate();
     }
 }

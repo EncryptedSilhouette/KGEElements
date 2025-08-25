@@ -1,7 +1,10 @@
-﻿using SFML.Graphics;
+﻿using Elements.Core;
+using SFML.Graphics;
 using SFML.Window;
 
-namespace Elements.Core.Systems
+//640x360 
+
+namespace Elements.Systems
 {
     public class KWindowManager
     {
@@ -10,11 +13,13 @@ namespace Elements.Core.Systems
         public readonly static Texture DEFAULT_TEXTURE = new Texture(new Image(16, 16, Color.Magenta));
         
         private string _title;
-        private RenderStates _renderStates = RenderStates.Default;
+        private RenderStates _renderStates;
 
         public Color BackgroundColor;
         public RenderWindow Window;
         public KDrawLayer[] DrawLayers;
+
+        public int TopLayer => DrawLayers.Length - 1;
 
         public string Title
         {
@@ -26,19 +31,24 @@ namespace Elements.Core.Systems
             }
         }
 
-        public KWindowManager()
+        public KWindowManager(string title)
         {
-            _title = "Elements";
+            _title = title;
+            _renderStates = RenderStates.Default;
             BackgroundColor = Color.White;
             Window = new(DESKTOP_MODE, _title);
-            DrawLayers = [];
+            Window.Closed += (_, _) => KProgram.Running = false;
+
+            DrawLayers = [CreateDrawLayer(256)];
         }
 
-        public KWindowManager(KDrawLayer[] layers)
+        public KWindowManager(string title, KDrawLayer[] layers) : this(title)
         {
-            _title = "Elements";
-            BackgroundColor = Color.White;
-            Window = new(DESKTOP_MODE, _title);
+            DrawLayers = layers;
+        }
+
+        public void Init(KDrawLayer[] layers)
+        {
             DrawLayers = layers;
         }
 
@@ -55,6 +65,29 @@ namespace Elements.Core.Systems
             }
 
             Window.Display();
+        }
+
+        public void SubmitDraw(int layer, in KDrawData dat, in KRectangle rec) =>
+            KDrawLayer.SubmitDraw(ref DrawLayers[layer], dat, rec);
+
+        public void SubmitDraw(in KDrawData dat, in KRectangle rec) =>
+            KDrawLayer.SubmitDraw(ref DrawLayers[TopLayer], dat, rec);
+
+        public KDrawLayer CreateDrawLayer(uint bufferSize)
+        {
+            return new()
+            {
+                RenderStates = RenderStates.Default,
+                RenderTexture = new(Window.Size.X, Window.Size.Y),
+                Buffer = new VertexBuffer(bufferSize, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+                Vertices = 
+                [
+                    new Vertex(new(0, 0), Color.White, new(0, 0)),
+                    new Vertex(new(Window.Size.X, 0), Color.White, new(Window.Size.X, 0)),
+                    new Vertex(new(Window.Size.X, Window.Size.Y), Color.White, new(Window.Size.X, Window.Size.Y)),
+                    new Vertex(new(0, Window.Size.Y), Color.White, new(0, Window.Size.Y)),
+                ]
+            };
         }
     }
 

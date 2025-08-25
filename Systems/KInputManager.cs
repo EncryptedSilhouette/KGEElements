@@ -1,4 +1,5 @@
-﻿using SFML.Window;
+﻿using Elements.Systems;
+using SFML.Window;
 using System.Text;
 
 //FINALIZED
@@ -30,8 +31,8 @@ namespace Elements.Core.Systems
         public record struct KKey(in byte KeyCode, in KKeyStates States);
 
         private byte _activeKeyCount; //The current amount of active keys.
-        private KKey[] _activeKeys;
         private StringBuilder _stringBuilder; 
+        private KKey[] _activeKeys;
 
         public int MousePosX;
         public int MousePosY;
@@ -45,7 +46,8 @@ namespace Elements.Core.Systems
             MouseStates = PreviousMouseStates = 0;
 
             _stringBuilder = new(128);
-            _activeKeys = new KKey[128]; 
+            _activeKeys = new KKey[128];
+
 
             for (int i = 0; i < _activeKeys.Length; i++)
             {

@@ -1,4 +1,6 @@
-﻿namespace Elements.Core.Systems
+﻿using Elements.Core;
+
+namespace Elements.Systems
 {
     public class KResourceManager
     {
@@ -14,7 +16,7 @@
                 switch (values[0])
                 {
                     case "atlases":
-                        KTextureAtlases = LoadAtlases(values.AsSpan(1, values.Length - 1)).ToArray();
+                        KTextureAtlases = LoadAtlases(values.AsSpan(1, values.Length - 1));
                         break;
 
                     default:
@@ -23,12 +25,14 @@
             }
         }
 
-        public IEnumerable<KTextureAtlas> LoadAtlases(Span<string> filePaths)
+        public KTextureAtlas[] LoadAtlases(Span<string> filePaths)
         {
+            KTextureAtlas[] textures = new KTextureAtlas[filePaths.Length];
             for (var i = 0; i < filePaths.Length; i++)
             {
-                yield return KTextureAtlas.Load(filePaths[i]);
+                textures[i] = KTextureAtlas.Load(filePaths[i]);
             }
+            return textures;
         }
     }
 }
