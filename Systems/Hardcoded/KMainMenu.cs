@@ -12,6 +12,10 @@ namespace Elements.Systems.UI
 
         public KMainMenu()
         {
+            drawData = new()
+            {
+                Layer = 0,
+            };
             buttons = 
             [
                 new() 

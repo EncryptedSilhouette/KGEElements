@@ -20,7 +20,6 @@ namespace Elements.Core
             sprites[0] = new()
             {
                 Name = string.Empty,
-                Texture = texture,
                 TextureBounds = new KRectangle()
                 {
                     Width = (int)texture.Size.X,
@@ -41,7 +40,6 @@ namespace Elements.Core
                 sprites[i - 1] = new()
                 {
                     Name = values[0],
-                    Texture = texture,
                     TextureBounds= new KRectangle()
                     {
                         Width = Convert.ToInt32(values[1]),

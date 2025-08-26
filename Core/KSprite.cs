@@ -6,12 +6,22 @@ namespace Elements.Core
     {
         public KRectangle TextureBounds;
         public string Name;
-        public Texture Texture;
+
+        public KSprite()
+        {
+            TextureBounds = new()
+            {
+                Width = 1,
+                Height = 1,
+                Transform = new(),
+            };
+            Name = string.Empty;
+        }
 
         public KSprite(in KRectangle textureBounds, string name, Texture texture) =>
-            (TextureBounds, Name, Texture) = (textureBounds, name, texture);
+            (TextureBounds, Name) = (textureBounds, name);
 
-        public KSprite(in int width, in int height, in int posX, in int posY, string name, Texture texture)
+        public KSprite(in int width, in int height, in int posX, in int posY, string name)
         {
             TextureBounds = new()
             {
@@ -23,7 +33,7 @@ namespace Elements.Core
                     PosY = posY,
                 }
             };
-            (Name, Texture) = (name, texture);
+            Name = name;
         }
     }
 }
