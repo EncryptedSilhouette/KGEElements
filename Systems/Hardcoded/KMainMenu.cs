@@ -1,4 +1,5 @@
 ﻿using Elements.Core;
+using SFML.Graphics;
 
 namespace Elements.Systems.UI
 {
@@ -8,13 +9,24 @@ namespace Elements.Systems.UI
 
         private KRectangle bounds;
         private KDrawData drawData;
-        public KButton[] buttons;
+        private KButton[] buttons;
 
         public KMainMenu()
         {
+            bounds = new()
+            {
+                Width = 128,
+                Height = 128,
+                Transform = new()
+                {
+                    PosX = 0,
+                    PosY = 0,
+                },
+            };
             drawData = new()
             {
                 Layer = 0,
+                Color = Color.Cyan,
             };
             buttons = 
             [
@@ -67,10 +79,9 @@ namespace Elements.Systems.UI
 
         public void Update()
         {
-            var mousePos = (KProgram.InputManager.MousePosX, KProgram.InputManager.MousePosY);
             for (int i = 0; i < buttons.Length; i++)
             {
-                buttons[i].Update(mousePos.MousePosX, mousePos.MousePosY);
+                buttons[i].Update(KProgram.InputManager.MousePosX, KProgram.InputManager.MousePosY);
             }
         }
 
