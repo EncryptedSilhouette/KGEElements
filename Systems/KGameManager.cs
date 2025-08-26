@@ -21,7 +21,7 @@ namespace Elements.Systems
 
         public void Update(in uint currentUpdate)
         {
-
+            MainMenu.Update();
         }
 
         public void FrameUpdate(in uint currentUpdate, in uint currentFrame, KWindowManager window)

@@ -8,9 +8,9 @@ namespace Elements.Systems
 {
     public class KWindowManager
     {
+        public readonly static Texture DEFAULT_TEXTURE = new Texture(new Image(16, 16, Color.Magenta));
         public readonly static VideoMode DESKTOP_MODE = VideoMode.DesktopMode;
         public readonly static VideoMode[] FULLSCREEN_MODES = VideoMode.FullscreenModes;
-        public readonly static Texture DEFAULT_TEXTURE = new Texture(new Image(16, 16, Color.Magenta));
         
         private string _title;
         private RenderStates _renderStates;
@@ -20,6 +20,8 @@ namespace Elements.Systems
         public KDrawLayer[] DrawLayers;
 
         public int TopLayer => DrawLayers.Length - 1;
+        public float ScreenCenterX => Window.Size.X / 2;
+        public float ScreenCenterY => Window.Size.Y / 2;
 
         public string Title
         {
@@ -68,10 +70,10 @@ namespace Elements.Systems
         }
 
         public void SubmitDraw(int layer, in KDrawData dat, in KRectangle rec) =>
-            KDrawLayer.SubmitDraw(ref DrawLayers[layer], dat, rec);
+            DrawLayers[layer].SubmitDraw(dat, rec);
 
         public void SubmitDraw(in KDrawData dat, in KRectangle rec) =>
-            KDrawLayer.SubmitDraw(ref DrawLayers[TopLayer], dat, rec);
+            DrawLayers[TopLayer].SubmitDraw(dat, rec);
 
         public KDrawLayer CreateDrawLayer(uint bufferSize)
         {
@@ -92,10 +94,31 @@ namespace Elements.Systems
     }
 
     public struct KDrawLayer
-    {
-        #region Static 
+    {       
+        private uint _bufferOffset;
 
-        public static void SubmitDraw(ref KDrawLayer drawLayer, in KDrawData dat, in KRectangle rec)
+        public RenderStates RenderStates;
+        public RenderTexture RenderTexture;
+        public VertexBuffer Buffer;
+        public Vertex[] Vertices;
+
+#nullable disable
+        public KDrawLayer() => (_bufferOffset, RenderStates) = (0, RenderStates.Default);
+#nullable enable
+
+        public KDrawLayer(in RenderStates renderStates, RenderTexture renderTexture, VertexBuffer buffer, Vertex[] vertices) =>
+            (RenderStates, RenderTexture, Buffer, Vertices) = (renderStates, renderTexture, buffer, vertices);
+
+        public void DrawFrame()
+        {
+            RenderTexture.Clear(Color.Black);
+            Buffer.Draw(RenderTexture, 0, _bufferOffset, RenderStates);
+            RenderTexture.Display();
+
+            _bufferOffset = 0;
+        }
+
+        public void SubmitDraw(in KDrawData dat, in KRectangle rec)
         {
             Vertex[] vertices =
             [
@@ -124,44 +147,8 @@ namespace Elements.Systems
                     Position = rec.BottomLeft
                 }
             ];
-            drawLayer.Buffer.Update(vertices, 4, drawLayer._bufferOffset);
-            drawLayer._bufferOffset += 4;
-        }
-
-        //public static void SubmitDraw(ref KDrawLayer drawLayer, in KDrawData drawData, in KTransform transform)
-        //{
-        //    KRectangle drawBounds = new()
-        //    {
-        //        Width = drawData.Sprite.Width,
-        //        Height = drawData.Sprite.Height,
-        //        Transform = transform
-        //    };
-        //    SubmitDraw(ref drawLayer, drawData, drawBounds);
-        //}
-
-        #endregion
-
-        private uint _bufferOffset;
-
-        public RenderStates RenderStates;
-        public RenderTexture RenderTexture;
-        public VertexBuffer Buffer;
-        public Vertex[] Vertices;
-
-#nullable disable
-        public KDrawLayer() => (_bufferOffset, RenderStates) = (0, RenderStates.Default);
-#nullable enable
-
-        public KDrawLayer(in RenderStates renderStates, RenderTexture renderTexture, VertexBuffer buffer, Vertex[] vertices) =>
-            (RenderStates, RenderTexture, Buffer, Vertices) = (renderStates, renderTexture, buffer, vertices);
-
-        public void DrawFrame()
-        {
-            RenderTexture.Clear(Color.Black);
-            Buffer.Draw(RenderTexture, 0, _bufferOffset, RenderStates);
-            RenderTexture.Display();
-
-            _bufferOffset = 0;
+            Buffer.Update(vertices, 4, _bufferOffset);
+            _bufferOffset += 4;
         }
     }
 }
