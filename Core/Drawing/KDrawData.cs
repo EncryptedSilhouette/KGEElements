@@ -1,11 +1,12 @@
 ﻿using SFML.Graphics;
 
-namespace Elements.Core
+namespace Elements.Core.Drawing
 {
     public struct KDrawData
     {
         public int Layer;
         public Color Color;
-        public KSprite Sprite;
+        public KRectangle Sprite;
+        public KRectangle DrawBounds;
     }
 }

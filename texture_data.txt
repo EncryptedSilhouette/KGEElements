@@ -1,5 +1,0 @@
-$TexturePacker:SmartUpdate:97ade2d15a7f87cfd1406f50f146d329:b3002529e94fdbb05a57f20e39321685:ee560dd3e10d8825144581982ad6abc5$
-atlas.png
-extractor,64,0,20,20,0,0
-tile,0,0,32,32,0,0
-tile_resource,32,0,32,32,0,0
