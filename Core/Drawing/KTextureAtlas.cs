@@ -1,5 +1,4 @@
 ﻿using SFML.Graphics;
-using System.Diagnostics;
 
 namespace Elements.Core.Drawing
 {
@@ -12,27 +11,34 @@ namespace Elements.Core.Drawing
             Texture? texture = null;
             Dictionary<string, KRectangle> sprites = new(64);
 
-            for (int i = 1; i < contents.Length; i++)
+            for (int i = 0; i < contents.Length; i++)
             {
                 var values = contents[i].Split(',');
+                var element = 0;
 
-                if (values[i] == "tex") texture = new Texture(values[i]);
-
-                if (values[i] == "sprite")
+                switch (values[element])
                 {
-                    sprites.Add(values[i++], new KRectangle()
-                    {
-                        Width = Convert.ToInt32(values[i++]),
-                        Height = Convert.ToInt32(values[i++]),
-                        Transform = new()
+                    case "tex":
+                        texture = new Texture(values[element++]);
+                        break;
+
+                    case "sprite":
+                        sprites.Add(values[element++], new KRectangle()
                         {
-                            PosX = Convert.ToInt32(values[i++]),
-                            PosY = Convert.ToInt32(values[i++])
-                        }
-                    });
+                            Width = Convert.ToInt32(values[element++]),
+                            Height = Convert.ToInt32(values[element++]),
+                            Transform = new()
+                            {
+                                PosX = Convert.ToInt32(values[element++]),
+                                PosY = Convert.ToInt32(values[element++])
+                            }
+                        });
+                        break;
+
+                    default:
+                        break;
                 }
             }
-
             if (texture == null) return null;
             else return new(texture, sprites);
         }
