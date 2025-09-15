@@ -1,4 +1,5 @@
 ﻿using Elements.Systems;
+using Elements.Systems.Game;
 using System.Diagnostics;
 
 public class KProgram
@@ -12,6 +13,7 @@ public class KProgram
     public static KResourceManager ResourceManager;
     public static KWindowManager WindowManager;
     public static KInputManager InputManager;
+    public static KCommandManager CommandManager;
     public static KGameManager GameManager;
 
     public static event Action? OnStart;
@@ -115,6 +117,7 @@ public class KProgram
     {
         InputManager.Update();  //Must update first, else inputs will be cleared immediately.
         WindowManager.Update(); //Need to call dispatch events in case of game lagging.
+        CommandManager.Update();
         GameManager.Update(currentUpdate);
     }
 
