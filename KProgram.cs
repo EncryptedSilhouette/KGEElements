@@ -1,26 +1,54 @@
-﻿using Elements.Systems;
-using Elements.Systems.Game;
+﻿using Elements;
+using Elements.Drawing;
+using Elements.Extensions;
+using SFML.Graphics;
+using SFML.Window;
 using System.Diagnostics;
 
 public class KProgram
 {
     //Using doubles for floating point precision.
     const double MS_PER_SECOND = 1000.0d;
+    
+    private static string s_title;
+    
     public static bool Running;
     public static double UpdateTarget;
     public static double UpdateInterval;
-    public static string Title;
+    public static RenderWindow Window;
     public static KResourceManager ResourceManager;
-    public static KWindowManager WindowManager;
     public static KInputManager InputManager;
     public static KCommandManager CommandManager;
+    public static KDrawManager DrawManager;
     public static KGameManager GameManager;
+    public static KLogManager LogManager;
+    public static KCLI CLI;
 
+    public static event Action? OnInit;
+    public static event Action? OnLoad;
     public static event Action? OnStart;
     public static event Action? OnStop;
+    public static event Action? OnDeinit;
+
+    public static float ScreenCenterX => Window.Size.X / 2;
+    public static float ScreenCenterY => Window.Size.Y / 2;
+
+    public static string Title
+    {
+        get => s_title;
+        set
+        {
+            s_title = value;
+            Window.SetTitle(value);
+        }
+    }
 
     static KProgram()
     {
+        s_title = string.Empty; //removes warning.
+        Window = new(VideoMode.DesktopMode, s_title);
+        Window.Closed += (_, _) => Running = false;
+
         //configs
         Title = "Elements";
         UpdateTarget = 30;
@@ -28,10 +56,16 @@ public class KProgram
         //Defaults
         Running = false;
         UpdateInterval = MS_PER_SECOND / UpdateTarget;
+
+        //System managers
         ResourceManager = new();
-        WindowManager = new(Title);
         InputManager = new();
+        CommandManager = new();
+        DrawManager = new(Window);
         GameManager = new();
+        LogManager = new(); 
+
+        CLI = new(CommandManager);
     }
 
     public static void Main(string[] args)
@@ -44,8 +78,8 @@ public class KProgram
         uint currentFrame = 0;
         double unprocessedTime = 0;
         double newTime = 0;
-        
-        Init();
+
+        InitAndLoad();
         OnStart?.Invoke();
 
         Running = true;
@@ -94,38 +128,71 @@ public class KProgram
         Deinit();
     }
 
-    private static void Init()
+    private static void InitAndLoad()
     {
-        Console.WriteLine("init");
+        InputManager.Init(Window);
+        GameManager.Init(DrawManager);
 
-        InputManager.Init(WindowManager);
-        
+        //Load
         Load();
+
+        #region Draw layers
+
+        DrawManager.Init(
+        [
+            //Tilemap layer
+            new KDrawLayer()
+            {
+                States = new(ResourceManager.TextureAtlases["atlas"].Texture),
+                RenderTexture = Window.CreateRenderTexture(),
+                Buffer = new(512, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+            },
+            //Entity layer
+            new KDrawLayer()
+            {
+                States = new(ResourceManager.TextureAtlases["atlas"].Texture),
+                RenderTexture = Window.CreateRenderTexture(),
+                Buffer = new(512, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+            },
+            //Text layer
+            new KDrawLayer()
+            {
+                States = new(ResourceManager.Fonts["roboto_black"].GetTexture(12)),
+                RenderTexture = Window.CreateRenderTexture(),
+                Buffer = new(512, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+            },
+        ]);
+
+        #endregion
+
+        OnInit?.Invoke();
     }
 
     private static void Deinit()
     {
-        InputManager.Deinit(WindowManager);
+        InputManager.Deinit(Window);
+        OnDeinit?.Invoke();
     }
 
     private static void Load()
     {
         ResourceManager.Load();
+        OnLoad?.Invoke();
     } 
 
     private static void Update(in uint currentUpdate)
     {
-        InputManager.Update();  //Must update first, else inputs will be cleared immediately.
-        WindowManager.Update(); //Need to call dispatch events in case of game lagging.
+        InputManager.Update();      //Must update first or else inputs will be cleared before processed.
+        Window.DispatchEvents();    //Processes new input events here. Do NOT change the order of these two.
+
+        CLI.Update(InputManager);
         CommandManager.Update();
+
         GameManager.Update(currentUpdate);
     }
 
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame)
     {
-        GameManager.FrameUpdate(currentUpdate, currentFrame, WindowManager);
-
-        //Draw
-        WindowManager.FrameUpdate();
+        //GameManager.FrameUpdate(currentUpdate, currentFrame);
     }
 }

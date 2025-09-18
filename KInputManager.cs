@@ -1,8 +1,9 @@
-﻿using SFML.Window;
+﻿using SFML.Graphics;
+using SFML.Window;
 using System.Text;
 
 //FINALIZED
-namespace Elements.Systems
+namespace Elements
 {
     [Flags]
     public enum KMouseStates : byte
@@ -56,26 +57,26 @@ namespace Elements.Systems
             }
         }
 
-        public void Init(in KWindowManager windowManager)
+        public void Init(RenderWindow window)
         {
-            windowManager.Window.MouseMoved += UpdateMousePosition;
-            windowManager.Window.MouseWheelScrolled += UpdateScrollDelta;
-            windowManager.Window.MouseButtonPressed += RegisterMouseButtonPress;
-            windowManager.Window.MouseButtonReleased += RegisterMouseButtonRelease;
-            windowManager.Window.KeyPressed += RegisterKeyPress;
-            windowManager.Window.KeyReleased += RegisterKeyRelease;
-            windowManager.Window.TextEntered += UpdateTextBuffer;
+            window.MouseMoved += UpdateMousePosition;
+            window.MouseWheelScrolled += UpdateScrollDelta;
+            window.MouseButtonPressed += RegisterMouseButtonPress;
+            window.MouseButtonReleased += RegisterMouseButtonRelease;
+            window.KeyPressed += RegisterKeyPress;
+            window.KeyReleased += RegisterKeyRelease;
+            window.TextEntered += UpdateTextBuffer;
         }
 
-        public void Deinit(in KWindowManager windowManager)
+        public void Deinit(RenderWindow window)
         {
-            windowManager.Window.MouseMoved -= UpdateMousePosition;
-            windowManager.Window.MouseWheelScrolled -= UpdateScrollDelta;
-            windowManager.Window.MouseButtonPressed -= RegisterMouseButtonPress;
-            windowManager.Window.MouseButtonReleased -= RegisterMouseButtonRelease;
-            windowManager.Window.KeyPressed -= RegisterKeyPress;
-            windowManager.Window.KeyReleased -= RegisterKeyRelease;
-            windowManager.Window.TextEntered -= UpdateTextBuffer;
+            window.MouseMoved -= UpdateMousePosition;
+            window.MouseWheelScrolled -= UpdateScrollDelta;
+            window.MouseButtonPressed -= RegisterMouseButtonPress;
+            window.MouseButtonReleased -= RegisterMouseButtonRelease;
+            window.KeyPressed -= RegisterKeyPress;
+            window.KeyReleased -= RegisterKeyRelease;
+            window.TextEntered -= UpdateTextBuffer;
         }
 
         public void Update()

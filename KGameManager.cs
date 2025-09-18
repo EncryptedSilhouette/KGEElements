@@ -1,6 +1,4 @@
-﻿using Elements.Systems.UI;
-
-namespace Elements.Systems.Game
+﻿namespace Elements
 {
     [Flags]
     public enum KGameState
@@ -13,11 +11,16 @@ namespace Elements.Systems.Game
         public KGameState GameState;
         //public KMainMenu MainMenu;
 
-        public IKEntityHandler EntityHandler;
+        //public IKEntityHandler EntityHandler;
 
         public KGameManager() 
         {
             //MainMenu = new();
+        }
+
+        public void Init(KDrawManager drawManager)
+        {
+            drawManager.CreateDrawLayer(256);
         }
 
         public void Update(in uint currentUpdate)
@@ -26,7 +29,7 @@ namespace Elements.Systems.Game
             //MainMenu.Update();
         }
 
-        public void FrameUpdate(in uint currentUpdate, in uint currentFrame, KWindowManager window)
+        public void FrameUpdate(in uint currentUpdate, in uint currentFrame, KDrawManager drawManager)
         {
             if (!GameState.HasFlag(KGameState.PAUSED)) return;
 

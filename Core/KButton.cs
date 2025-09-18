@@ -1,5 +1,4 @@
-﻿using Elements.Core.Drawing;
-using Elements.Systems;
+﻿using Elements.Drawing;
 using SFML.Graphics;
 
 namespace Elements.Core
@@ -52,9 +51,9 @@ namespace Elements.Core
             OnHold?.Invoke();
         }
 
-        public void FrameUpdate(KWindowManager window)
+        public void FrameUpdate(KDrawManager drawManager)
         {
-            window.SubmitDraw(DrawData, Bounds);
+            drawManager.SubmitDraw(DrawData, Bounds);
         }
     }
 }

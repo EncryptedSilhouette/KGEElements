@@ -1,8 +1,8 @@
 ﻿using Elements.Core;
-using Elements.Core.Drawing;
+using Elements.Drawing;
 using SFML.Graphics;
 
-namespace Elements.Systems.UI
+namespace Elements.Hardcoded
 {
     public class KMainMenu
     {
@@ -86,12 +86,12 @@ namespace Elements.Systems.UI
             }
         }
 
-        public void FrameUpdate(KWindowManager mainMenu)
+        public void FrameUpdate(KDrawManager drawManager)
         {
-            mainMenu.SubmitDraw(drawData, bounds);
+            drawManager.SubmitDraw(drawData, bounds);
             for (int i = 0; i < buttons.Length; i++) 
             {
-                buttons[i].FrameUpdate(mainMenu);
+                buttons[i].FrameUpdate(drawManager);
             }
         }
 

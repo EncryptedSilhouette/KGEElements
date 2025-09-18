@@ -1,4 +1,4 @@
-﻿namespace Elements.Systems.ECS
+﻿namespace Elements.ECS
 {
     public class KEntity
     {

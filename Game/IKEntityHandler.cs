@@ -1,4 +1,4 @@
-﻿namespace Elements.Systems.Game
+﻿namespace Elements.Game
 {
     public class IKEntityHandler
     {

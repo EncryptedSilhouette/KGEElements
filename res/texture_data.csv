@@ -1,4 +1,4 @@
-atlas.png
+res/atlas.png
 
 #Unit icons
 sprite,unit_triangle_up,0,0,32,32,0,0

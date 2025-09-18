@@ -1,6 +1,6 @@
-﻿using Elements.Systems.Game;
+﻿using Elements.Game;
 
-namespace Elements.Systems.ECS
+namespace Elements.ECS
 {
     public class KECSHandler : IKEntityHandler
     {
