@@ -131,7 +131,6 @@ public class KProgram
     private static void InitAndLoad()
     {
         InputManager.Init(Window);
-        GameManager.Init(DrawManager);
 
         //Load
         Load();

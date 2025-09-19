@@ -1,26 +1,26 @@
-﻿namespace Elements
+﻿using Elements.Core;
+using Elements.Drawing;
+
+namespace Elements
 {
     [Flags]
     public enum KGameState
     {
-        PAUSED
+        PAUSED,
     }
 
     public class KGameManager
     {
-        public KGameState GameState;
-        //public KMainMenu MainMenu;
+        const int TILE_MAP_LAYER = 0;
 
+        public KGameState GameState;
+        public KTileMap TileMap;
+        public KDrawManager DrawManager;
         //public IKEntityHandler EntityHandler;
 
-        public KGameManager() 
+        public KGameManager(KDrawManager drawManager) 
         {
-            //MainMenu = new();
-        }
-
-        public void Init(KDrawManager drawManager)
-        {
-            drawManager.CreateDrawLayer(256);
+            DrawManager = drawManager;
         }
 
         public void Update(in uint currentUpdate)
@@ -33,7 +33,18 @@
         {
             if (!GameState.HasFlag(KGameState.PAUSED)) return;
 
-            //MainMenu.FrameUpdate(window);
+            //Draw tile map.
+            for (int i = 0; i < TileMap.Cells.Length; i++)
+            {
+                var rec = new KRectangle()
+                {
+                    Transform = new(TileMap.Columns % i * TileMap.CellWidth, 
+                                    TileMap.Columns / i * TileMap.CellHeight),
+                    Width = TileMap.CellWidth,
+                    Height = TileMap.CellHeight
+                };
+                DrawManager.SubmitDraw(TILE_MAP_LAYER, TileMap.TileSprites[TileMap.Cells[i]], rec);
+            }
         }
     }
 }
