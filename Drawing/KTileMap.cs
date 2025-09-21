@@ -7,9 +7,9 @@ namespace Elements.Drawing
         public KDrawData[] TileSprites;
         public KGrid Grid;
 
-        public KTileMap(int rows, int columns, KDrawData[] tileSprites)
+        public KTileMap(int rows, int columns, int cellWidth, int cellHeight, KDrawData[] tileSprites)
         {
-            (Grid, TileSprites) = (new(rows, columns), tileSprites);
+            (Grid, TileSprites) = (new(rows, columns, 16, 16), tileSprites);
         }
     }
 }

@@ -15,6 +15,7 @@ public class KProgram
     public static bool Running;
     public static double UpdateTarget;
     public static double UpdateInterval;
+    public static Random RNG;
     public static RenderWindow Window;
     public static KResourceManager ResourceManager;
     public static KInputManager InputManager;
@@ -45,6 +46,8 @@ public class KProgram
 
     static KProgram()
     {
+        RNG = new();
+
         s_title = string.Empty; //removes warning.
         Window = new(VideoMode.DesktopMode, s_title);
         Window.Closed += (_, _) => Running = false;
@@ -62,7 +65,7 @@ public class KProgram
         InputManager = new();
         CommandManager = new();
         DrawManager = new(Window);
-        GameManager = new();
+        GameManager = new(DrawManager);
         LogManager = new(); 
 
         CLI = new(CommandManager);

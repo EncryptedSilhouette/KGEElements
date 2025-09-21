@@ -1,5 +1,4 @@
-﻿using Elements.Core;
-using Elements.Drawing;
+﻿using Elements.Game;
 
 namespace Elements
 {
@@ -11,16 +10,17 @@ namespace Elements
 
     public class KGameManager
     {
-        const int TILE_MAP_LAYER = 0;
+        public const int TILE_MAP_LAYER = 0;
 
         public KGameState GameState;
-        public KTileMap TileMap;
+        public KMapManager MapManager;
         public KDrawManager DrawManager;
         //public IKEntityHandler EntityHandler;
 
         public KGameManager(KDrawManager drawManager) 
         {
             DrawManager = drawManager;
+            MapManager = new(this);
         }
 
         public void Update(in uint currentUpdate)
@@ -33,18 +33,7 @@ namespace Elements
         {
             if (!GameState.HasFlag(KGameState.PAUSED)) return;
 
-            //Draw tile map.
-            for (int i = 0; i < TileMap.Cells.Length; i++)
-            {
-                var rec = new KRectangle()
-                {
-                    Transform = new(TileMap.Columns % i * TileMap.CellWidth, 
-                                    TileMap.Columns / i * TileMap.CellHeight),
-                    Width = TileMap.CellWidth,
-                    Height = TileMap.CellHeight
-                };
-                DrawManager.SubmitDraw(TILE_MAP_LAYER, TileMap.TileSprites[TileMap.Cells[i]], rec);
-            }
+            MapManager.FrameUpdate(currentUpdate, currentFrame, drawManager);
         }
     }
 }
