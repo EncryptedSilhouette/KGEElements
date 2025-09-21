@@ -1,6 +1,7 @@
 ﻿using Elements;
 using Elements.Drawing;
 using Elements.Extensions;
+using Elements.Game;
 using SFML.Graphics;
 using SFML.Window;
 using System.Diagnostics;
@@ -85,11 +86,37 @@ public class KProgram
         InitAndLoad();
         OnStart?.Invoke();
 
-        Running = true;
+        Running = false;
         Stopwatch debugTimer = Stopwatch.StartNew();
         Stopwatch loopTimer = Stopwatch.StartNew();
 
         double lastTime = loopTimer.ElapsedTicks;
+
+        KMapManager map = new(null) 
+        {
+            TileMap = new KTileMap(10, 10, 5, 5, [])
+        };
+
+        for (int r = 0; r < map.TileMap.Grid.Rows; r++)
+        {
+            for (int c = 0; c < map.TileMap.Grid.Columns; c++)
+            {
+                Console.Write(map.TileMap.Grid[r,c] + " ");
+            }
+            Console.Write("\n");
+        }
+
+        Console.WriteLine();
+        map.Generate(1);
+
+        for (int r = 0; r < map.TileMap.Grid.Rows; r++)
+        {
+            for (int c = 0; c < map.TileMap.Grid.Columns; c++)
+            {
+                Console.Write(map.TileMap.Grid[r, c] + " ");
+            }
+            Console.Write("\n");
+        }
 
         while (Running)
         {

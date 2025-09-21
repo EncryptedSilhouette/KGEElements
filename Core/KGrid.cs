@@ -5,10 +5,36 @@
         public int CellWidth;
         public int CellHeight;
 
+        public int CellCount => Cells.Length;
         public int Rows { get; private set; } 
         public int Columns { get; private set; }
-        public int CellCount => Cells.Length;
         public int[] Cells { get; private set; }
+
+        public int this[int index] 
+        {
+            get => Cells[index]; 
+            set => Cells[index] = value;
+        }
+
+        public int this[int row, int column]
+        {
+            get
+            {
+                if (0 <= column && column < Columns && 0 <= row && row < Rows)
+                {
+                    return Cells[row * Columns + column];
+                }
+                else throw new IndexOutOfRangeException();
+            }
+            set
+            {
+                if (0 <= column && column < Columns && 0 <= row && row < Rows)
+                {
+                    Cells[row * Columns + column] = value;
+                }
+                else throw new IndexOutOfRangeException();
+            }
+        }
 
         public KGrid(int rows, int columns, int cellWidth, int cellHeight)
         {

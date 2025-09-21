@@ -17,22 +17,105 @@ namespace Elements.Game
 
         public void Generate(int players)
         {
-            var grid = TileMap.Grid;
-            var nodes = new int[players * 4];
+            bool filled = false;
+            Span<(int row, int col)> nodes = stackalloc (int, int)[players * 4];
 
-            for (int i = 0; i < nodes.Length; i++)
+            for (int n = 0; n < nodes.Length; n++) 
             {
-                int index;
-                do index = KProgram.RNG.Next(grid.Rows) * grid.Columns + KProgram.RNG.Next(grid.Columns);
-                while (grid.Cells[index] == RESOURCE_NODE_TILE);
-
-                grid.Cells[index] = RESOURCE_NODE_TILE;
-                nodes[i] = index;
+                nodes[n] = (KProgram.RNG.Next(TileMap.Grid.Rows), KProgram.RNG.Next(TileMap.Grid.Columns));
+                TileMap.Grid[nodes[n].row, nodes[n].col] = 1;
             }
 
-            for (int i = 0; i < nodes.Length; i++)
+            for (int row, col, spread = 0; !filled; spread++) 
             {
-                
+                for (int n = 0; n < nodes.Length; n++)
+                {
+                    //BottomRight
+                    row = Math.Clamp(nodes[n].row + spread, 0, TileMap.Grid.Rows - 1);
+                    col = Math.Clamp(nodes[n].col + spread, 0, TileMap.Grid.Columns - 1);
+                    if (TileMap.Grid[row, col] < 8)
+                    {
+                        //Checks if one neighbors
+                        if (row + 1 < TileMap.Grid.Rows && col + 1 < TileMap.Grid.Columns && 
+                                TileMap.Grid[row + 1, col + 1] == 1 ||
+                            row + 1 < TileMap.Grid.Rows && 0 <= col - 1 && 
+                                TileMap.Grid[row + 1, col - 1] == 1 ||
+                            0 <= row - 1  && 0 <= col - 1 && 
+                                TileMap.Grid[row - 1, col - 1] == 1 ||
+                            0 <= row -1 && col + 1 < TileMap.Grid.Columns && 
+                                TileMap.Grid[row - 1, col + 1] == 1)
+                        {
+                            TileMap.Grid[row, col] = 1;
+                        }
+                    }
+
+                    //BottomLeft
+                    row = Math.Clamp(nodes[n].row + spread, 0, TileMap.Grid.Rows - 1);
+                    col = Math.Clamp(nodes[n].col - spread, 0, TileMap.Grid.Columns - 1);
+                    if (TileMap.Grid[row, col] < 8)
+                    {
+                        //Checks if one neighbors
+                        if (row + 1 < TileMap.Grid.Rows && col + 1 < TileMap.Grid.Columns &&
+                                TileMap.Grid[row + 1, col + 1] == 1 ||
+                            row + 1 < TileMap.Grid.Rows && 0 <= col - 1 &&
+                                TileMap.Grid[row + 1, col - 1] == 1 ||
+                            0 <= row - 1 && 0 <= col - 1 &&
+                                TileMap.Grid[row - 1, col - 1] == 1 ||
+                            0 <= row - 1 && col + 1 < TileMap.Grid.Columns &&
+                                TileMap.Grid[row - 1, col + 1] == 1)
+                        {
+                            TileMap.Grid[row, col] = 1;
+                        }
+                    }
+
+                    //TopRight
+                    row = Math.Clamp(nodes[n].row - spread, 0, TileMap.Grid.Rows - 1);
+                    col = Math.Clamp(nodes[n].col - spread, 0, TileMap.Grid.Columns - 1);
+                    if (TileMap.Grid[row, col] < 8)
+                    {
+                        //Checks if one neighbors
+                        if (row + 1 < TileMap.Grid.Rows && col + 1 < TileMap.Grid.Columns &&
+                                TileMap.Grid[row + 1, col + 1] == 1 ||
+                            row + 1 < TileMap.Grid.Rows && 0 <= col - 1 &&
+                                TileMap.Grid[row + 1, col - 1] == 1 ||
+                            0 <= row - 1 && 0 <= col - 1 &&
+                                TileMap.Grid[row - 1, col - 1] == 1 ||
+                            0 <= row - 1 && col + 1 < TileMap.Grid.Columns &&
+                                TileMap.Grid[row - 1, col + 1] == 1)
+                        {
+                            TileMap.Grid[row, col] = 1;
+                        }
+                    }
+
+                    //TopLeft
+                    row = Math.Clamp(nodes[n].row - spread, 0, TileMap.Grid.Rows - 1);
+                    col = Math.Clamp(nodes[n].col + spread, 0, TileMap.Grid.Columns - 1);
+                    if (TileMap.Grid[row, col] < 8)
+                    {
+                        //Checks if one neighbors
+                        if (row + 1 < TileMap.Grid.Rows && col + 1 < TileMap.Grid.Columns &&
+                                TileMap.Grid[row + 1, col + 1] == 1 ||
+                            row + 1 < TileMap.Grid.Rows && 0 <= col - 1 &&
+                                TileMap.Grid[row + 1, col - 1] == 1 ||
+                            0 <= row - 1 && 0 <= col - 1 &&
+                                TileMap.Grid[row - 1, col - 1] == 1 ||
+                            0 <= row - 1 && col + 1 < TileMap.Grid.Columns &&
+                                TileMap.Grid[row - 1, col + 1] == 1)
+                        {
+                            TileMap.Grid[row, col] = 1;
+                        }
+                    }
+                }
+
+                filled = true;
+
+                for (int r = 0; r < nodes.Length; r++)
+                {
+                    for (int c = 0; c < nodes.Length; c++)
+                    {
+                        if (TileMap.Grid[r, c] != 1) filled = false;
+                    }
+                }
             }
         }
 
