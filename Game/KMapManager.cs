@@ -31,74 +31,18 @@ namespace Elements.Game
             }
         }
 
-        public void Generate(int players)
+        public void Generate(int players, int spread)
         {
-            bool filled = false;
-            Span<(int row, int col)> nodes = stackalloc (int, int)[players * 4];
+            Span<(int r, int c)> nodes = stackalloc (int, int)[players * 4];
 
-            for (int n = 0; n < nodes.Length; n++)
+            for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[n] = (KProgram.RNG.Next(TileMap.Grid.Rows), KProgram.RNG.Next(TileMap.Grid.Columns));
-                TileMap.Grid[nodes[n].row, nodes[n].col] = 1;
-            }
+                (int r, int c) pos = (KProgram.RNG.Next(TileMap.Grid.Rows), KProgram.RNG.Next(TileMap.Grid.Columns));
 
-            for (int row, col, spread = 0; !filled; spread++)
-            {
-                for (int n = 0; n < nodes.Length; n++)
-                {
-                    //BottomRight
-                    row = Math.Clamp(nodes[n].row + spread, 0, TileMap.Grid.Rows - 1);
-                    col = Math.Clamp(nodes[n].col + spread, 0, TileMap.Grid.Columns - 1);
-                    TryPlaceResourceNode(row, col);
-
-                    //BottomLeft
-                    row = Math.Clamp(nodes[n].row + spread, 0, TileMap.Grid.Rows - 1);
-                    col = Math.Clamp(nodes[n].col - spread, 0, TileMap.Grid.Columns - 1);
-                    TryPlaceResourceNode(row, col);
+                
 
 
-                    //TopRight
-                    row = Math.Clamp(nodes[n].row - spread, 0, TileMap.Grid.Rows - 1);
-                    col = Math.Clamp(nodes[n].col - spread, 0, TileMap.Grid.Columns - 1);
-                    TryPlaceResourceNode(row, col);
-
-
-                    //TopLeft
-                    row = Math.Clamp(nodes[n].row - spread, 0, TileMap.Grid.Rows - 1);
-                    col = Math.Clamp(nodes[n].col + spread, 0, TileMap.Grid.Columns - 1);
-                    TryPlaceResourceNode(row, col);
-                }
-
-                filled = true;
-
-                for (int r = 0; r < nodes.Length; r++)
-                {
-                    for (int c = 0; c < nodes.Length; c++)
-                    {
-                        if (TileMap.Grid[r, c] != 1) filled = false;
-                    }
-                }
             }
         }
-
-        private void TryPlaceResourceNode(int row, int col)
-        {
-            if (TileMap.Grid[row, col] < 8)
-            {
-                //Checks neighbors
-                if (row + 1 < TileMap.Grid.Rows && col + 1 < TileMap.Grid.Columns &&
-                        TileMap.Grid[row + 1, col + 1] == 1 ||
-                    row + 1 < TileMap.Grid.Rows && col - 1 >= 0 &&
-                        TileMap.Grid[row + 1, col - 1] == 1 ||
-                    row - 1 >= 0 && col - 1 >= 0 &&
-                        TileMap.Grid[row - 1, col - 1] == 1 ||
-                    row - 1 >= 0 && col + 1 < TileMap.Grid.Columns &&
-                        TileMap.Grid[row - 1, col + 1] == 1)
-                {
-                    TileMap.Grid[row, col] = 1;
-                }
-            }
-        }
-
     }
 }
