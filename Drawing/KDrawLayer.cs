@@ -18,12 +18,12 @@ namespace Elements.Drawing
         public KDrawLayer(in RenderStates renderStates, RenderTexture renderTexture, VertexBuffer buffer, Vertex[] vertices) =>
             (States, RenderTexture, Buffer) = (renderStates, renderTexture, buffer);
 
-        public void DrawFrame()
+        public void DrawFrame(View cameraView)
         {
-            RenderTexture.Clear(Color.Black);
+            RenderTexture.SetView(cameraView);
+            RenderTexture.Clear(Color.Transparent);
             Buffer.Draw(RenderTexture, 0, _bufferOffset, States);
             RenderTexture.Display();
-
             _bufferOffset = 0;
         }
 

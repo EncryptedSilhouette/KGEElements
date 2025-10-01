@@ -9,5 +9,13 @@ namespace Elements.Drawing
         public byte Order;
         public Color Color;
         public KRectangle Sprite;
+
+        public KDrawData()
+        {
+            Layer = 0;
+            Order = 0;
+            Color = Color.White;
+            Sprite = new KRectangle();
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Elements.Game;
+﻿using Elements.D;
+using Elements.Game;
 
 namespace Elements
 {
@@ -17,6 +18,8 @@ namespace Elements
         public KDrawManager DrawManager;
         //public IKEntityHandler EntityHandler;
 
+        public KTests Tests = new();
+
         public KGameManager(KDrawManager drawManager) 
         {
             DrawManager = drawManager;
@@ -25,15 +28,16 @@ namespace Elements
 
         public void Update(in uint currentUpdate)
         {
-            if (!GameState.HasFlag(KGameState.PAUSED)) return;
+            Tests.Update();
+            //if (!GameState.HasFlag(KGameState.PAUSED)) return;
             //MainMenu.Update();
         }
 
         public void FrameUpdate(in uint currentUpdate, in uint currentFrame, KDrawManager drawManager)
         {
-            if (!GameState.HasFlag(KGameState.PAUSED)) return;
-
-            MapManager.FrameUpdate(currentUpdate, currentFrame, drawManager);
+            Tests.FrameUpdate(drawManager);
+            //if (!GameState.HasFlag(KGameState.PAUSED)) return;
+            //MapManager.FrameUpdate(currentUpdate, currentFrame, drawManager);
         }
     }
 }

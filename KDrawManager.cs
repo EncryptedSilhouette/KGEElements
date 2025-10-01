@@ -9,6 +9,7 @@ namespace Elements
         private RenderStates _states;
 
         public Color BackgroundColor;
+        public View CameraView;
         public RenderWindow Window;
         public KDrawLayer[] DrawLayers;
 
@@ -17,9 +18,11 @@ namespace Elements
         public KDrawManager(RenderWindow window)
         {
             _states = RenderStates.Default;
-            BackgroundColor = Color.White;
+            BackgroundColor = Color.Black;
             Window = window;
             DrawLayers = [];
+            CameraView = Window.GetView();
+            CameraView.Center = new(0, 0);
         }
 
         public void Init(KDrawLayer[] drawLayers)
@@ -36,16 +39,35 @@ namespace Elements
 
             for (int i = 0; i < DrawLayers.Length; i++)
             {
+                DrawLayers[i].DrawFrame(CameraView);
                 _states.Texture = DrawLayers[i].RenderTexture.Texture;
-
-                var textureBounds = new KRectangle(_states.Texture.Size.X, _states.Texture.Size.Y);
 
                 Vertex[] vertices =
                 [
-                    new Vertex(windowBounds.TopLeft, Color.White, textureBounds.TopLeft),
-                    new Vertex(windowBounds.TopRight, Color.White, textureBounds.TopRight),
-                    new Vertex(windowBounds.BottomRight, Color.White, textureBounds.BottomRight),
-                    new Vertex(windowBounds.BottomLeft, Color.White, textureBounds.BottomLeft),
+                    new Vertex() 
+                    {
+                        TexCoords = new(0, 0),
+                        Position = new(0, 0), 
+                        Color = Color.White
+                    },
+                    new Vertex() 
+                    {
+                        TexCoords = new(_states.Texture.Size.X, 0),
+                        Position = new(Window.Size.X, 0), 
+                        Color = Color.White 
+                    },
+                    new Vertex() 
+                    {
+                        TexCoords = new(_states.Texture.Size.X, _states.Texture.Size.Y),
+                        Position = new(Window.Size.X, Window.Size.Y), 
+                        Color = Color.White
+                    },
+                    new Vertex() 
+                    {
+                        TexCoords = new(0, _states.Texture.Size.Y),
+                        Position= new(0, Window.Size.Y), 
+                        Color = Color.White
+                    },
                 ];
 
                 Window.Draw(vertices, PrimitiveType.Quads, _states);

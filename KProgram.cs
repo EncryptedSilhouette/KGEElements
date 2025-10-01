@@ -1,7 +1,6 @@
 ﻿using Elements;
 using Elements.Drawing;
 using Elements.Extensions;
-using Elements.Game;
 using SFML.Graphics;
 using SFML.Window;
 using System.Diagnostics;
@@ -10,9 +9,9 @@ public class KProgram
 {
     //Using doubles for floating point precision.
     const double MS_PER_SECOND = 1000.0d;
-    
+
     private static string s_title;
-    
+
     public static bool Running;
     public static double UpdateTarget;
     public static double UpdateInterval;
@@ -55,8 +54,8 @@ public class KProgram
 
         //configs
         Title = "Elements";
-        UpdateTarget = 30;
-        
+        UpdateTarget = 60;
+
         //Defaults
         Running = false;
         UpdateInterval = MS_PER_SECOND / UpdateTarget;
@@ -67,56 +66,28 @@ public class KProgram
         CommandManager = new();
         DrawManager = new(Window);
         GameManager = new(DrawManager);
-        LogManager = new(); 
+        LogManager = new();
 
         CLI = new(CommandManager);
     }
 
     public static void Main(string[] args)
     {
-        _ = args; //gets rid of the warning
-
         uint ups = 0;
         uint fps = 0;
         uint currentUpdate = 0;
         uint currentFrame = 0;
         double unprocessedTime = 0;
         double newTime = 0;
+        double lastTime;
 
         InitAndLoad();
         OnStart?.Invoke();
 
-        Running = false;
+        Running = true;
         Stopwatch debugTimer = Stopwatch.StartNew();
         Stopwatch loopTimer = Stopwatch.StartNew();
-
-        double lastTime = loopTimer.ElapsedTicks;
-
-        KMapManager map = new(null) 
-        {
-            TileMap = new KTileMap(10, 10, 5, 5, [])
-        };
-
-        for (int r = 0; r < map.TileMap.Grid.Rows; r++)
-        {
-            for (int c = 0; c < map.TileMap.Grid.Columns; c++)
-            {
-                Console.Write(map.TileMap.Grid[r,c] + " ");
-            }
-            Console.Write("\n");
-        }
-
-        Console.WriteLine();
-        map.Generate(1);
-
-        for (int r = 0; r < map.TileMap.Grid.Rows; r++)
-        {
-            for (int c = 0; c < map.TileMap.Grid.Columns; c++)
-            {
-                Console.Write(map.TileMap.Grid[r, c] + " ");
-            }
-            Console.Write("\n");
-        }
+        lastTime = loopTimer.ElapsedTicks;
 
         while (Running)
         {
@@ -130,7 +101,7 @@ public class KProgram
             {
                 debugTimer.Restart();
 #if DEBUG
-                Console.WriteLine($"ups: {ups}, fps: {fps}");
+                Console.Write($"\rups: {ups}, fps: {fps}");
 #endif
                 ups = fps = 0;
             }
@@ -174,21 +145,21 @@ public class KProgram
             {
                 States = new(ResourceManager.TextureAtlases["atlas"].Texture),
                 RenderTexture = Window.CreateRenderTexture(),
-                Buffer = new(512, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+                Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             },
             //Entity layer
             new KDrawLayer()
             {
                 States = new(ResourceManager.TextureAtlases["atlas"].Texture),
                 RenderTexture = Window.CreateRenderTexture(),
-                Buffer = new(512, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+                Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             },
             //Text layer
             new KDrawLayer()
             {
                 States = new(ResourceManager.Fonts["roboto_black"].GetTexture(12)),
                 RenderTexture = Window.CreateRenderTexture(),
-                Buffer = new(512, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+                Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             },
         ]);
 
@@ -222,6 +193,7 @@ public class KProgram
 
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame)
     {
-        //GameManager.FrameUpdate(currentUpdate, currentFrame);
+        GameManager.FrameUpdate(currentUpdate, currentFrame, DrawManager);
+        DrawManager.FrameUpdate();
     }
 }
