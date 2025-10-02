@@ -6,18 +6,39 @@ namespace Elements
 {
     public class KResourceManager
     {
+        public string ConfigPath;
         public Dictionary<string, KTextureAtlas> TextureAtlases = [];
         public Dictionary<string, Font> Fonts = [];
 
+        public KResourceManager(string configPath)
+        {
+            ConfigPath = configPath;
+        }
+
         public void Load()
         {
-            var resources = File.ReadAllLines("res/resources.csv");
+            var resources = File.ReadAllLines(ConfigPath);
             foreach (var line in resources) 
             {
                 var values = line.Split(',');
 
                 switch (values[0])
                 {
+                    case "title":
+                        try { KProgram.Title = values[1]; }
+                        catch (Exception) { break; }
+                        break;
+
+                    case "frame_target":
+                        try { KProgram.FrameLimit = Convert.ToUInt32(values[1]); }
+                        catch (Exception) { break; }
+                        break;
+
+                    case "vsync":
+                        try { KProgram.VSync = bool.TrueString == values[1]; }
+                        catch (Exception) { break; }
+                        break;
+
                     case "atlases":
                         for (int i = 1; i < values.Length; i++) LoadAtlas(values[i]);
                         break;

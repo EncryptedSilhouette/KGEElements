@@ -10,10 +10,12 @@ public class KProgram
     //Using doubles for floating point precision.
     const double MS_PER_SECOND = 1000.0d;
 
+    private static bool s_vSync;
+    private static uint s_frameLimit;
     private static string s_title;
 
     public static bool Running;
-    public static double UpdateTarget;
+    public static uint UpdateTarget;
     public static double UpdateInterval;
     public static Random RNG;
     public static RenderWindow Window;
@@ -31,7 +33,29 @@ public class KProgram
     public static event Action? OnStop;
     public static event Action? OnDeinit;
 
+    public static bool VSync
+    {
+        get => s_vSync;
+        set
+        {
+            Window.SetVerticalSyncEnabled(value);
+            Window.SetFramerateLimit(value ? 0 : s_frameLimit);
+            s_vSync = value;
+        }
+    }
+
+    public static uint FrameLimit
+    {
+        get => s_frameLimit;
+        set
+        {
+            s_frameLimit = value > UpdateTarget ? value : UpdateTarget;
+            if (!s_vSync) Window.SetFramerateLimit(value);
+        }
+    }
+
     public static float ScreenCenterX => Window.Size.X / 2;
+
     public static float ScreenCenterY => Window.Size.Y / 2;
 
     public static string Title
@@ -48,20 +72,22 @@ public class KProgram
     {
         RNG = new();
 
+        s_vSync = false;
         s_title = string.Empty; //removes warning.
         Window = new(VideoMode.DesktopMode, s_title);
         Window.Closed += (_, _) => Running = false;
 
         //configs
         Title = "Elements";
-        UpdateTarget = 60;
+        UpdateTarget = 30;
+        FrameLimit = UpdateTarget;
 
         //Defaults
         Running = false;
         UpdateInterval = MS_PER_SECOND / UpdateTarget;
 
         //System managers
-        ResourceManager = new();
+        ResourceManager = new("config.csv");
         InputManager = new();
         CommandManager = new();
         DrawManager = new(Window);
@@ -73,6 +99,20 @@ public class KProgram
 
     public static void Main(string[] args)
     {
+        InitAndLoad();
+        OnStart?.Invoke();
+
+        StartGameLoop();
+
+        OnStop?.Invoke();
+        Deinit();
+    }
+
+     #region capped frame loop
+
+#if false
+    private static void StartGameLoop()
+    {
         uint ups = 0;
         uint fps = 0;
         uint currentUpdate = 0;
@@ -80,9 +120,6 @@ public class KProgram
         double unprocessedTime = 0;
         double newTime = 0;
         double lastTime;
-
-        InitAndLoad();
-        OnStart?.Invoke();
 
         Running = true;
         Stopwatch debugTimer = Stopwatch.StartNew();
@@ -124,10 +161,63 @@ public class KProgram
             currentFrame++;
             FrameUpdate(currentUpdate, currentFrame);
         }
-
-        OnStop?.Invoke();
-        Deinit();
     }
+#endif
+
+    #endregion
+
+    #region uncapped frame loop
+
+    private static void StartGameLoop()
+    {
+        uint ups = 0;
+        uint fps = 0;
+        uint currentUpdate = 0;
+        uint currentFrame = 0;
+        double unprocessedTime = 0;
+        double newTime = 0;
+        double lastTime = 0;
+
+        GC.Collect();
+
+        Running = true;
+        Stopwatch debugTimer = Stopwatch.StartNew();
+        Stopwatch loopTimer = Stopwatch.StartNew();
+        lastTime = loopTimer.ElapsedTicks;
+
+        while (Running)
+        {
+            //Keeps track of time between updates.
+            newTime = loopTimer.ElapsedTicks;
+            unprocessedTime += (newTime - lastTime) / TimeSpan.TicksPerMillisecond;
+            lastTime = newTime;
+
+            //Debug tracker.
+            if (debugTimer.ElapsedMilliseconds / MS_PER_SECOND >= 1)
+            {
+                debugTimer.Restart();
+#if DEBUG
+                Console.Write($"\rups: {ups}, fps: {fps}");
+#endif
+                ups = fps = 0;
+            }
+
+            while (unprocessedTime >= UpdateInterval && Running)
+            {
+                ups++;
+                currentUpdate++;
+                unprocessedTime -= UpdateInterval;
+                Update(currentUpdate);
+            }
+
+            //Update and draw frame.
+            fps++;
+            currentFrame++;
+            FrameUpdate(currentUpdate, currentFrame);
+        }
+    }
+
+    #endregion
 
     private static void InitAndLoad()
     {

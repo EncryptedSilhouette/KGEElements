@@ -1,2 +1,6 @@
+title,Elements
+frame_target,60
+vsync,true
+
 atlases,res/texture_data.csv
 fonts,res/roboto_black.ttf
