@@ -18,9 +18,9 @@ namespace Elements.Drawing
         public KDrawLayer(in RenderStates renderStates, RenderTexture renderTexture, VertexBuffer buffer, Vertex[] vertices) =>
             (States, RenderTexture, Buffer) = (renderStates, renderTexture, buffer);
 
-        public void DrawFrame(View cameraView)
+        public void DrawFrame(View view)
         {
-            RenderTexture.SetView(cameraView);
+            RenderTexture.SetView(view);
             RenderTexture.Clear(Color.Transparent);
             Buffer.Draw(RenderTexture, 0, _bufferOffset, States);
             RenderTexture.Display();

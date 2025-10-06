@@ -1,4 +1,7 @@
-﻿namespace Elements.Dev
+﻿using Elements.Drawing;
+using Elements.Game;
+
+namespace Elements.Dev
 {
     public class KEditor
     {

@@ -1,7 +1,7 @@
 ﻿using Elements.D;
-using Elements.Game;
+using Elements.Drawing;
 
-namespace Elements
+namespace Elements.Game
 {
     [Flags]
     public enum KGameState

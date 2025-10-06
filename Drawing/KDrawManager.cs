@@ -1,15 +1,14 @@
 ﻿using Elements.Core;
-using Elements.Drawing;
 using SFML.Graphics;
 
-namespace Elements
+namespace Elements.Drawing
 {
     public class KDrawManager
     {
         private RenderStates _states;
 
         public Color BackgroundColor;
-        public View CameraView;
+        public View View;
         public RenderWindow Window;
         public KDrawLayer[] DrawLayers;
 
@@ -21,8 +20,8 @@ namespace Elements
             BackgroundColor = Color.Black;
             Window = window;
             DrawLayers = [];
-            CameraView = Window.GetView();
-            CameraView.Center = new(0, 0);
+            View = Window.GetView();
+            View.Center = new(0, 0);
         }
 
         public void Init(KDrawLayer[] drawLayers)
@@ -39,7 +38,7 @@ namespace Elements
 
             for (int i = 0; i < DrawLayers.Length; i++)
             {
-                DrawLayers[i].DrawFrame(CameraView);
+                DrawLayers[i].DrawFrame(View);
                 _states.Texture = DrawLayers[i].RenderTexture.Texture;
 
                 Vertex[] vertices =

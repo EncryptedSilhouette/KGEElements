@@ -29,10 +29,10 @@ namespace Elements
                         catch (Exception) { break; }
                         break;
 
-                    case "frame_target":
-                        try { KProgram.FrameLimit = Convert.ToUInt32(values[1]); }
-                        catch (Exception) { break; }
-                        break;
+                    //case "frame_target":
+                    //    try { KProgram.FrameLimit = Convert.ToUInt32(values[1]); }
+                    //    catch (Exception) { break; }
+                    //    break;
 
                     case "vsync":
                         try { KProgram.VSync = bool.TrueString == values[1]; }

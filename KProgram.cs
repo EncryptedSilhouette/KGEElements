@@ -1,9 +1,16 @@
 ﻿using Elements;
 using Elements.Drawing;
 using Elements.Extensions;
+using Elements.Game;
 using SFML.Graphics;
 using SFML.Window;
 using System.Diagnostics;
+
+//TODO
+//Resizing the window causes the visuals to warp.
+//This is probably due to the RenderTexture streching and compressing to fit the new aspect ratio.
+//Need to figure out a layout manager.
+//interpolated rendering.
 
 public class KProgram
 {
@@ -54,6 +61,12 @@ public class KProgram
         }
     }
 
+    //TODO
+    public static float ScreenTopLeft;
+    public static float ScreenTopRight;
+    public static float ScreenBottomRight;
+    public static float ScreenBottomLeft;
+
     public static float ScreenCenterX => Window.Size.X / 2;
 
     public static float ScreenCenterY => Window.Size.Y / 2;
@@ -80,7 +93,7 @@ public class KProgram
         //configs
         Title = "Elements";
         UpdateTarget = 30;
-        FrameLimit = UpdateTarget;
+        //FrameLimit = UpdateTarget;
 
         //Defaults
         Running = false;
@@ -174,6 +187,7 @@ public class KProgram
         uint fps = 0;
         uint currentUpdate = 0;
         uint currentFrame = 0;
+        double delta = 0;
         double unprocessedTime = 0;
         double newTime = 0;
         double lastTime = 0;
@@ -189,7 +203,8 @@ public class KProgram
         {
             //Keeps track of time between updates.
             newTime = loopTimer.ElapsedTicks;
-            unprocessedTime += (newTime - lastTime) / TimeSpan.TicksPerMillisecond;
+            delta = (newTime - lastTime) / TimeSpan.TicksPerMillisecond;
+            unprocessedTime += delta;
             lastTime = newTime;
 
             //Debug tracker.
@@ -201,7 +216,7 @@ public class KProgram
 #endif
                 ups = fps = 0;
             }
-
+            
             while (unprocessedTime >= UpdateInterval && Running)
             {
                 ups++;
