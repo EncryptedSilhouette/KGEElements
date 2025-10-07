@@ -93,7 +93,7 @@ public class KProgram
         //configs
         Title = "Elements";
         UpdateTarget = 30;
-        //FrameLimit = UpdateTarget;
+        FrameLimit = UpdateTarget;
 
         //Defaults
         Running = false;
@@ -228,7 +228,7 @@ public class KProgram
             //Update and draw frame.
             fps++;
             currentFrame++;
-            FrameUpdate(currentUpdate, currentFrame);
+            FrameUpdate(currentUpdate, currentFrame, delta / UpdateInterval);
         }
     }
 
@@ -296,9 +296,9 @@ public class KProgram
         GameManager.Update(currentUpdate);
     }
 
-    private static void FrameUpdate(in uint currentUpdate, in uint currentFrame)
+    private static void FrameUpdate(in uint currentUpdate, in uint currentFrame, in double deltaTime)
     {
-        GameManager.FrameUpdate(currentUpdate, currentFrame, DrawManager);
+        GameManager.FrameUpdate(DrawManager, currentUpdate, currentFrame, deltaTime);
         DrawManager.FrameUpdate();
     }
 }

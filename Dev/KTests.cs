@@ -14,23 +14,23 @@ namespace Elements.D
 
         public void Update()
         {
-            if (KProgram.InputManager.ScrollDelta < 0) KProgram.DrawManager.View.Zoom(-KProgram.InputManager.ScrollDelta);
-            if (KProgram.InputManager.ScrollDelta > 0) KProgram.DrawManager.View.Zoom(1 / KProgram.InputManager.ScrollDelta);
+            if (KProgram.InputManager.ScrollDelta < 0) KProgram.DrawManager.WindowView.Zoom(-KProgram.InputManager.ScrollDelta);
+            if (KProgram.InputManager.ScrollDelta > 0) KProgram.DrawManager.WindowView.Zoom(1 / KProgram.InputManager.ScrollDelta);
 
             Vector2f offset = new Vector2f(0, 0);
             if (KProgram.InputManager.IsKeyDown(SFML.Window.Keyboard.Key.W)) offset.Y -= 5;
             if (KProgram.InputManager.IsKeyDown(SFML.Window.Keyboard.Key.S)) offset.Y += 5;
             if (KProgram.InputManager.IsKeyDown(SFML.Window.Keyboard.Key.A)) offset.X -= 5;
             if (KProgram.InputManager.IsKeyDown(SFML.Window.Keyboard.Key.D)) offset.X += 5;
-            KProgram.DrawManager.View.Move(offset);
+            KProgram.DrawManager.WindowView.Move(offset);
         }
 
         public void FrameUpdate(KDrawManager drawManager)
         {
-            var width = drawManager.View.Size.X;
-            var height = drawManager.View.Size.Y;
-            var posX = drawManager.View.Center.X - width / 2;
-            var posY = drawManager.View.Center.Y - height / 2;
+            var width = drawManager.WindowView.Size.X;
+            var height = drawManager.WindowView.Size.Y;
+            var posX = drawManager.WindowView.Center.X - width / 2;
+            var posY = drawManager.WindowView.Center.Y - height / 2;
             Color color = new(50, 50, 50);
 
             drawManager.SubmitDraw(

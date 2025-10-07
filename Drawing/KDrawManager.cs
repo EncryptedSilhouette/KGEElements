@@ -8,11 +8,13 @@ namespace Elements.Drawing
         private RenderStates _states;
 
         public Color BackgroundColor;
-        public View View;
         public RenderWindow Window;
         public KDrawLayer[] DrawLayers;
 
         public int TopLayer => DrawLayers.Length - 1;
+
+        public View WindowView => Window.GetView();
+        //OnResize => View = Window.GetView()
 
         public KDrawManager(RenderWindow window)
         {
@@ -20,8 +22,6 @@ namespace Elements.Drawing
             BackgroundColor = Color.Black;
             Window = window;
             DrawLayers = [];
-            View = Window.GetView();
-            View.Center = new(0, 0);
         }
 
         public void Init(KDrawLayer[] drawLayers)
@@ -38,7 +38,7 @@ namespace Elements.Drawing
 
             for (int i = 0; i < DrawLayers.Length; i++)
             {
-                DrawLayers[i].DrawFrame(View);
+                DrawLayers[i].DrawFrame(WindowView);
                 _states.Texture = DrawLayers[i].RenderTexture.Texture;
 
                 Vertex[] vertices =

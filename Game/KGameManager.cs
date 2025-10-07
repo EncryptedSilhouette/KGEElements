@@ -33,7 +33,7 @@ namespace Elements.Game
             //MainMenu.Update();
         }
 
-        public void FrameUpdate(in uint currentUpdate, in uint currentFrame, KDrawManager drawManager)
+        public void FrameUpdate(KDrawManager drawManager, in uint currentUpdate, in uint currentFrame, in double deltaTime)
         {
             Tests.FrameUpdate(drawManager);
             //if (!GameState.HasFlag(KGameState.PAUSED)) return;
