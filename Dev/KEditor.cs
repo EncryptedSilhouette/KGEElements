@@ -17,7 +17,7 @@ namespace Elements.Dev
 
         }
 
-        public void FrameUpdate(in uint currentUpdate, in uint currentFrame, KDrawManager drawManager)
+        public void FrameUpdate(in uint currentUpdate, in uint currentFrame, KRenderManager renderManager)
         {
 
         }

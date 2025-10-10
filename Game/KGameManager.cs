@@ -1,43 +1,74 @@
-﻿using Elements.D;
+﻿using Elements.Dev;
 using Elements.Drawing;
+using SFML.System;
+using System.Diagnostics;
+using static SFML.Window.Keyboard;
 
 namespace Elements.Game
 {
     [Flags]
-    public enum KGameState
+    public enum KGameFlags
     {
-        PAUSED,
+        DEBUG = 1 << 0,
     }
 
     public class KGameManager
     {
+        public const int GAME_CAMERA = 0;
         public const int TILE_MAP_LAYER = 0;
 
-        public KGameState GameState;
+        public KDebugger Debugger;
+        public KInputManager InputManager;
+        public KGameFlags GameFlags;
         public KMapManager MapManager;
-        public KDrawManager DrawManager;
-        //public IKEntityHandler EntityHandler;
+        public KRenderManager DrawManager;
 
-        public KTests Tests = new();
-
-        public KGameManager(KDrawManager drawManager) 
+        public KGameManager(KRenderManager renderManager, KInputManager inputManager) 
         {
-            DrawManager = drawManager;
+            Debugger = new();
+            InputManager = inputManager;
+            DrawManager = renderManager;
             MapManager = new(this);
         }
 
         public void Update(in uint currentUpdate)
         {
-            Tests.Update();
-            //if (!GameState.HasFlag(KGameState.PAUSED)) return;
-            //MainMenu.Update();
+            if (InputManager.IsKeyPressed(Key.LAlt) && InputManager.IsKeyPressed(Key.D))
+            {
+                if (GameFlags.HasFlag(KGameFlags.DEBUG)) GameFlags &= ~KGameFlags.DEBUG;
+                else GameFlags |= KGameFlags.DEBUG;
+            }
         }
 
-        public void FrameUpdate(KDrawManager drawManager, in uint currentUpdate, in uint currentFrame, in double deltaTime)
+        public void FrameUpdate(KRenderManager renderManager, in uint currentUpdate, in uint currentFrame, in double deltaTime)
         {
-            Tests.FrameUpdate(drawManager);
-            //if (!GameState.HasFlag(KGameState.PAUSED)) return;
-            //MapManager.FrameUpdate(currentUpdate, currentFrame, drawManager);
+            HandleScreenPanning(renderManager, deltaTime);
+            Debugger.FrameUpdate(renderManager);
+        }
+
+        //Call in FrameUpdate
+        public void HandleScreenPanning(KRenderManager renderManager, in double deltaTime)
+        {
+            Vector2f moveOffset = new(); 
+
+            if (InputManager.IsKeyDown(Key.W))
+            {
+                moveOffset.Y += -1;
+            }
+            if (InputManager.IsKeyDown(Key.S))
+            {
+                moveOffset.Y += 1;
+            }
+            if (InputManager.IsKeyDown(Key.A))
+            {
+                moveOffset.X += -1;
+            }
+            if (InputManager.IsKeyDown(Key.D))
+            {
+                moveOffset.X += 1;
+            }
+
+            renderManager.Cameras[GAME_CAMERA].Move(moveOffset * (float) deltaTime);
         }
     }
 }

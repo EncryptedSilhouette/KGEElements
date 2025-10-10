@@ -7,6 +7,7 @@ namespace Elements.Drawing
     {
         private uint _bufferOffset;
 
+        public byte CameraID;
         public RenderStates States;
         public RenderTexture RenderTexture;
         public VertexBuffer Buffer;

@@ -51,9 +51,9 @@ namespace Elements.Core
             OnHold?.Invoke();
         }
 
-        public void FrameUpdate(KDrawManager drawManager)
+        public void FrameUpdate(KRenderManager renderManager)
         {
-            drawManager.SubmitDraw(DrawData, Bounds);
+            renderManager.SubmitDraw(DrawData, Bounds);
         }
     }
 }

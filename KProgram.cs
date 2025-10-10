@@ -29,7 +29,7 @@ public class KProgram
     public static KResourceManager ResourceManager;
     public static KInputManager InputManager;
     public static KCommandManager CommandManager;
-    public static KDrawManager DrawManager;
+    public static KRenderManager DrawManager;
     public static KGameManager GameManager;
     public static KLogManager LogManager;
     public static KCLI CLI;
@@ -104,7 +104,7 @@ public class KProgram
         InputManager = new();
         CommandManager = new();
         DrawManager = new(Window);
-        GameManager = new(DrawManager);
+        GameManager = new(DrawManager, InputManager);
         LogManager = new();
 
         CLI = new(CommandManager);
@@ -244,10 +244,16 @@ public class KProgram
         #region Draw layers
 
         DrawManager.Init(
-        [
+        new View[]
+        {
+            Window.GetView()
+        },
+        new KDrawLayer[]
+        {
             //Tilemap layer
             new KDrawLayer()
             {
+                CameraID = 0,
                 States = new(ResourceManager.TextureAtlases["atlas"].Texture),
                 RenderTexture = Window.CreateRenderTexture(),
                 Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
@@ -255,6 +261,7 @@ public class KProgram
             //Entity layer
             new KDrawLayer()
             {
+                CameraID = 0,
                 States = new(ResourceManager.TextureAtlases["atlas"].Texture),
                 RenderTexture = Window.CreateRenderTexture(),
                 Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
@@ -262,11 +269,12 @@ public class KProgram
             //Text layer
             new KDrawLayer()
             {
+                CameraID = 0,
                 States = new(ResourceManager.Fonts["roboto_black"].GetTexture(12)),
                 RenderTexture = Window.CreateRenderTexture(),
                 Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
-            },
-        ]);
+            }
+        });
 
         #endregion
 

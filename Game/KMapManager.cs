@@ -15,7 +15,7 @@ namespace Elements.Game
             GameManager = gameManager;
         }
 
-        public void FrameUpdate(in uint currentUpdate, in uint currentFrame, KDrawManager drawManager)
+        public void FrameUpdate(in uint currentUpdate, in uint currentFrame, KRenderManager renderManager)
         {
             //Draw tile map.
             for (int i = 0; i < TileMap.Grid.CellCount; i++)
@@ -27,7 +27,7 @@ namespace Elements.Game
                     Width = TileMap.Grid.CellWidth,
                     Height = TileMap.Grid.CellHeight
                 };
-                drawManager.SubmitDraw(KGameManager.TILE_MAP_LAYER, TileMap.TileSprites[TileMap.Grid.Cells[i]], rec);
+                renderManager.SubmitDraw(KGameManager.TILE_MAP_LAYER, TileMap.TileSprites[TileMap.Grid.Cells[i]], rec);
             }
         }
 

@@ -29,12 +29,12 @@ namespace Elements.Game.Hardcoded
             }
         }
 
-        public void FrameUpdate(KDrawManager drawManager)
+        public void FrameUpdate(KRenderManager renderManager)
         {
-            drawManager.SubmitDraw(drawData, bounds);
+            renderManager.SubmitDraw(drawData, bounds);
             for (int i = 0; i < buttons.Length; i++) 
             {
-                buttons[i].FrameUpdate(drawManager);
+                buttons[i].FrameUpdate(renderManager);
             }
         }
 
