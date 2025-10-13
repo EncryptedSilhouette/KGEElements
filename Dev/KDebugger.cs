@@ -1,5 +1,4 @@
-﻿using Elements.Core;
-using Elements.Drawing;
+﻿using Elements.Drawing;
 using SFML.Graphics;
 
 namespace Elements.Dev
@@ -14,42 +13,94 @@ namespace Elements.Dev
         public void FrameUpdate(KRenderManager renderManager)
         {
             int cellWidth = 16, cellHeight = 16;
-            Color color = Color.White;
-
-            for (int i = 0; i < renderManager.Window.Size.X / cellWidth; i++) 
+            Color color = new(50,50,50);
+            var size = renderManager.CameraViews[0].Size;
+            var position = renderManager.CameraViews[0].Center - size / 2;
+            
+            for (int col = 0; col < renderManager.Window.Size.X / cellWidth; col++) 
             {
-                renderManager.Cameras[0].Viewport
-                    .Deconstruct(out float left, out float top, out float width, out float height);
+                var x = MathF.Round(position.X / cellWidth) * cellWidth + cellWidth * col;
 
                 Vertex[] vertices =
                 [
                     new Vertex() 
                     {
-                        Position = new((int) (left / cellWidth) * cellWidth, top),
+                        Position = new(x, position.Y),
                         Color = color,
                     },
                     new Vertex()
                     {
-                        Position = new((int) (left / cellWidth) * cellWidth + cellWidth, top),
+                        Position = new(x + 1, position.Y),
                         Color = color,
                     },
                     new Vertex()
                     {
-                        Position = new((int) (left / cellWidth) * cellWidth + cellWidth, height),
+                        Position = new(x + 1, position.Y + size.Y),
                         Color = color,
                     },
                     new Vertex()
                     {
-                        Position = new((int) (left / cellWidth) * cellWidth, height),
+                        Position = new(x, position.Y + size.Y),
                         Color = color,
                     }
                 ];
+                renderManager.SubmitDraw(vertices);
             }
 
-            for (int i = 0; i < renderManager.Window.Size.Y / cellHeight; i++)
+            for (int row = 0; row < renderManager.Window.Size.Y / cellHeight; row++)
             {
+                var y = MathF.Round(position.Y / cellHeight) * cellHeight + cellHeight * row;
 
+                Vertex[] vertices =
+                [
+                    new Vertex()
+                    {
+                        Position = new(position.X, y),
+                        Color = color,
+                    },
+                    new Vertex()
+                    {
+                        Position = new(position.X + size.X + 1, y),
+                        Color = color,
+                    },
+                    new Vertex()
+                    {
+                        Position = new(position.X + size.X, y + 1),
+                        Color = color,
+                    },
+                    new Vertex()
+                    {
+                        Position = new(position.X, y + 1),
+                        Color = color,
+                    }
+                ];
+                renderManager.SubmitDraw(vertices);
             }
+
+            Vertex[] v =
+            [
+                new Vertex()
+                {
+                    Position = new(KProgram.Window.Size.X / 2 - 4, KProgram.Window.Size.Y / 2 - 4),
+                    Color = color,
+                },
+                new Vertex()
+                {
+                    Position = new(KProgram.Window.Size.X / 2 + 4, KProgram.Window.Size.Y / 2 - 4),
+                    Color = color,
+                },
+                new Vertex()
+                {
+                    Position = new(KProgram.Window.Size.X / 2 + 4, KProgram.Window.Size.Y / 2 + 4),
+                    Color = color,
+                },
+                new Vertex()
+                {
+                    Position = new(KProgram.Window.Size.X / 2 - 4, KProgram.Window.Size.Y / 2 + 4),
+                    Color = color,
+                }
+            ];
+            renderManager.SubmitDraw(v);
 
         }
     }

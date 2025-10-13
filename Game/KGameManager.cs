@@ -1,7 +1,6 @@
 ﻿using Elements.Dev;
 using Elements.Drawing;
 using SFML.System;
-using System.Diagnostics;
 using static SFML.Window.Keyboard;
 
 namespace Elements.Game
@@ -17,6 +16,7 @@ namespace Elements.Game
         public const int GAME_CAMERA = 0;
         public const int TILE_MAP_LAYER = 0;
 
+        int panSpeed = 5;
         public KDebugger Debugger;
         public KInputManager InputManager;
         public KGameFlags GameFlags;
@@ -68,7 +68,7 @@ namespace Elements.Game
                 moveOffset.X += 1;
             }
 
-            renderManager.Cameras[GAME_CAMERA].Move(moveOffset * (float) deltaTime);
+            renderManager.CameraViews[GAME_CAMERA].Move(moveOffset * panSpeed * (float) deltaTime);
         }
     }
 }

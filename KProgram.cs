@@ -3,14 +3,9 @@ using Elements.Drawing;
 using Elements.Extensions;
 using Elements.Game;
 using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
-
-//TODO
-//Resizing the window causes the visuals to warp.
-//This is probably due to the RenderTexture streching and compressing to fit the new aspect ratio.
-//Need to figure out a layout manager.
-//interpolated rendering.
 
 public class KProgram
 {
@@ -29,7 +24,7 @@ public class KProgram
     public static KResourceManager ResourceManager;
     public static KInputManager InputManager;
     public static KCommandManager CommandManager;
-    public static KRenderManager DrawManager;
+    public static KRenderManager RenderManager;
     public static KGameManager GameManager;
     public static KLogManager LogManager;
     public static KCLI CLI;
@@ -60,16 +55,6 @@ public class KProgram
             if (!s_vSync) Window.SetFramerateLimit(value);
         }
     }
-
-    //TODO
-    public static float ScreenTopLeft;
-    public static float ScreenTopRight;
-    public static float ScreenBottomRight;
-    public static float ScreenBottomLeft;
-
-    public static float ScreenCenterX => Window.Size.X / 2;
-
-    public static float ScreenCenterY => Window.Size.Y / 2;
 
     public static string Title
     {
@@ -103,8 +88,8 @@ public class KProgram
         ResourceManager = new("config.csv");
         InputManager = new();
         CommandManager = new();
-        DrawManager = new(Window);
-        GameManager = new(DrawManager, InputManager);
+        RenderManager = new(Window);
+        GameManager = new(RenderManager, InputManager);
         LogManager = new();
 
         CLI = new(CommandManager);
@@ -241,35 +226,35 @@ public class KProgram
         //Load
         Load();
 
-        #region Draw layers
+        #region Rendering initilization
 
-        DrawManager.Init(
+        RenderManager.Init(
         new View[]
         {
             Window.GetView()
         },
-        new KDrawLayer[]
+        new KRenderLayer[]
         {
             //Tilemap layer
-            new KDrawLayer()
+            new KRenderLayer()
             {
-                CameraID = 0,
+                Camera = 0,
                 States = new(ResourceManager.TextureAtlases["atlas"].Texture),
                 RenderTexture = Window.CreateRenderTexture(),
                 Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             },
             //Entity layer
-            new KDrawLayer()
+            new KRenderLayer()
             {
-                CameraID = 0,
+                Camera = 0,
                 States = new(ResourceManager.TextureAtlases["atlas"].Texture),
                 RenderTexture = Window.CreateRenderTexture(),
                 Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             },
             //Text layer
-            new KDrawLayer()
+            new KRenderLayer()
             {
-                CameraID = 0,
+                Camera = 0,
                 States = new(ResourceManager.Fonts["roboto_black"].GetTexture(12)),
                 RenderTexture = Window.CreateRenderTexture(),
                 Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
@@ -306,7 +291,7 @@ public class KProgram
 
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame, in double deltaTime)
     {
-        GameManager.FrameUpdate(DrawManager, currentUpdate, currentFrame, deltaTime);
-        DrawManager.FrameUpdate();
+        GameManager.FrameUpdate(RenderManager, currentUpdate, currentFrame, deltaTime);
+        RenderManager.FrameUpdate();
     }
 }
