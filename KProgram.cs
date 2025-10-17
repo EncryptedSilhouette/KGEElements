@@ -1,7 +1,6 @@
 ﻿using Elements;
 using Elements.Drawing;
 using Elements.Extensions;
-using Elements.Game;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
@@ -25,7 +24,7 @@ public class KProgram
     public static KInputManager InputManager;
     public static KCommandManager CommandManager;
     public static KRenderManager RenderManager;
-    public static KGameManager GameManager;
+    //public static KGameManager GameManager;
     public static KLogManager LogManager;
     public static KCLI CLI;
 
@@ -89,7 +88,7 @@ public class KProgram
         InputManager = new();
         CommandManager = new();
         RenderManager = new(Window);
-        GameManager = new(RenderManager, InputManager);
+        //GameManager = new(RenderManager, InputManager);
         LogManager = new();
 
         CLI = new(CommandManager);
@@ -197,7 +196,7 @@ public class KProgram
             {
                 debugTimer.Restart();
 #if DEBUG
-                Console.Write($"\rups: {ups}, fps: {fps}");
+                //Console.Write($"\rups: {ups}, fps: {fps}");
 #endif
                 ups = fps = 0;
             }
@@ -229,37 +228,20 @@ public class KProgram
         #region Rendering initilization
 
         RenderManager.Init(
-        new View[]
-        {
-            Window.GetView()
-        },
-        new KRenderLayer[]
-        {
-            //Tilemap layer
-            new KRenderLayer()
+            new View[]
             {
-                Camera = 0,
-                States = new(ResourceManager.TextureAtlases["atlas"].Texture),
-                RenderTexture = Window.CreateRenderTexture(),
-                Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+                Window.GetView()
             },
-            //Entity layer
-            new KRenderLayer()
+            new KRenderLayer[]
             {
-                Camera = 0,
-                States = new(ResourceManager.TextureAtlases["atlas"].Texture),
-                RenderTexture = Window.CreateRenderTexture(),
-                Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
-            },
-            //Text layer
-            new KRenderLayer()
-            {
-                Camera = 0,
-                States = new(ResourceManager.Fonts["roboto_black"].GetTexture(12)),
-                RenderTexture = Window.CreateRenderTexture(),
-                Buffer = new(1028, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
-            }
-        });
+                new KRenderLayer()
+                {
+                    //Camera = 0,
+                    States = new(ResourceManager.TextureAtlases["atlas"].Texture),
+                    RenderTexture = Window.CreateRenderTexture(),
+                    Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+                },
+            });
 
         #endregion
 
@@ -286,12 +268,12 @@ public class KProgram
         CLI.Update(InputManager);
         CommandManager.Update();
 
-        GameManager.Update(currentUpdate);
+        //GameManager.Update(currentUpdate);
     }
 
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame, in double deltaTime)
     {
-        GameManager.FrameUpdate(RenderManager, currentUpdate, currentFrame, deltaTime);
+        //GameManager.FrameUpdate(RenderManager, currentUpdate, currentFrame, deltaTime);
         RenderManager.FrameUpdate();
     }
 }

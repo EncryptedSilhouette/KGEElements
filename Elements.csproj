@@ -29,4 +29,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ECS\" />
+    <Folder Include="Game\Hardcoded\" />
+  </ItemGroup>
+
 </Project>
