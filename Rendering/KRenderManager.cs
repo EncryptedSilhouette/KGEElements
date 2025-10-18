@@ -32,7 +32,7 @@ namespace Elements.Drawing
         }
 
         //use during scene swapping if additional layers/cameras are needed.
-        public void Init(View[] cameraViews, KRenderLayer[] drawLayers)
+        public void Init(View[] cameraViews, KRenderLayer[] renderLayers)
         {
             //I will loose my mind otherwise.
             Window.SetView(new(new(0, 0), (Vector2f) Window.Size));
@@ -43,16 +43,30 @@ namespace Elements.Drawing
             CameraViews =
             [
                 //Life truly is hell.
-                new(new(0, 0), new(640, 480))
+                new(new(0, 0), new(1920, 1080)),
+                new(new(1920/2 - 320, -1080/2 + 240), new(640, 480))
+
             ];
             DrawLayers =
             [
                 new()
                 {
                     Camera = 0,
+                    LineColor = Color.Red,
+                    BackgroundColor = new(100, 100, 100),
                     //States = new(ResourceManager.TextureAtlases["atlas"].Texture),
                     States = RenderStates.Default,
                     RenderTexture = new(Window.Size.X, Window.Size.Y),
+                    Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+                },
+                new() //Overlay.
+                {
+                    Camera = 1,
+                    LineColor = Color.Red,
+                    BackgroundColor = new(0, 0, 100),
+                    //States = new(ResourceManager.TextureAtlases["atlas"].Texture),
+                    States = RenderStates.Default,
+                    RenderTexture = new(640, 480),
                     Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
                 }
             ];
@@ -65,52 +79,48 @@ namespace Elements.Drawing
 
         public void FrameUpdate()
         {
-            Vertex[] v =
-            [
-                new(new(-32, -32), Color.White),
-                new(new(32, -32), Color.White),
-                new(new(32, 32), Color.White),
-                new(new(-32, 32), Color.White),
-            ];
-            SubmitDraw(v);
-
-            var camera = CameraViews[DrawLayers[0].Camera];
-            var layer = DrawLayers[0].DrawFrame(camera);
-            States = RenderStates.Default;
-            States.Texture = layer.Texture;
 
             Window.Clear(Color.Black);
 
-            Vertex[] bounds =
+            for (int i = 0; i < DrawLayers.Length; i++)
             {
-                new Vertex() 
+                var camera = CameraViews[DrawLayers[i].Camera];
+                var layer = DrawLayers[i].DrawFrame(camera);
+                States = RenderStates.Default;
+                States.Texture = layer.Texture;
+
+
+                Vertex[] bounds =
                 {
-                    Color = Color.White,
-                    Position = camera.Center + new Vector2f(-layer.Size.X, -layer.Size.Y) / 2,
-                    TexCoords = new(0, 0),
-                },
-                new Vertex()
-                {
-                    Color = Color.White,
-                    Position = camera.Center + new Vector2f(layer.Size.X, -layer.Size.Y) / 2,
-                    TexCoords = new(layer.Texture.Size.X, 0),
-                },
-                new Vertex()
-                {
-                    Color = Color.White,
-                    Position = camera.Center + new Vector2f(layer.Size.X, layer.Size.Y) / 2,
-                    TexCoords = new(layer.Texture.Size.X, layer.Texture.Size.Y),
-                },
-                new Vertex()
-                {
-                    Color = Color.White,
-                    Position = camera.Center + new Vector2f(-layer.Size.X, layer.Size.Y) / 2,
-                    TexCoords = new(0, layer.Texture.Size.Y),
-                }
-            };
+                    new Vertex()
+                    {
+                        Color = Color.White,
+                        Position = camera.Center + new Vector2f(-camera.Size.X, -camera.Size.Y) / 2,
+                        TexCoords = new(0, 0),
+                    },
+                    new Vertex()
+                    {
+                        Color = Color.White,
+                        Position = camera.Center + new Vector2f(camera.Size.X, -camera.Size.Y) / 2,
+                        TexCoords = new(layer.Texture.Size.X, 0),
+                    },
+                    new Vertex()
+                    {
+                        Color = Color.White,
+                        Position = camera.Center + new Vector2f(camera.Size.X, camera.Size.Y) / 2,
+                        TexCoords = new(layer.Texture.Size.X, layer.Texture.Size.Y),
+                    },
+                    new Vertex()
+                    {
+                        Color = Color.White,
+                        Position = camera.Center + new Vector2f(-camera.Size.X, camera.Size.Y) / 2,
+                        TexCoords = new(0, layer.Texture.Size.Y),
+                    }
+                };
+                Window.Draw(bounds, PrimitiveType.Quads, States);
+            }
 
             DrawGizmos();
-            Window.Draw(bounds, PrimitiveType.Quads, States);
             Window.Display();
         }
 

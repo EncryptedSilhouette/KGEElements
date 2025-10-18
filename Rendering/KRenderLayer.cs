@@ -8,14 +8,16 @@ namespace Elements.Drawing
     {
         private uint _bufferOffset;
         public int Camera;
+        public Color BackgroundColor;
+        public Color LineColor; 
         public RenderTexture RenderTexture;
         public VertexBuffer Buffer;
         public RenderStates States;
 
-        public KRenderLayer() => _bufferOffset = 0;
+        public KRenderLayer() => (_bufferOffset, BackgroundColor, LineColor) = (0, Color.White, Color.Green);
 
-        public KRenderLayer(RenderStates states, RenderTexture renderTexture, VertexBuffer buffer) =>
-            (_bufferOffset, States, RenderTexture, Buffer) = (0, states, renderTexture, buffer);
+        public KRenderLayer(RenderStates states, RenderTexture renderTexture, VertexBuffer buffer) : this() =>
+            (States, RenderTexture, Buffer) = (states, renderTexture, buffer);
 
         public void SubmitDraw(Vertex[] vertices)
         {
@@ -25,23 +27,12 @@ namespace Elements.Drawing
 
         public RenderTexture DrawFrame(View view)
         {
-            RenderTexture.Clear(Color.Transparent);
+            RenderTexture.Clear(BackgroundColor);
 
             Buffer.Draw(RenderTexture, 0, _bufferOffset, States);
 
             _bufferOffset = 0;
-            Vertex[] lines =
-            {
-                //Line A
-                new(new(0, 0), Color.Green),
-                new(new(RenderTexture.Size.X, RenderTexture.Size.Y), Color.Green),
-
-                //Line B
-                new(new(RenderTexture.Size.X, 0), Color.Green),
-                new(new(0, RenderTexture.Size.Y), Color.Green)
-            };
-
-            RenderTexture.Draw(lines, PrimitiveType.Lines);
+            DrawGizmos();
             RenderTexture.Display();
 
             return RenderTexture;
@@ -52,12 +43,12 @@ namespace Elements.Drawing
             Vertex[] lines =
             {
                 //Line A
-                new(new(0, 0), Color.Green),
-                new(new(RenderTexture.Size.X, RenderTexture.Size.Y), Color.Green),
+                new(new(0, 0), LineColor),
+                new(new(RenderTexture.Size.X, RenderTexture.Size.Y), LineColor),
 
                 //Line B
-                new(new(RenderTexture.Size.X, 0), Color.Green),
-                new(new(0, RenderTexture.Size.Y), Color.Green)
+                new(new(RenderTexture.Size.X, 0), LineColor),
+                new(new(0, RenderTexture.Size.Y), LineColor)
             };
 
             RenderTexture.Draw(lines, PrimitiveType.Lines);
