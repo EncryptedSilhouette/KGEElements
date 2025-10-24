@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Elements.Drawing;
+using System.Text;
 
 namespace Elements
 {
@@ -7,6 +8,8 @@ namespace Elements
         private bool _isReadingInput = false; 
         private StringBuilder _textBuffer = new();
         private KCommandManager _commandManager;
+
+        private KDrawData _drawData;
 
         public KCLI(KCommandManager commandManager)
         {

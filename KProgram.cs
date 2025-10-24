@@ -1,8 +1,8 @@
 ﻿using Elements;
 using Elements.Drawing;
 using Elements.Extensions;
+using Elements.Game;
 using SFML.Graphics;
-using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
 
@@ -24,7 +24,7 @@ public class KProgram
     public static KInputManager InputManager;
     public static KCommandManager CommandManager;
     public static KRenderManager RenderManager;
-    //public static KGameManager GameManager;
+    public static KGameManager GameManager;
     public static KLogManager LogManager;
     public static KCLI CLI;
 
@@ -87,6 +87,7 @@ public class KProgram
         ResourceManager = new("config.csv");
         InputManager = new();
         CommandManager = new();
+
         RenderManager = new(Window);
         //GameManager = new(RenderManager, InputManager);
         LogManager = new();
