@@ -18,33 +18,43 @@ namespace Elements
         public void Load()
         {
             var resources = File.ReadAllLines(ConfigPath);
-            foreach (var line in resources) 
+            for (int i = 0; i < resources.Length; i++)
             {
-                var values = line.Split(',');
+                var values = resources[i].Split(',');
 
                 switch (values[0])
                 {
                     case "title":
                         try { KProgram.Title = values[1]; }
-                        catch (Exception) { break; }
+                        catch (Exception) { Console.WriteLine("failed to read \'title\'"); }
                         break;
 
                     case "frame_target":
                         try { KProgram.FrameLimit = Convert.ToUInt32(values[1]); }
-                        catch (Exception) { break; }
+                        catch (Exception) { Console.WriteLine("failed to read \'frame_target\'"); }
                         break;
 
                     case "vsync":
                         try { KProgram.VSync = bool.TrueString == values[1]; }
-                        catch (Exception) { break; }
+                        catch (Exception) { Console.WriteLine("failed to read \'vsync\'"); }
+                        break;
+
+                    case "resolution":
+                        try
+                        {
+                            KProgram.TargetResolution = new SFML.System.Vector2u(
+                                Convert.ToUInt32(values[1]),
+                                Convert.ToUInt32(values[2]));
+                        }
+                        catch (Exception) { Console.WriteLine("failed to read \'resolution\'"); }
                         break;
 
                     case "atlases":
-                        for (int i = 1; i < values.Length; i++) LoadAtlas(values[i]);
+                        for (int j = 1; j < values.Length; j++) LoadAtlas(values[j]);
                         break;
 
                     case "fonts":
-                        for (int i = 1; i < values.Length; i++) LoadFont(values[i]);
+                        for (int j = 1; j < values.Length; j++) LoadFont(values[j]);
                         break;
 
                     default:

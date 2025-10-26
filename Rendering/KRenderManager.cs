@@ -31,14 +31,7 @@ namespace Elements.Drawing
             Window = window;
             CameraViews = [];
             RenderLayers = [];
-
-            _drawBounds = 
-            [ 
-                new((0, 0), Color.White, (0, 0)),
-                new((Window.Size.X, 0), Color.White, (Window.Size.X, 0)),
-                new((Vector2f) Window.Size, Color.White, (Vector2f) Window.Size),
-                new((0, Window.Size.Y), Color.White, (0, Window.Size.Y))
-            ];
+            _drawBounds = [ new(), new(), new(), new() ];
         }
 
         //use during scene swapping if additional layers/cameras are needed.

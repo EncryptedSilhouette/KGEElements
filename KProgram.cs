@@ -3,6 +3,7 @@ using Elements.Drawing;
 using Elements.Extensions;
 using Elements.Game;
 using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
 
@@ -33,6 +34,16 @@ public class KProgram
     public static event Action? OnStart;
     public static event Action? OnStop;
     public static event Action? OnDeinit;
+
+    public static Vector2u TargetResolution
+    {
+        get => Window.Size;
+        set
+        {
+            Window.Size = value;
+            Window.SetView(new((0, 0), (Vector2f) value));
+        }
+    }
 
     public static bool VSync
     {
@@ -78,6 +89,7 @@ public class KProgram
         Title = "Elements";
         UpdateTarget = 30;
         FrameLimit = UpdateTarget;
+        TargetResolution = Window.Size;
 
         //Defaults
         Running = false;
