@@ -16,61 +16,34 @@ namespace Elements.Drawing
         public KRenderLayer[] RenderLayers;
 
         public int TopLayer => RenderLayers.Length - 1;
-        public float CenterX => Window.Size.X / 2;
-        public float CenterY => Window.Size.Y / 2;
-        public Vector2f Center => (Vector2f) Window.Size / 2;
-        public Vector2f TopLeft => new(0, 0);
-        public Vector2f TopRight => new(Window.Size.X, 0);
-        public Vector2f BottomRight => (Vector2f) Window.Size;
-        public Vector2f BottomLeft => new(0, Window.Size.Y);
+
+        public float ScreenLeft => 0;
+        public float ScreenRight => Window.Size.X;
+        public float ScreenTop => 0;
+        public float ScreenBottom => Window.Size.Y;
+        public Vector2f ScreenTopLeft => (0, 0);
+        public Vector2f ScreenTopRight => (Window.Size.X, 0);
+        public Vector2f ScreenBottomRight => (Vector2f) Window.Size;
+        public Vector2f ScreenBottomLeft => (0, Window.Size.Y);
+        public Vector2f ScreenCenter => (Vector2f) Window.Size / 2;
 
         public KRenderManager(RenderWindow window)
         {
-            BackgroundColor = Color.Black;
+            _drawBounds = [ new(), new(), new(), new() ];
+
+            BackgroundColor = Color.White;
             States = RenderStates.Default;
             Window = window;
             CameraViews = [];
             RenderLayers = [];
-            _drawBounds = [ new(), new(), new(), new() ];
         }
 
         //use during scene swapping if additional layers/cameras are needed.
         public void Init(View[] cameraViews, KRenderLayer[] renderLayers)
         {
-            //I will loose my mind otherwise.
-            Window.SetView(new((0,0), (Vector2f) Window.Size));
-
             CameraViews = cameraViews;
+            RenderLayers = renderLayers;
             Window.Resized += ResizeView;
-            CameraViews =
-            [
-                new View((0, 0), (Vector2f) Window.Size),
-                new View((1920/2 - 320, -1080/2 + 240), (640, 480))
-
-            ];
-            RenderLayers =
-            [
-                new() //Default layer.
-                {
-                    Camera = 0,
-                    LineColor = Color.Red,
-                    BackgroundColor = new(100, 100, 100),
-                    //States = new(ResourceManager.TextureAtlases["atlas"].Texture),
-                    States = RenderStates.Default,
-                    RenderTexture = new(Window.Size.X, Window.Size.Y),
-                    Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
-                },
-                new() //Overlay.
-                {
-                    Camera = 1,
-                    LineColor = Color.Red,
-                    BackgroundColor = new(0, 0, 100),
-                    //States = new(ResourceManager.TextureAtlases["atlas"].Texture),
-                    States = RenderStates.Default,
-                    RenderTexture = new(640, 480),
-                    Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
-                }
-            ];
         }
 
         public void Deinit()
@@ -80,47 +53,35 @@ namespace Elements.Drawing
 
         public void FrameUpdate()
         {
-            Window.Clear(Color.Black);
+            Window.Clear(BackgroundColor);
 
             for (int i = 0; i < RenderLayers.Length; i++)
             {
-                var layer = RenderLayers[i];
-                var texture = layer.RenderTexture.Texture;
-                var camera = CameraViews[layer.Camera];
-                layer.DrawFrame(camera);
+                States.Texture = RenderLayers[i].DrawFrame(this).Texture;
+                var halfSize = (Vector2f) States.Texture.Size / 2;
 
-                States = RenderStates.Default;
-                States.Texture = layer.RenderTexture.Texture;
+                _drawBounds[0] = new(
+                    ScreenCenter + -halfSize, 
+                    Color.White, 
+                    new(0, 0));
 
-                _drawBounds[0] = new Vertex()
-                {
-                    Color = Color.White,
-                    Position = camera.Center + new Vector2f(-camera.Size.X, -camera.Size.Y) / 2,
-                    TexCoords = new(0, 0),
-                };
-                _drawBounds[1] = new Vertex()
-                {
-                    Color = Color.White,
-                    Position = camera.Center + new Vector2f(camera.Size.X, -camera.Size.Y) / 2,
-                    TexCoords = new(texture.Size.X, 0),
-                };
-                _drawBounds[2] = new Vertex()
-                {
-                    Color = Color.White,
-                    Position = camera.Center + new Vector2f(camera.Size.X, camera.Size.Y) / 2,
-                    TexCoords = new(texture.Size.X, texture.Size.Y),
-                };
-                _drawBounds[3] = new Vertex()
-                {
-                    Color = Color.White,
-                    Position = camera.Center + new Vector2f(-camera.Size.X, camera.Size.Y) / 2,
-                    TexCoords = new(0, texture.Size.Y),
-                };
+                _drawBounds[1] = new(
+                    ScreenCenter + (halfSize.X, -halfSize.Y), 
+                    Color.White, 
+                    new(States.Texture.Size.X, 0));
+
+                _drawBounds[2] = new(
+                    ScreenCenter + halfSize, 
+                    Color.White,
+                    (Vector2f) States.Texture.Size);
+
+                _drawBounds[3] = new(
+                    ScreenCenter + (-halfSize.X, halfSize.Y), 
+                    Color.White,
+                    new(0, States.Texture.Size.Y));
 
                 Window.Draw(_drawBounds, PrimitiveType.Quads, States);
             }
-
-            DrawGizmos();
             Window.Display();
         }
 
@@ -143,24 +104,8 @@ namespace Elements.Drawing
         {
             Window.SetView(
                 new View(
-                    new(0, 0), //Center
-                    new(e.Width, e.Height)));       //Size
-        }
-
-        private void DrawGizmos()
-        {
-            Vertex[] lines =
-            {
-                //Line A
-                new(new Vector2f(-Window.Size.X, -Window.Size.Y) / 2),
-                new(new Vector2f(Window.Size.X, Window.Size.Y) / 2),
-
-                //Line B
-                new(new Vector2f(Window.Size.X, -Window.Size.Y) / 2),
-                new(new Vector2f(-Window.Size.X, Window.Size.Y) / 2),
-            };
-
-            Window.Draw(lines, PrimitiveType.Lines);
+                    new Vector2f(e.Width, e.Height) / 2,     //Center
+                    new Vector2f(e.Width, e.Height)));       //Size
         }
     }
 }

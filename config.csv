@@ -1,7 +1,7 @@
 title,Elements
 frame_target,60
 vsync,true
-resolution,1280,720
+resolution,1920,1080
 
 atlases,res/texture_data.csv
 fonts,res/roboto_black.ttf

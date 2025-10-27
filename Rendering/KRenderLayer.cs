@@ -1,18 +1,23 @@
 ﻿#nullable disable
 
 using SFML.Graphics;
+using SFML.System;
 
 namespace Elements.Drawing
 {
     public struct KRenderLayer
     {
         private uint _bufferOffset;
+
         public int Camera;
-        public Color BackgroundColor;
         public Color LineColor; 
+        public Color BackgroundColor;
+        public FloatRect Bounds;
         public RenderTexture RenderTexture;
         public VertexBuffer Buffer;
         public RenderStates States;
+
+        public Vector2u Resolution => RenderTexture.Size;
 
         public KRenderLayer() => (_bufferOffset, BackgroundColor, LineColor) = (0, Color.White, Color.Green);
 
@@ -25,16 +30,15 @@ namespace Elements.Drawing
             _bufferOffset += (uint) vertices.Length;
         }
 
-        public RenderTexture DrawFrame(View view)
+        public RenderTexture DrawFrame(KRenderManager manager)
         {
+            //Draw texture.
             RenderTexture.Clear(BackgroundColor);
-
             Buffer.Draw(RenderTexture, 0, _bufferOffset, States);
-
-            _bufferOffset = 0;
-            DrawGizmos();
+            //DrawGizmos();
             RenderTexture.Display();
 
+            _bufferOffset = 0;
             return RenderTexture;
         }
 

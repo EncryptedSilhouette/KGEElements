@@ -19,6 +19,7 @@ public class KProgram
     public static bool Running;
     public static uint UpdateTarget;
     public static double UpdateInterval;
+    public static Vector2u TargetResolution;
     public static Random RNG;
     public static RenderWindow Window;
     public static KResourceManager ResourceManager;
@@ -34,16 +35,6 @@ public class KProgram
     public static event Action? OnStart;
     public static event Action? OnStop;
     public static event Action? OnDeinit;
-
-    public static Vector2u TargetResolution
-    {
-        get => Window.Size;
-        set
-        {
-            Window.Size = value;
-            Window.SetView(new((0, 0), (Vector2f) value));
-        }
-    }
 
     public static bool VSync
     {
@@ -101,7 +92,7 @@ public class KProgram
         CommandManager = new();
 
         RenderManager = new(Window);
-        //GameManager = new(RenderManager, InputManager);
+        GameManager = new();
         LogManager = new();
 
         CLI = new(CommandManager);
@@ -243,15 +234,18 @@ public class KProgram
         RenderManager.Init(
             new View[]
             {
-                Window.GetView()
+                Window.DefaultView,
             },
             new KRenderLayer[]
             {
-                new KRenderLayer()
+                new KRenderLayer() //Default layer.
                 {
-                    //Camera = 0,
-                    States = new(ResourceManager.TextureAtlases["atlas"].Texture),
-                    RenderTexture = Window.CreateRenderTexture(),
+                    Camera = 0,
+                    LineColor = Color.Yellow,
+                    BackgroundColor = Color.Black,
+                    //States = new(ResourceManager.TextureAtlases["atlas"].Texture),
+                    States = RenderStates.Default,
+                    RenderTexture = new(TargetResolution.X, TargetResolution.Y),
                     Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
                 },
             });
@@ -286,7 +280,7 @@ public class KProgram
 
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame, in double deltaTime)
     {
-        //GameManager.FrameUpdate(RenderManager, currentUpdate, currentFrame, deltaTime);
+        GameManager.FrameUpdate(RenderManager);
         RenderManager.FrameUpdate();
     }
 }
