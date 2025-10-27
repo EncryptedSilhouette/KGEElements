@@ -1,4 +1,5 @@
 ﻿using Elements.Core;
+using Elements.Rendering;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
@@ -12,6 +13,7 @@ namespace Elements.Drawing
         public Color BackgroundColor;
         public RenderStates States;
         public RenderWindow Window;
+        public KTextRenderer TextRenderer;
         public View[] CameraViews;
         public KRenderLayer[] RenderLayers;
 
@@ -82,6 +84,9 @@ namespace Elements.Drawing
 
                 Window.Draw(_drawBounds, PrimitiveType.Quads, States);
             }
+
+            TextRenderer.FrameUpdate(this);
+            
             Window.Display();
         }
 
