@@ -9,7 +9,7 @@ namespace Elements.Drawing
         public byte Order;
         public Color Color;
         public KRectangle Sprite;
-        public KRectangle Bounds;
+        //public KRectangle Bounds;
 
         public KDrawData()
         {

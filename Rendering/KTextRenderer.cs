@@ -8,11 +8,11 @@ namespace Elements.Rendering
     {
         private uint _bufferOffset;
 
-        Font Font;
-        VertexBuffer Buffer;
+        public Font Font;
+        public VertexBuffer Buffer;
+        public Texture Texture;
+        public RenderStates States;
 
-        Texture texture;
-        
         public KTextRenderer()
         {
             Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic);
@@ -50,9 +50,7 @@ namespace Elements.Rendering
             }
         }
 
-        public void FrameUpdate(KRenderManager renderer)
-        {
-            renderer.SubmitDraw();
-        }
+        public void DrawText(KRenderManager renderer, RenderTarget target) =>
+            Buffer.Draw(target, 0, _bufferOffset, States);
     }
 }
