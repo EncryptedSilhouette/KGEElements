@@ -1,56 +1,33 @@
-﻿using Elements.Core;
-using Elements.Drawing;
+﻿using Elements.Drawing;
 using SFML.Graphics;
 
 namespace Elements.Rendering
 {
     public class KTextRenderer
     {
-        private uint _bufferOffset;
+        private uint _vertexCount;
+        private RenderStates _renderStates;
+        private Font _font;
+        private KRenderManager _renderManager;
+        private VertexBuffer _vertexBuffer;
 
-        public Font Font;
-        public VertexBuffer Buffer;
-        public Texture Texture;
-        public RenderStates States;
-
-        public KTextRenderer()
+        public KTextRenderer(Font font, KRenderManager renderManager)
         {
-            Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic);
+            _vertexCount = 0;
+            _font = font;
+            _renderManager = renderManager;
+            _vertexBuffer = new(1024, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic);
         }
 
-        public void SubmitDraw(KTextBox textbox)
+        public void SubmitDraw(KText text)
         {
-            uint xOffset = 0;
-            uint yOffset = 0;
-
-            var chars = textbox.Text.AsSpan();
-            for (int i = 0; i < chars.Length; i++)
-            {
-                var glyph = Font.GetGlyph(chars[i], textbox.FontSize, false, 1);
-                glyph.TextureRect.Deconstruct(out int top, out int left, out int width, out int height);
-                
-                if (xOffset + width > textbox.LineLength)
-                {
-                    yOffset += textbox.LineSpacing;
-                    xOffset = 0;
-                }
-
-                Vertex[] vertices =
-                [
-                    new((xOffset, yOffset), Color.White, (left, top)),
-                    new((xOffset + width, yOffset), Color.White, (width, top)),
-                    new((xOffset + width, yOffset + height), Color.White, (width, height)),
-                    new((xOffset, yOffset + height), Color.White, (left, height)),
-                ];
-
-                xOffset += (uint) glyph.Advance;
-
-                Buffer.Update(vertices, _bufferOffset);
-                _bufferOffset += (uint) vertices.Length;
-            }
+            
         }
 
-        public void DrawText(KRenderManager renderer, RenderTarget target) =>
-            Buffer.Draw(target, 0, _bufferOffset, States);
+        public void DrawText(RenderTarget target)
+        {
+            _font.GetTexture
+            _vertexBuffer.Draw(target, 0, _vertexCount, _renderStates);
+        }
     }
 }

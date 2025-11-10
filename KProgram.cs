@@ -1,4 +1,5 @@
 ﻿using Elements;
+using Elements.Dev;
 using Elements.Drawing;
 using Elements.Extensions;
 using Elements.Game;
@@ -12,11 +13,11 @@ public class KProgram
     //Using doubles for floating point precision.
     const double MS_PER_SECOND = 1000.0d;
 
-    private static bool s_vSync;
+    private static bool s_vSync = false;
     private static uint s_frameLimit;
-    private static string s_title;
+    private static string s_title = string.Empty;
 
-    public static bool Running;
+    public static bool Running = false;
     public static uint UpdateTarget;
     public static double UpdateInterval;
     public static Vector2u TargetResolution;
@@ -28,6 +29,7 @@ public class KProgram
     public static KRenderManager RenderManager;
     public static KGameManager GameManager;
     public static KLogManager LogManager;
+    public static KDebugger Debugger;
     public static KCLI CLI;
 
     public static event Action? OnInit;
@@ -70,9 +72,6 @@ public class KProgram
     static KProgram()
     {
         RNG = new();
-
-        s_vSync = false;
-        s_title = string.Empty; //removes warning.
         Window = new(VideoMode.DesktopMode, s_title);
         Window.Closed += (_, _) => Running = false;
 
@@ -83,7 +82,6 @@ public class KProgram
         TargetResolution = Window.Size;
 
         //Defaults
-        Running = false;
         UpdateInterval = MS_PER_SECOND / UpdateTarget;
 
         //System managers
@@ -94,7 +92,7 @@ public class KProgram
         RenderManager = new(Window);
         GameManager = new();
         LogManager = new();
-
+        Debugger = new();
         CLI = new(CommandManager);
     }
 
@@ -275,6 +273,7 @@ public class KProgram
         CLI.Update(InputManager);
         CommandManager.Update();
 
+        Debugger.Update();
         //GameManager.Update(currentUpdate);
     }
 
@@ -282,5 +281,6 @@ public class KProgram
     {
         GameManager.FrameUpdate(RenderManager);
         RenderManager.FrameUpdate();
+        Debugger.FrameUpdate();
     }
 }

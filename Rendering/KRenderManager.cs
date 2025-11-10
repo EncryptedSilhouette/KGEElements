@@ -1,6 +1,4 @@
 ﻿using Elements.Core;
-using Elements.Game.UI;
-using Elements.Rendering;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
@@ -9,18 +7,15 @@ namespace Elements.Drawing
 {
     public class KRenderManager
     {
+        private View _screenView;
         private Vertex[] _drawBounds;
 
         public Color BackgroundColor;
         public RenderStates States;
         public RenderWindow Window;
-        public KUIRenderer UIRenderer;
-        public KTextRenderer TextRenderer;  
-        public View[] CameraViews;
         public KRenderLayer[] RenderLayers;
 
         public int TopLayer => RenderLayers.Length - 1;
-
         public float ScreenLeft => 0;
         public float ScreenRight => Window.Size.X;
         public float ScreenTop => 0;
@@ -33,19 +28,18 @@ namespace Elements.Drawing
 
         public KRenderManager(RenderWindow window)
         {
+            _screenView = window.GetView();
             _drawBounds = [ new(), new(), new(), new() ];
 
             BackgroundColor = Color.White;
             States = RenderStates.Default;
             Window = window;
-            CameraViews = [];
             RenderLayers = [];
         }
 
         //use during scene swapping if additional layers/cameras are needed.
         public void Init(View[] cameraViews, KRenderLayer[] renderLayers)
         {
-            CameraViews = cameraViews;
             RenderLayers = renderLayers;
             Window.Resized += ResizeView;
         }
@@ -87,11 +81,6 @@ namespace Elements.Drawing
                 Window.Draw(_drawBounds, PrimitiveType.Quads, States);
             }
 
-            UIRenderer.DrawFrame(this);
-
-
-            TextRenderer.DrawText(Window);
-
             Window.Display();
         }
 
@@ -112,10 +101,9 @@ namespace Elements.Drawing
 
         private void ResizeView(object? _, SizeEventArgs e)
         {
-            Window.SetView(
-                new View(
-                    new Vector2f(e.Width, e.Height) / 2,     //Center
-                    new Vector2f(e.Width, e.Height)));       //Size
+            _screenView.Size = new Vector2f(e.Width, e.Height);
+            _screenView.Center = _screenView.Size / 2;
+            Window.SetView(_screenView);
         }
     }
 }
