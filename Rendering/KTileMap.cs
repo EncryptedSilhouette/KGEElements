@@ -1,6 +1,6 @@
 ﻿using Elements.Core;
 
-namespace Elements.Drawing
+namespace Elements.Rendering
 {
     public struct KTileMap
     {

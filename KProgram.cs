@@ -1,14 +1,13 @@
 ﻿using Elements;
 using Elements.Dev;
-using Elements.Drawing;
-using Elements.Extensions;
+using Elements.Rendering;
 using Elements.Game;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
 
-public class KProgram
+public static class KProgram
 {
     //Using doubles for floating point precision.
     const double MS_PER_SECOND = 1000.0d;
@@ -240,12 +239,16 @@ public class KProgram
                 {
                     Camera = 0,
                     LineColor = Color.Yellow,
-                    BackgroundColor = Color.Black,
+                    BackgroundColor = new(100,100,100),
                     //States = new(ResourceManager.TextureAtlases["atlas"].Texture),
                     States = RenderStates.Default,
                     RenderTexture = new(TargetResolution.X, TargetResolution.Y),
                     Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
                 },
+            },
+            new KTextRenderer[]
+            {
+                new(ResourceManager.Fonts["roboto_black"])
             });
 
         #endregion

@@ -1,5 +1,5 @@
 ﻿using Elements.Core;
-using Elements.Drawing;
+using Elements.Rendering;
 using SFML.Graphics;
 
 namespace Elements
@@ -18,6 +18,7 @@ namespace Elements
         public void Load()
         {
             var resources = File.ReadAllLines(ConfigPath);
+
             for (int i = 0; i < resources.Length; i++)
             {
                 var values = resources[i].Split(',');

@@ -1,5 +1,5 @@
 ﻿using Elements.Core;
-using Elements.Drawing;
+using Elements.Rendering;
 
 namespace Elements.Game
 {

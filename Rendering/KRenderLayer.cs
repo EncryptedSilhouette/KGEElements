@@ -3,7 +3,7 @@
 using SFML.Graphics;
 using SFML.System;
 
-namespace Elements.Drawing
+namespace Elements.Rendering
 {
     public struct KRenderLayer
     {
@@ -62,7 +62,7 @@ namespace Elements.Drawing
 
 #nullable enable
 
-//namespace Elements.Drawing
+//namespace Elements.Rendering
 //{
 //    public struct KRenderLayer
 //    {

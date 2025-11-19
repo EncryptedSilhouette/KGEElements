@@ -3,7 +3,7 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 
-namespace Elements.Drawing
+namespace Elements.Rendering
 {
     public class KRenderManager
     {
@@ -14,6 +14,7 @@ namespace Elements.Drawing
         public RenderStates States;
         public RenderWindow Window;
         public KRenderLayer[] RenderLayers;
+        public KTextRenderer[] TextRenderers;
 
         public int TopLayer => RenderLayers.Length - 1;
         public float ScreenLeft => 0;
@@ -31,15 +32,17 @@ namespace Elements.Drawing
             _screenView = window.GetView();
             _drawBounds = [ new(), new(), new(), new() ];
 
-            BackgroundColor = Color.White;
+            BackgroundColor = Color.Black;
             States = RenderStates.Default;
             Window = window;
             RenderLayers = [];
+            TextRenderers = []; 
         }
 
         //use during scene swapping if additional layers/cameras are needed.
-        public void Init(View[] cameraViews, KRenderLayer[] renderLayers)
+        public void Init(View[] cameraViews, KRenderLayer[] renderLayers, KTextRenderer[] textRenderers)
         {
+            TextRenderers = textRenderers;
             RenderLayers = renderLayers;
             Window.Resized += ResizeView;
         }
@@ -79,6 +82,11 @@ namespace Elements.Drawing
                     new(0, States.Texture.Size.Y));
 
                 Window.Draw(_drawBounds, PrimitiveType.Quads, States);
+            }
+
+            for (int i = 0; i < TextRenderers.Length; i++) 
+            {
+                TextRenderers[i].DrawText(Window);
             }
 
             Window.Display();

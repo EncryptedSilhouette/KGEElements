@@ -1,7 +1,7 @@
 ﻿using Elements.Core;
 using SFML.Graphics;
 
-namespace Elements.Drawing
+namespace Elements.Rendering
 {
     public struct KDrawData
     {

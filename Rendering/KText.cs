@@ -1,74 +1,86 @@
 ﻿using SFML.Graphics;
 
-namespace Elements.Drawing
+namespace Elements.Rendering
 {
     public struct KText
     {
         public bool Bold;
         public byte LineThickness;
-        public byte Spacing;
-        public byte FontSize;    
+        public byte LineSpacing;
         public Color Color;
         public string Text;
 
-        public KText(Font font)
+        public KText(string text)
         {
             Bold = false;
             LineThickness = 1;
-            Spacing = 0;
-            FontSize = 12;
+            LineSpacing = 1;
             Color = Color.White;
-            Text = string.Empty;
+            Text = text;
         }
 
-        public Vertex[] CreateTextBox(float posX, float posY, int width, int height, Font font, int wrapThreshold = 0)
+        public KText(string text, Color color, bool bold = false, byte lineThickness = 0, byte lineSpacing = 0)
         {
-            int offsetX = 0;
-            int offsetY = 0;
+            Bold = bold;
+            LineThickness = lineThickness;
+            LineSpacing = lineSpacing;
+            Color = color;
+            Text = text;
+        }
 
-            Vertex[] buffer = new Vertex[Text.Length * 4];
-            var characters = Text.AsSpan();
+        public Vertex[] CreateTextBox(float posX, float posY, Font font, uint size, int wrapThreshold = 0)
+        {
+            float xOffset = 0;
+            float yOffset = 0;
+            ReadOnlySpan<char> chars = Text.AsSpan();
+            Vertex[] vertices = new Vertex[chars.Length * 4];
 
-            if (wrapThreshold <= 0) wrapThreshold = width;
-
-            for (int i = 0; i < characters.Length; i++)
+            for (int i = 0; i < chars.Length; i++)
             {
-                var glyph = font.GetGlyph(characters[i], FontSize, Bold, LineThickness);
+                var glyph = font.GetGlyph(chars[i], size, Bold, LineThickness);
+                var coords = glyph.TextureRect;
+                var bounds = glyph.Bounds;
 
-                buffer[i] = new Vertex()
-                {
-                    TexCoords = new(glyph.TextureRect.Left, glyph.TextureRect.Top), 
-                    Position = new(offsetX, offsetY),
-                    Color = Color
-                };
-                buffer[i++] = new Vertex()
-                {
-                    TexCoords = new(glyph.TextureRect.Width, glyph.TextureRect.Top),
-                    Position = new(offsetX + glyph.Bounds.Width, offsetY),
-                    Color = Color
-                };
-                buffer[i++] = new Vertex()
-                {
-                    TexCoords = new(glyph.TextureRect.Width, glyph.TextureRect.Height),
-                    Position = new(offsetX + glyph.Bounds.Width, glyph.Bounds.Height),
-                    Color = Color
-                };
-                buffer[i++] = new Vertex()
-                {
-                    TexCoords = new(glyph.TextureRect.Left, glyph.TextureRect.Height),
-                    Position = new(offsetX, glyph.Bounds.Height),
-                    Color = Color
-                };
+                Console.WriteLine(coords);
 
-                offsetX += (int) glyph.Advance;
-
-                if (posX >= wrapThreshold) 
+                if (wrapThreshold != 0 && xOffset > wrapThreshold)
                 {
-                    offsetX = 0;
-                    offsetY += (int) glyph.Bounds.Height + Spacing;
+                    xOffset = 0;
+                    yOffset += LineSpacing + coords.Height;
                 }
+
+                vertices[i * 4] = new()
+                {
+                    Position = (bounds.Left + posX + xOffset, 
+                                bounds.Top + posY + yOffset),
+                    TexCoords = (coords.Left, coords.Top),
+                    Color = Color,
+                };
+                vertices[i * 4 + 1] = new()
+                {
+                    Position = (bounds.Left + bounds.Width + posX + xOffset, 
+                                bounds.Top + posY + yOffset),
+                    TexCoords = (coords.Left + coords.Width, coords.Top),
+                    Color = Color,
+                };
+                vertices[i * 4 + 2] = new()
+                {
+                    Position = (bounds.Left + bounds.Width + posX + xOffset, 
+                                bounds.Top + bounds.Height + posY + yOffset),
+                    TexCoords = (coords.Left + coords.Width, coords.Top + coords.Height),
+                    Color = Color,
+                };
+                vertices[i * 4 + 3] = new()
+                {
+                    Position = (bounds.Left + posX + xOffset,
+                                bounds.Top + bounds.Height + posY + yOffset),
+                    TexCoords = (coords.Left, coords.Top + coords.Height),
+                    Color = Color,
+                };
+
+                xOffset += glyph.Advance;
             }
-            return buffer;
+            return vertices;
         }
     }
 }
