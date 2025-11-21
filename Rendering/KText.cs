@@ -41,12 +41,11 @@ namespace Elements.Rendering
                 var coords = glyph.TextureRect;
                 var bounds = glyph.Bounds;
 
-                Console.WriteLine(coords);
-
-                if (wrapThreshold != 0 && xOffset > wrapThreshold)
+                if ("\n".Contains(chars[i]) || (wrapThreshold != 0 && xOffset > wrapThreshold))
                 {
                     xOffset = 0;
                     yOffset += LineSpacing + coords.Height;
+                    continue;
                 }
 
                 vertices[i * 4] = new()

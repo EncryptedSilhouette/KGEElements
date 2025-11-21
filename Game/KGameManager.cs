@@ -19,12 +19,6 @@ namespace Elements.Game
 
         public void FrameUpdate(KRenderManager renderManager)
         {
-            //MainMenu.FrameUpdate(renderManager);
-
-            renderManager.TextRenderers[0].SubmitDraw("Demo Game Menu", 200, 200);
-
-
-            renderManager.TextRenderers[0].SubmitDraw(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\r\n", 1009, 789);
 
         }
     }

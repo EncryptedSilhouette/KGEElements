@@ -100,6 +100,8 @@ public static class KProgram
         InitAndLoad();
         OnStart?.Invoke();
 
+        KProgram.LogManager.DebugLog("Working");
+
         StartGameLoop();
 
         OnStop?.Invoke();
@@ -283,6 +285,7 @@ public static class KProgram
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame, in double deltaTime)
     {
         GameManager.FrameUpdate(RenderManager);
+        CLI.FrameUpdate(RenderManager);
         RenderManager.FrameUpdate();
         Debugger.FrameUpdate();
     }

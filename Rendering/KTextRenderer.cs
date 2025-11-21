@@ -7,12 +7,13 @@ namespace Elements.Rendering
         private uint _vertexCount;
         private VertexBuffer _vertexBuffer;
 
-        public uint FontSize = 32;
+        public uint FontSize;
         public RenderStates RenderStates;
         public Font Font;
 
-        public KTextRenderer(Font font)
+        public KTextRenderer(Font font, uint fontSize = 14)
         {
+            FontSize = fontSize;
             RenderStates = RenderStates.Default;
             _vertexCount = 0;
             _vertexBuffer = new(1024, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic);
@@ -20,7 +21,7 @@ namespace Elements.Rendering
             Font = font;
         }
 
-        public void SubmitDraw(KText text, int posX, int posY, int wrapThreshold = 0)
+        public void SubmitDraw(KText text, float posX, float posY, float wrapThreshold = 0)
         {
             var textBox = text.CreateTextBox(posX, posY, Font, FontSize);
             _vertexBuffer.Update(textBox, (uint) textBox.Length, _vertexCount);
