@@ -28,6 +28,7 @@ namespace Elements
         public void Log(int logID, string message)
         {
             _logs[logID].AppendLine(message);
+            
             Console.WriteLine($"Log ({logID}): {message}");
         }
 #endif

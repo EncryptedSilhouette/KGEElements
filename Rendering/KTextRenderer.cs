@@ -11,7 +11,7 @@ namespace Elements.Rendering
         public RenderStates RenderStates;
         public Font Font;
 
-        public KTextRenderer(Font font, uint fontSize = 14)
+        public KTextRenderer(Font font, uint fontSize = 12)
         {
             FontSize = fontSize;
             RenderStates = RenderStates.Default;

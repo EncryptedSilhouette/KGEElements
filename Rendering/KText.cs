@@ -14,12 +14,12 @@ namespace Elements.Rendering
         {
             Bold = false;
             LineThickness = 1;
-            LineSpacing = 1;
+            LineSpacing = 4;
             Color = Color.White;
             Text = text;
         }
 
-        public KText(string text, Color color, bool bold = false, byte lineThickness = 0, byte lineSpacing = 0)
+        public KText(string text, Color color, bool bold = false, byte lineThickness = 0, byte lineSpacing = 4)
         {
             Bold = bold;
             LineThickness = lineThickness;

@@ -199,7 +199,7 @@ public static class KProgram
             {
                 debugTimer.Restart();
 #if DEBUG
-                //Console.Write($"\rups: {ups}, fps: {fps}");
+                Console.Write($"\rups: {ups}, fps: {fps}");
 #endif
                 ups = fps = 0;
             }
@@ -241,7 +241,7 @@ public static class KProgram
                 {
                     Camera = 0,
                     LineColor = Color.Yellow,
-                    BackgroundColor = new(100,100,100),
+                    BackgroundColor = Color.Black,
                     //States = new(ResourceManager.TextureAtlases["atlas"].Texture),
                     States = RenderStates.Default,
                     RenderTexture = new(TargetResolution.X, TargetResolution.Y),

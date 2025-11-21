@@ -1,4 +1,5 @@
-﻿using Elements.Rendering;
+﻿using Elements.Core;
+using Elements.Rendering;
 using SFML.Graphics;
 using System.Text;
 
@@ -11,6 +12,8 @@ namespace Elements
         private Color _color = new Color(100,100,100);
         private StringBuilder _textBuffer = new();
         private KCommandManager _commandManager;
+
+        
 
         public Color TextColor;
 
@@ -44,8 +47,7 @@ namespace Elements
         public void FrameUpdate(KRenderManager renderManager)
         {
             if (!_enabled) return;
-            Console.WriteLine(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG));
-            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 32);
+            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 32);                    
         }
 
         public void StartReadTextBuffer()
