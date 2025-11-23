@@ -12,9 +12,9 @@ namespace Elements
         private Color _color = new Color(100,100,100);
         private StringBuilder _textBuffer = new();
         private KCommandManager _commandManager;
-
+        private KDrawData drawData;
+        private KRectangle drawBounds;
         
-
         public Color TextColor;
 
         public Color InterfaceColor
@@ -32,6 +32,22 @@ namespace Elements
         public KCLI(KCommandManager commandManager)
         {
             _commandManager = commandManager;
+            
+            drawData = new()
+            {
+                Color = _color
+            };
+
+            drawBounds = new()
+            {
+                Width = 800, 
+                Height = 1600,
+                Transform = new()
+                {
+                    PosX = 400,
+                    PosY = 800
+                }
+            };
         }
 
         public void Update(KInputManager inputManager)
@@ -47,7 +63,8 @@ namespace Elements
         public void FrameUpdate(KRenderManager renderManager)
         {
             if (!_enabled) return;
-            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 32);                    
+            renderManager.SubmitDraw(drawData, drawBounds);
+            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 0);       
         }
 
         public void StartReadTextBuffer()

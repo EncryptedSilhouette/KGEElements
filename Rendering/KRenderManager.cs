@@ -2,6 +2,7 @@
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
+using System.Buffers;
 
 namespace Elements.Rendering
 {
@@ -15,6 +16,8 @@ namespace Elements.Rendering
         public RenderWindow Window;
         public KRenderLayer[] RenderLayers;
         public KTextRenderer[] TextRenderers;
+
+        public ArrayPool<Vertex> ArrayPool => ArrayPool<Vertex>.Shared;
 
         public int TopLayer => RenderLayers.Length - 1;
         public float ScreenLeft => 0;
@@ -97,14 +100,14 @@ namespace Elements.Rendering
 
         public void SubmitDraw(in KDrawData dat, in KRectangle rec, int layer = 0)
         {
-            Vertex[] vertices = 
-            {
-                new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight),
-                new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft),
-                new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.TopLeft),
-                new Vertex(rec.BottomRight, dat.Color, dat.Sprite.TopRight),
-            };
+            Vertex[] vertices = ArrayPool.Rent(4);
+            vertices[0] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
+            vertices[1] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
+            vertices[2] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
+            vertices[3] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.TopRight);
+            
             RenderLayers[layer].SubmitDraw(vertices);
+            ArrayPool.Return(vertices);
         }
 
         private void ResizeView(object? _, SizeEventArgs e)

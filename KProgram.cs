@@ -100,7 +100,7 @@ public static class KProgram
         InitAndLoad();
         OnStart?.Invoke();
 
-        KProgram.LogManager.DebugLog("Working");
+        LogManager.DebugLog("Working");
 
         StartGameLoop();
 
