@@ -1,5 +1,4 @@
 ﻿using SFML.Graphics;
-using System.Buffers;
 
 namespace Elements.Rendering
 {
@@ -11,7 +10,7 @@ namespace Elements.Rendering
         public Color Color;
         public string Text;
 
-        public KText(string text)
+        public KText(string text) 
         {
             Bold = false;
             LineThickness = 0;

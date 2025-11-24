@@ -25,10 +25,10 @@ namespace Elements.Rendering
         public KRenderLayer(RenderStates states, RenderTexture renderTexture, VertexBuffer buffer) : this() =>
             (States, RenderTexture, Buffer) = (states, renderTexture, buffer);
 
-        public void SubmitDraw(Vertex[] vertices)
+        public void SubmitDraw(Vertex[] vertices, uint vertexCount)
         {
-            Buffer.Update(vertices, _bufferOffset);
-            _bufferOffset += (uint) vertices.Length;
+            Buffer.Update(vertices, vertexCount, _bufferOffset);
+            _bufferOffset += vertexCount;
         }
 
         public RenderTexture DrawFrame(KRenderManager manager)
@@ -43,21 +43,21 @@ namespace Elements.Rendering
             return RenderTexture;
         }
 
-        private void DrawGizmos()
-        {
-            Vertex[] lines = 
-            {
-                //Line A
-                new(new(0, 0), LineColor),
-                new(new(RenderTexture.Size.X, RenderTexture.Size.Y), LineColor),
+        //private void DrawGizmos()
+        //{
+        //    Vertex[] lines = 
+        //    {
+        //        //Line A
+        //        new(new(0, 0), LineColor),
+        //        new(new(RenderTexture.Size.X, RenderTexture.Size.Y), LineColor),
 
-                //Line B
-                new(new(RenderTexture.Size.X, 0), LineColor),
-                new(new(0, RenderTexture.Size.Y), LineColor)
-            };
+        //        //Line B
+        //        new(new(RenderTexture.Size.X, 0), LineColor),
+        //        new(new(0, RenderTexture.Size.Y), LineColor)
+        //    };
 
-            RenderTexture.Draw(lines, PrimitiveType.Lines);
-        }
+        //    RenderTexture.Draw(lines, PrimitiveType.Lines);
+        //}
     }
 }
 

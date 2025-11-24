@@ -250,7 +250,7 @@ public static class KProgram
             },
             new KTextRenderer[]
             {
-                new(ResourceManager.Fonts["roboto_black"])
+                new(ResourceManager.Fonts["roboto_black"], RenderManager)
             });
 
         #endregion

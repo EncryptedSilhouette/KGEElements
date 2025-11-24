@@ -95,18 +95,18 @@ namespace Elements.Rendering
             Window.Display();
         }
 
-        public void SubmitDraw(Vertex[] vertices, int layer = 0) =>
-            RenderLayers[layer].SubmitDraw(vertices);
+        public void SubmitDraw(Vertex[] vertices, uint vertexCount, int layer = 0) =>
+            RenderLayers[layer].SubmitDraw(vertices, vertexCount);
 
         public void SubmitDraw(in KDrawData dat, in KRectangle rec, int layer = 0)
         {
             Vertex[] vertices = ArrayPool.Rent(4);
-            vertices[0] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
-            vertices[1] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
-            vertices[2] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
-            vertices[3] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.TopRight);
+            vertices[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
+            vertices[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
+            vertices[2] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.BottomRight);
+            vertices[3] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);
             
-            RenderLayers[layer].SubmitDraw(vertices);
+            RenderLayers[layer].SubmitDraw(vertices, 4);
             ArrayPool.Return(vertices);
         }
 
