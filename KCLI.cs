@@ -64,7 +64,7 @@ namespace Elements
         {
             if (!_enabled) return;
             renderManager.SubmitDraw(drawData, drawBounds);
-            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 0);       
+            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 0, 512);       
         }
 
         public void StartReadTextBuffer()

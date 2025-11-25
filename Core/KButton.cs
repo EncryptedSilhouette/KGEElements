@@ -69,7 +69,7 @@ namespace Elements.Core
         public void FrameUpdate(KRenderManager renderManager)
         {
             renderManager.SubmitDraw(DrawData, Bounds);
-            renderManager.TextRenderers[0].SubmitDraw(TextBox, Bounds.TopLeft.X, Bounds.TopLeft.Y, Bounds.Width);
+            renderManager.TextRenderers[0].SubmitDraw(TextBox, Bounds.TopLeft.X, Bounds.TopLeft.Y, 10);
         }
     }
 }
