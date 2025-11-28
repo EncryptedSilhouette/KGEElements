@@ -110,6 +110,19 @@ namespace Elements.Rendering
             ArrayPool.Return(vertices);
         }
 
+        public void SubmitDraw(in KDrawData dat, in FloatRect rec, int layer = 0)
+        {
+            Vertex[] vertices = ArrayPool.Rent(4);
+            vertices[0] = new Vertex((rec.Left, rec.Top), dat.Color, dat.Sprite.TopLeft);
+            vertices[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
+            vertices[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
+            vertices[3] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
+
+            RenderLayers[layer].SubmitDraw(vertices, 4);
+            ArrayPool.Return(vertices);
+        }
+
+
         private void ResizeView(object? _, SizeEventArgs e)
         {
             _screenView.Size = new Vector2f(e.Width, e.Height);

@@ -9,7 +9,7 @@ namespace Elements
     {
         private bool _enabled = true;
         private bool _isReadingInput = false;
-        private Color _color = new Color(100,100,100);
+        private Color _color;
         private StringBuilder _textBuffer = new();
         private KCommandManager _commandManager;
         private KDrawData drawData;
@@ -31,6 +31,7 @@ namespace Elements
 
         public KCLI(KCommandManager commandManager)
         {
+            _color = new(100, 100, 100);
             _commandManager = commandManager;
             
             drawData = new()
@@ -63,8 +64,9 @@ namespace Elements
         public void FrameUpdate(KRenderManager renderManager)
         {
             if (!_enabled) return;
+            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 0, out FloatRect drawBounds, 512);       
+            Console.WriteLine(drawBounds);
             renderManager.SubmitDraw(drawData, drawBounds);
-            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 0, 512);       
         }
 
         public void StartReadTextBuffer()

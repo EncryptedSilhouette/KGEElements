@@ -5,63 +5,14 @@ namespace Elements.Rendering
 {
     public class KTextRenderer
     {
+        public record struct GlyphHandle(char Character, byte FontSize, bool Bold, byte LineThickness);
+        
         #region static
 
+        private static Dictionary<GlyphHandle, Glyph> _glyphCache = new(128);
         private static ArrayPool<Vertex> ArrayPool => ArrayPool<Vertex>.Shared;
 
-        #region unused glyph caching 
-
-        //private static Dictionary<ulong, Glyph> _glyphCache = new(128);
-
-        //public static ulong CreateGlypthHandle(char c, byte size, bool bold, byte thickness)
-        //{
-        //    //STFU- I WAS JUST ABOUT TO SAY SOMETHING ABOUT THE CODE BELOW,
-        //    //BUT THEN THE FUCKING AI AUTO-COMPLETE WAS TRYING TO AUTO-COMPLETE MY BITCHING LIKE IT FUCKING KNOWS ME.
-        //    //But yeah this code is something...
-        //    return
-        //        (ulong)c << 48 |
-        //        (ulong)size << 40 |
-        //        (ulong)thickness << 32 |
-        //        (ulong)(bold ? 1 : 0) << 31;
-        //}
-
-        ////!!!Syntactic hell below!!!
-        //public static string DecimalToBinaryString(ulong value)
-        //{
-        //    char[] chars = new char[sizeof(ulong) * 8];
-
-        //    for (int i = 0; i < chars.Length; i++)
-        //    {
-        //        //WHY CAN'T THE ALLMIGHTY COMPILER DO THIS FOR ME.
-        //        //                    v                  v
-        //        chars[i] = (value & (ulong)1 << i) == (ulong)1 << i ? '1' : '0';
-        //    }
-
-        //    return new(chars);
-        //}
-
-        //public void SubmitDraw(KText text, float posX, float posY, float wrapThreshold = 0)
-        //{
-        //    uint vCount = 0;
-        //    float x = 0;
-        //    float y = 0;
-        //    ReadOnlySpan<char> chars = text.Text.AsSpan();
-
-        //    Vertex[] vertices = ArrayPool.Rent(chars.Length * 4);
-
-        //    for (int i = 0; i < chars.Length; i++)
-        //    {
-        //        var handle = CreateGlypthHandle(chars[i], FontSize, text.Bold, text.LineThickness);
-
-        //        //if (!_glyphCache.TryGetValue(handle, out Glyph glyph))
-        //        //{
-        //        //    glyph = Font.GetGlyph(chars[i], FontSize, text.Bold, text.LineThickness);
-        //        //    _glyphCache.Add(handle, glyph);
-
-        //        //    Console.WriteLine($"Glyph cached: {chars[i]}");
-        //        //}
-
-        #endregion
+        public static void CacheGlyph(in GlyphHandle handle, Glyph glyph) => _glyphCache.TryAdd(handle, glyph);
 
         #endregion
 
@@ -83,18 +34,29 @@ namespace Elements.Rendering
             FontSize = fontSize;
         }
 
-        public void SubmitDraw(KText text, float posX, float posY, float wrapThreshold = 0)
+        public void SubmitDraw(KText text, float posX, float posY, out FloatRect bounds, float wrapThreshold = 0)
         {
             bool pass = false;
             uint vCount = 0;
-            float x = 0;
-            float y = 0;
+            float width = 0;
+            float height = 0;
+            float xoffset = 0;
             ReadOnlySpan<char> chars = text.Text.AsSpan();
             Vertex[] vertices = ArrayPool.Rent(chars.Length * 4);
 
+            posY += FontSize;
+
             for (int i = 0, cp = 0; i < chars.Length; i++)
             {
-                var glyph = Font.GetGlyph(chars[i], FontSize, text.Bold, text.LineThickness);
+                GlyphHandle handle = new(chars[i], FontSize, text.Bold, text.LineThickness);
+
+                if (!_glyphCache.TryGetValue(handle, out Glyph glyph))
+                {
+                    glyph = Font.GetGlyph(chars[i], FontSize, text.Bold, text.LineThickness);
+                    _glyphCache.Add(handle, glyph);
+
+                    Console.WriteLine($"Glyph cached: {chars[i]}");
+                }
 
                 if (chars[i] == '\n')
                 {
@@ -104,8 +66,8 @@ namespace Elements.Rendering
                     vertices[i * 4 + 3] = new();
                     vCount += 4;
 
-                    x = 0;
-                    y += FontSize;
+                    xoffset = 0;
+                    height += FontSize;
 
                     continue;
                 }
@@ -114,58 +76,65 @@ namespace Elements.Rendering
                     cp = i + 1;
                     pass = false;
                 }
-                else if (!pass && wrapThreshold != 0 && x != 0 && x + glyph.Advance > wrapThreshold)
+                else if (!pass && wrapThreshold != 0 && xoffset != 0 && xoffset + glyph.Advance > wrapThreshold)
                 {
                     i = cp;
-                    x = 0;
-                    y += FontSize;
+                    xoffset = 0;
+                    height += FontSize;
                     pass = true;
                 }
 
                 var coords = glyph.TextureRect;
-                var bounds = glyph.Bounds;
+                var rect = glyph.Bounds;
 
                 vertices[i * 4] = new()
                 {
-                    Position = (bounds.Left + posX + x,
-                                bounds.Top + posY + y),
+                    Position = (posX + xoffset + rect.Left,
+                                posY + height + rect.Top),
                     TexCoords = (coords.Left, coords.Top),
                     Color = text.Color,
                 };
                 vertices[i * 4 + 1] = new()
                 {
-                    Position = (bounds.Left + bounds.Width + posX + x,
-                                bounds.Top + posY + y),
+                    Position = (posX + xoffset + rect.Left + rect.Width,
+                                posY + height + rect.Top),
                     TexCoords = (coords.Left + coords.Width, coords.Top),
                     Color = text.Color,
                 };
                 vertices[i * 4 + 2] = new()
                 {
-                    Position = (bounds.Left + bounds.Width + posX + x,
-                                bounds.Top + bounds.Height + posY + y),
+                    Position = (posX + xoffset + rect.Left + rect.Width,
+                                posY + height + rect.Top + rect.Height),
                     TexCoords = (coords.Left + coords.Width, coords.Top + coords.Height),
                     Color = text.Color,
                 };
                 vertices[i * 4 + 3] = new()
                 {
-                    Position = (bounds.Left + posX + x,
-                                bounds.Top + bounds.Height + posY + y),
+                    Position = (posX + xoffset + rect.Left,
+                                posY + height + rect.Top + rect.Height),
                     TexCoords = (coords.Left, coords.Top + coords.Height),
                     Color = text.Color,
                 };
                 vCount += 4;
 
-                x += glyph.Advance;
-            }
+                xoffset += glyph.Advance;
 
+                if (xoffset > width) width = xoffset;
+            }
+                 
             _vertexBuffer.Update(vertices, vCount, _bufferOffset);
             _bufferOffset += (uint) (text.Text.Length * 4);
-
             ArrayPool.Return(vertices);
+
+            posY -= FontSize;
+            bounds = new FloatRect(posX, posY, width, height);
         }
 
-        public void SubmitDraw(string text, float posX, float posY, float wrapThreshold = 0) =>
-            SubmitDraw(new KText(text), posX, posY, wrapThreshold);
+        public void SubmitDraw(string text, float posX, float posY, out FloatRect bounds, float wrapThreshold = 0)
+        {
+            SubmitDraw(new KText(text), posX, posY, out FloatRect b, wrapThreshold);
+            bounds = b;
+        }
 
         public void DrawText(RenderTarget target)
         {
