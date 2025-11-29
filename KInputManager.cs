@@ -41,6 +41,8 @@ namespace Elements
         public KMouseStates MouseStates;
         public KMouseStates PreviousMouseStates;
 
+        public int TextBufferLength => _stringBuilder.Length;
+
         public KInputManager()
         {
             ScrollDelta = MousePosX = MousePosY = _activeKeyCount = 0;
