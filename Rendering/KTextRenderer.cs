@@ -6,11 +6,18 @@ namespace Elements.Rendering
     public class KTextRenderer
     {
         public record struct GlyphHandle(char Character, byte FontSize, bool Bold, byte LineThickness);
+
+        public record struct TextDrawData(int VertexCount, Vertex[] Vertices, );
         
         #region static
 
         private static Dictionary<GlyphHandle, Glyph> _glyphCache = new(128);
         private static ArrayPool<Vertex> ArrayPool => ArrayPool<Vertex>.Shared;
+
+        //public static void CreateTextDrawData(KText text, float posX, float posY, out FloatRect bounds, float wrapThreshold = 0)
+        //{
+
+        //}
 
         public static void CacheGlyph(in GlyphHandle handle, Glyph glyph) => _glyphCache.TryAdd(handle, glyph);
 

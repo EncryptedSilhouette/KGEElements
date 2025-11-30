@@ -31,7 +31,6 @@ namespace Elements
         public const byte MAX_KEYS = 128;
 
         private byte _activeKeyCount; //The current amount of active keys.
-        private StringBuilder _stringBuilder;
         private KKeyStates[] _keyStates;
         private byte[] _activeKeys;
 
@@ -40,15 +39,18 @@ namespace Elements
         public float ScrollDelta;
         public KMouseStates MouseStates;
         public KMouseStates PreviousMouseStates;
+        public StringBuilder TextBuffer;
 
-        public int TextBufferLength => _stringBuilder.Length;
+        public int BufferCharCount => TextBuffer.Length;
+
+        public int TextBufferLength => TextBuffer.Length;
 
         public KInputManager()
         {
             ScrollDelta = MousePosX = MousePosY = _activeKeyCount = 0;
             MouseStates = PreviousMouseStates = 0;
 
-            _stringBuilder = new(128);
+            TextBuffer = new(128);
             _keyStates = new KKeyStates[MAX_KEYS];
             _activeKeys = new byte[MAX_KEYS];
 
@@ -84,7 +86,7 @@ namespace Elements
         public void Update()
         {
             //Clear text buffer.
-            _stringBuilder.Clear();
+            TextBuffer.Clear();
 
             //Update Mouse.
             ScrollDelta = 0;
@@ -115,7 +117,7 @@ namespace Elements
             MouseStates &= ~(KMouseStates)(1 << (byte)e.Button);
 
         private void UpdateTextBuffer(object? ignored, TextEventArgs e) =>
-            _stringBuilder.Append(e.Unicode);
+            TextBuffer.Append(e.Unicode);
 
         private void RegisterKeyPress(object? ignored, KeyEventArgs e)
         {
@@ -140,7 +142,7 @@ namespace Elements
             }
         }
 
-        public string ReadTextBuffer() => _stringBuilder.ToString();
+        public string ReadTextBuffer() => TextBuffer.ToString();
 
         public bool IsMouseDown(KMouseStates mouseStates) => MouseStates.HasFlag(mouseStates);
 

@@ -17,7 +17,7 @@ namespace Elements.Core
         public Action? OnHold;
         public Action? OnReleased;
 
-        public KButton(int x, int y, int width, int height, string text)
+        public KButton(float x, float y, float width, float height, string text)
         {
             HeldColor = Color.White;
             DrawData = new();

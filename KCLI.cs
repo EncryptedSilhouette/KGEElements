@@ -1,4 +1,5 @@
 ﻿using Elements.Core;
+using Elements.Game.UI;
 using Elements.Rendering;
 using SFML.Graphics;
 using System.Text;
@@ -12,9 +13,14 @@ namespace Elements
         private Color _color;
         private StringBuilder _textBuffer = new();
         private KCommandManager _commandManager;
+
+        //Draw background
         private KDrawData drawData;
         private KRectangle drawBounds;
-        
+
+        //Input box
+        private KTextInput _textInput;
+
         public Color TextColor;
 
         public Color InterfaceColor
@@ -49,24 +55,31 @@ namespace Elements
                     PosY = 800
                 }
             };
+
+            _textInput = new(0, 0, KProgram.Window.Size.X, 32);
         }
 
         public void Update(KInputManager inputManager)
         {
             if (!_enabled) return;
 
-            if (_isReadingInput)
-            {
-                _textBuffer.Append(inputManager.ReadTextBuffer());
-            }
+            _textInput.Update(inputManager);
         }
 
         public void FrameUpdate(KRenderManager renderManager)
         {
             if (!_enabled) return;
-            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 0, out FloatRect drawBounds, 512);       
-            Console.WriteLine(drawBounds);
-            renderManager.SubmitDraw(drawData, drawBounds);
+            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 0, out FloatRect aBounds, 512);       
+            renderManager.SubmitDraw(drawData, aBounds);
+
+            renderManager.SubmitDraw(_textInput.Button.DrawData, _textInput.Button.Bounds);
+            renderManager.TextRenderers[0].SubmitDraw(
+                _textInput.Button.TextBox, 
+                _textInput.Button.Bounds.TopLeft.X, 
+                _textInput.Button.Bounds.TopLeft.Y, 
+                out FloatRect bBounds, 10);
+
+
         }
 
         public void StartReadTextBuffer()
