@@ -6,60 +6,30 @@ namespace Elements.Rendering
     public class KTextRenderer
     {
         public record struct GlyphHandle(char Character, byte FontSize, bool Bold, byte LineThickness);
-
-        public record struct TextDrawData(int VertexCount, Vertex[] Vertices, );
         
         #region static
 
         private static Dictionary<GlyphHandle, Glyph> _glyphCache = new(128);
         private static ArrayPool<Vertex> ArrayPool => ArrayPool<Vertex>.Shared;
 
-        //public static void CreateTextDrawData(KText text, float posX, float posY, out FloatRect bounds, float wrapThreshold = 0)
-        //{
-
-        //}
-
-        public static void CacheGlyph(in GlyphHandle handle, Glyph glyph) => _glyphCache.TryAdd(handle, glyph);
-
-        #endregion
-
-        private uint _bufferOffset = 0;
-        private VertexBuffer _vertexBuffer;
-
-        public byte FontSize;
-        public KRenderManager RenderManager;
-        public RenderStates RenderStates;
-        public Font Font;
-
-        public KTextRenderer(Font font, KRenderManager renderManager, byte fontSize = 12)
-        {
-            _vertexBuffer = new(1024, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic);
-            RenderStates = RenderStates.Default;
-            
-            Font = font;
-            RenderManager = renderManager;
-            FontSize = fontSize;
-        }
-
-        public void SubmitDraw(KText text, float posX, float posY, out FloatRect bounds, float wrapThreshold = 0)
+        public static FloatRect CreateTextDrawData(KText text, float posX, float posY, Font font, byte fontSize, Vertex[] vertices, uint vertexCount, float wrapThreshold = 0)
         {
             bool pass = false;
-            uint vCount = 0;
             float width = 0;
             float height = 0;
             float xoffset = 0;
             ReadOnlySpan<char> chars = text.Text.AsSpan();
-            Vertex[] vertices = ArrayPool.Rent(chars.Length * 4);
 
-            posY += FontSize;
+            //I'm too lazy to do this a different way.
+            posY += fontSize;
 
             for (int i = 0, cp = 0; i < chars.Length; i++)
             {
-                GlyphHandle handle = new(chars[i], FontSize, text.Bold, text.LineThickness);
+                GlyphHandle handle = new(chars[i], fontSize, text.Bold, text.LineThickness);
 
                 if (!_glyphCache.TryGetValue(handle, out Glyph glyph))
                 {
-                    glyph = Font.GetGlyph(chars[i], FontSize, text.Bold, text.LineThickness);
+                    glyph = font.GetGlyph(chars[i], fontSize, text.Bold, text.LineThickness);
                     _glyphCache.Add(handle, glyph);
 
                     Console.WriteLine($"Glyph cached: {chars[i]}");
@@ -71,10 +41,9 @@ namespace Elements.Rendering
                     vertices[i * 4 + 1] = new();
                     vertices[i * 4 + 2] = new();
                     vertices[i * 4 + 3] = new();
-                    vCount += 4;
 
                     xoffset = 0;
-                    height += FontSize;
+                    height += fontSize;
 
                     continue;
                 }
@@ -83,11 +52,12 @@ namespace Elements.Rendering
                     cp = i + 1;
                     pass = false;
                 }
-                else if (!pass && wrapThreshold != 0 && xoffset != 0 && xoffset + glyph.Advance > wrapThreshold)
+                else if (!pass && wrapThreshold != 0 && xoffset != 0 &&
+                         xoffset + glyph.Advance > wrapThreshold)
                 {
                     i = cp;
                     xoffset = 0;
-                    height += FontSize;
+                    height += fontSize;
                     pass = true;
                 }
 
@@ -122,26 +92,52 @@ namespace Elements.Rendering
                     TexCoords = (coords.Left, coords.Top + coords.Height),
                     Color = text.Color,
                 };
-                vCount += 4;
 
                 xoffset += glyph.Advance;
 
                 if (xoffset > width) width = xoffset;
             }
-                 
-            _vertexBuffer.Update(vertices, vCount, _bufferOffset);
+
+            posY -= fontSize;
+
+            return new FloatRect(posX, posY, width, height);
+        }
+
+        public static void CacheGlyph(in GlyphHandle handle, Glyph glyph) => _glyphCache.TryAdd(handle, glyph);
+
+        #endregion
+
+        private uint _bufferOffset = 0;
+        private VertexBuffer _vertexBuffer;
+
+        public byte FontSize;
+        public KRenderManager RenderManager;
+        public RenderStates RenderStates;
+        public Font Font;
+
+        public KTextRenderer(Font font, KRenderManager renderManager, byte fontSize = 12)
+        {
+            _vertexBuffer = new(1024, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic);
+            RenderStates = RenderStates.Default;
+            
+            Font = font;
+            RenderManager = renderManager;
+            FontSize = fontSize;
+        }
+
+        public void SubmitDraw(KText text, float posX, float posY, float wrapThreshold = 0)
+        {
+            int vertexCount = text.Text.Length;
+            Vertex[] vertices = ArrayPool.Rent(vertexCount);
+
+            var drawData = CreateTextDrawData(text, posX, posY, Font, FontSize, vertices, (uint) vertexCount);
+
+            _vertexBuffer.Update(vertices, (uint) vertexCount, _bufferOffset);
             _bufferOffset += (uint) (text.Text.Length * 4);
             ArrayPool.Return(vertices);
-
-            posY -= FontSize;
-            bounds = new FloatRect(posX, posY, width, height);
         }
 
-        public void SubmitDraw(string text, float posX, float posY, out FloatRect bounds, float wrapThreshold = 0)
-        {
-            SubmitDraw(new KText(text), posX, posY, out FloatRect b, wrapThreshold);
-            bounds = b;
-        }
+        public void SubmitDraw(string text, float posX, float posY, float wrapThreshold = 0) => SubmitDraw(new KText(text), posX, posY, wrapThreshold);
 
         public void DrawText(RenderTarget target)
         {
