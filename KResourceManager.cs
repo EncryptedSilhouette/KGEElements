@@ -1,11 +1,13 @@
 ﻿using Elements.Core;
-using Elements.Rendering;
 using SFML.Graphics;
 
 namespace Elements
 {
+    public record struct KTextureAtlas(Texture Texture, Dictionary<string, KRectangle> Sprites);
+
     public class KResourceManager
     {
+
         public string ConfigPath;
         public Dictionary<string, KTextureAtlas> TextureAtlases = [];
         public Dictionary<string, Font> Fonts = [];

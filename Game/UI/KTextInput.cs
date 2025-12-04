@@ -74,7 +74,10 @@ namespace Elements.Game.UI
             }
         }
 
-        public void FrameUpdate(KRenderManager renderManager) => Button.FrameUpdate(renderManager);
+        public void FrameUpdate(KRenderManager renderManager)
+        {
+            Button.FrameUpdate(renderManager);
+        }
 
         private void Pressed()
         {

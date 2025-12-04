@@ -4,7 +4,7 @@ using SFML.System;
 
 namespace Elements.Rendering
 {
-    public struct KRenderLayer
+    public struct RenderLayer
     {
         private uint _bufferOffset;
 
@@ -19,10 +19,10 @@ namespace Elements.Rendering
         public Vector2u Resolution => RenderTexture.Size;
 
 #nullable disable
-        public KRenderLayer() => (_bufferOffset, BackgroundColor, LineColor) = (0, Color.White, Color.Green);
+        public RenderLayer() => (_bufferOffset, BackgroundColor, LineColor) = (0, Color.White, Color.Green);
 #nullable enable
 
-        public KRenderLayer(RenderStates states, RenderTexture renderTexture, VertexBuffer buffer) : this() =>
+        public RenderLayer(RenderStates states, RenderTexture renderTexture, VertexBuffer buffer) : this() =>
             (States, RenderTexture, Buffer) = (states, renderTexture, buffer);
 
         public void SubmitDraw(Vertex[] vertices, uint vertexCount)

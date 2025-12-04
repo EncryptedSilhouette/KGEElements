@@ -21,7 +21,7 @@ namespace Elements.Core
         {
             HeldColor = Color.White;
             DrawData = new();
-            TextBox = new("button");
+            TextBox = new(text);
             _isDown = false;
 
             Bounds = new()
@@ -68,8 +68,12 @@ namespace Elements.Core
 
         public void FrameUpdate(KRenderManager renderManager)
         {
+            if (TextBox.Text != string.Empty)
+            {
+                renderManager.TextRenderers[0].SubmitDraw(TextBox, Bounds.TopLeft.X, Bounds.TopLeft.Y, out FloatRect bounds);
+                Console.WriteLine(Bounds.TopLeft.X);
+            }
             renderManager.SubmitDraw(DrawData, Bounds);
-            renderManager.TextRenderers[0].SubmitDraw(TextBox, Bounds.TopLeft.X, Bounds.TopLeft.Y, out FloatRect drawBounds, 10);
         }
     }
 }

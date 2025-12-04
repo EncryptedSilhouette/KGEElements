@@ -235,9 +235,9 @@ public static class KProgram
             {
                 Window.DefaultView,
             },
-            new KRenderLayer[]
+            new RenderLayer[]
             {
-                new KRenderLayer() //Default layer.
+                new RenderLayer() //Default layer.
                 {
                     Camera = 0,
                     LineColor = Color.Yellow,

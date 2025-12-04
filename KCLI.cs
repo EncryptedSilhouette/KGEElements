@@ -55,8 +55,8 @@ namespace Elements
                     PosY = 800
                 }
             };
-
-            _textInput = new(0, 0, KProgram.Window.Size.X, 32);
+            _textInput = new(0, KProgram.Window.Size.Y - 148, KProgram.Window.Size.X, 48, "type here");
+            _textInput.Button.DrawData.Color = new(50,50,50);
         }
 
         public void Update(KInputManager inputManager)
@@ -72,14 +72,7 @@ namespace Elements
             renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 0, out FloatRect aBounds, 512);       
             renderManager.SubmitDraw(drawData, aBounds);
 
-            renderManager.SubmitDraw(_textInput.Button.DrawData, _textInput.Button.Bounds);
-            renderManager.TextRenderers[0].SubmitDraw(
-                _textInput.Button.TextBox, 
-                _textInput.Button.Bounds.TopLeft.X, 
-                _textInput.Button.Bounds.TopLeft.Y, 
-                out FloatRect bBounds, 10);
-
-
+            _textInput.FrameUpdate(renderManager);
         }
 
         public void StartReadTextBuffer()
