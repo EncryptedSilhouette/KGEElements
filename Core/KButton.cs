@@ -70,8 +70,7 @@ namespace Elements.Core
         {
             if (TextBox.Text != string.Empty)
             {
-                renderManager.TextRenderers[0].SubmitDraw(TextBox, Bounds.TopLeft.X, Bounds.TopLeft.Y, out FloatRect bounds);
-                Console.WriteLine(Bounds.TopLeft.X);
+                
             }
             renderManager.SubmitDraw(DrawData, Bounds);
         }

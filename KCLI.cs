@@ -69,8 +69,6 @@ namespace Elements
         public void FrameUpdate(KRenderManager renderManager)
         {
             if (!_enabled) return;
-            renderManager.TextRenderers[0].SubmitDraw(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG), 0, 0, out FloatRect aBounds, 512);       
-            renderManager.SubmitDraw(drawData, aBounds);
 
             _textInput.FrameUpdate(renderManager);
         }

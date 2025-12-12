@@ -88,7 +88,7 @@ public static class KProgram
         InputManager = new();
         CommandManager = new();
 
-        RenderManager = new(Window);
+        RenderManager = new(Window, ResourceManager);
         GameManager = new();
         LogManager = new();
         Debugger = new();
@@ -225,33 +225,25 @@ public static class KProgram
     {
         InputManager.Init(Window);
 
-        //Load
         Load();
 
         #region Rendering initilization
 
-        RenderManager.Init(
-            new View[]
+        var windowViews = new View[]
+        {
+            Window.DefaultView,
+        };
+
+        var drawLayers = new KRenderManager.KDrawLayer[]
+        {
+            new KRenderManager.KDrawLayer() //Default layer.
             {
-                Window.DefaultView,
+                Buffer = new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             },
-            new RenderLayer[]
-            {
-                new RenderLayer() //Default layer.
-                {
-                    Camera = 0,
-                    LineColor = Color.Yellow,
-                    BackgroundColor = Color.Black,
-                    //States = new(ResourceManager.TextureAtlases["atlas"].Texture),
-                    States = RenderStates.Default,
-                    RenderTexture = new(TargetResolution.X, TargetResolution.Y),
-                    Buffer = new(256, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
-                },
-            },
-            new KTextRenderer[]
-            {
-                new(ResourceManager.Fonts["roboto_black"], RenderManager)
-            });
+            KRenderManager.CreateTextLayer(ResourceManager.Fonts[0], 12), //Default text layer.
+        };
+
+        RenderManager.Init(windowViews, drawLayers);
 
         #endregion
 

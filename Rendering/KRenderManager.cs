@@ -43,21 +43,103 @@ namespace Elements.Rendering
 
         #region static
 
+        private static Dictionary<GlyphHandle, Glyph> s_glyphCache = new(128);
+
         public ArrayPool<Vertex> VertexArrayPool => ArrayPool<Vertex>.Shared;
 
-        public static void CreateTextLayer(Font font, byte fontSize)
+        public static KDrawLayer CreateTextLayer(Font font, byte fontSize)
         {
             KDrawLayer layer = new KDrawLayer(new VertexBuffer(1024, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Stream));
             layer.States.Texture = font.GetTexture(fontSize);
+            return layer;
         }
 
-        public FloatRect CreateTextbox(KText text, Font font, Vertex[] buffer, byte fontSize, float posX, float posY, int wrapThreshold = 0)
+        #endregion
+
+        public Color BackgroundColor;
+        public RenderStates States;
+        public RenderWindow Window;
+        public View ScreenView;
+        public KDrawLayer[] DrawLayers;
+        public KResourceManager ResourceManager;
+
+        public float ScreenLeft => 0;
+        public float ScreenRight => Window.Size.X;
+        public float ScreenTop => 0;
+        public float ScreenBottom => Window.Size.Y;
+        public Vector2f ScreenTopLeft => (0, 0);
+        public Vector2f ScreenTopRight => (Window.Size.X, 0);
+        public Vector2f ScreenBottomRight => (Vector2f) Window.Size;
+        public Vector2f ScreenBottomLeft => (0, Window.Size.Y);
+        public Vector2f ScreenCenter => (Vector2f) Window.Size / 2;
+
+        public KRenderManager(RenderWindow window, KResourceManager resourceManager)
+        {
+            Window = window;
+            ResourceManager = resourceManager;
+            BackgroundColor = Color.Black;
+            States = RenderStates.Default;
+            ScreenView = Window.GetView();
+
+            DrawLayers = [];
+        }
+
+        //use during scene swapping if additional layers/cameras are needed.
+        public void Init(View[] cameraViews, KDrawLayer[] drawLayers)
+        {
+            DrawLayers = drawLayers;
+            Window.Resized += ResizeView;
+        }
+
+        public void Deinit()
+        {
+            Window.Resized -= ResizeView;
+        }
+
+        public void FrameUpdate()
+        {
+            Window.Clear(BackgroundColor);
+
+            for (int i = 0; i < DrawLayers.Length; i++)
+            {
+                DrawLayers[i].DrawBufferToTarget(Window);
+            }
+
+            Window.Display();
+        }
+
+        public void SubmitDraw(in KDrawData dat, in FloatRect rec, int layer = 0)
+        {
+            Vertex[] vertices = ArrayPool<Vertex>.Shared.Rent(4);
+            vertices[0] = new Vertex((rec.Left, rec.Top), dat.Color, dat.Sprite.TopLeft);
+            vertices[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
+            vertices[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
+            vertices[3] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
+
+            DrawLayers[layer].SubmitDraw(vertices, 4);
+            ArrayPool<Vertex>.Shared.Return(vertices);
+        }
+
+        public void SubmitDraw(in KDrawData dat, in KRectangle rec, int layer = 0)
+        {
+            Vertex[] vertices = VertexArrayPool.Rent(4);
+            vertices[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
+            vertices[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
+            vertices[2] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.BottomRight);
+            vertices[3] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);
+            
+            DrawLayers[layer].SubmitDraw(vertices, 4);
+            VertexArrayPool.Return(vertices); 
+        }
+
+        public FloatRect CreateTextbox(KText text, int fontID, Vertex[] buffer, float posX, float posY, byte fontSize = 12, int wrapThreshold = 0)
         {
             bool pass = false;
             float width = 0;
             float height = 0;
             float xoffset = 0;
-            ReadOnlySpan<char> chars = text.Text.AsSpan();
+            var chars = text.Text.AsSpan();
+            var font = ResourceManager.Fonts[fontID];
 
             posY += fontSize;
 
@@ -65,10 +147,10 @@ namespace Elements.Rendering
             {
                 GlyphHandle handle = new(chars[i], fontSize, text.Bold, text.LineThickness);
 
-                if (!_glyphCache.TryGetValue(handle, out Glyph glyph))
+                if (!s_glyphCache.TryGetValue(handle, out Glyph glyph))
                 {
                     glyph = font.GetGlyph(chars[i], fontSize, text.Bold, text.LineThickness);
-                    _glyphCache.Add(handle, glyph);
+                    s_glyphCache.Add(handle, glyph);
 
                     Console.WriteLine($"Glyph cached: {chars[i]}");
                 }
@@ -130,97 +212,13 @@ namespace Elements.Rendering
                     Color = text.Color,
                 };
 
-                xoffset += glyph.Advance;
+                xoffset += (int)glyph.Advance;
 
                 if (xoffset > width) width = xoffset;
             }
 
             posY -= fontSize;
             return new FloatRect(posX, posY, width, height);
-        }
-
-        #endregion
-
-        public Color BackgroundColor;
-        public RenderStates States;
-        public RenderWindow Window;
-        public Font Font;
-        public View ScreenView;
-        public KDrawLayer[] DrawLayers;
-
-        private Dictionary<GlyphHandle, Glyph> _glyphCache = new(128);
-
-        public float ScreenLeft => 0;
-        public float ScreenRight => Window.Size.X;
-        public float ScreenTop => 0;
-        public float ScreenBottom => Window.Size.Y;
-        public Vector2f ScreenTopLeft => (0, 0);
-        public Vector2f ScreenTopRight => (Window.Size.X, 0);
-        public Vector2f ScreenBottomRight => (Vector2f) Window.Size;
-        public Vector2f ScreenBottomLeft => (0, Window.Size.Y);
-        public Vector2f ScreenCenter => (Vector2f) Window.Size / 2;
-
-        public KRenderManager(Font font, RenderWindow window)
-        {
-            BackgroundColor = Color.Black;
-            States = RenderStates.Default;
-            Window = window;
-            Font = font;
-
-            ScreenView = Window.GetView();
-        }
-
-        public void Load()
-        {
-
-        }
-
-        //use during scene swapping if additional layers/cameras are needed.
-        public void Init(View[] cameraViews, KDrawLayer[] drawLayers)
-        {
-            DrawLayers = drawLayers;
-            Window.Resized += ResizeView;
-        }
-
-        public void Deinit()
-        {
-            Window.Resized -= ResizeView;
-        }
-
-        public void FrameUpdate()
-        {
-            Window.Clear(BackgroundColor);
-
-            for (int i = 0; i < DrawLayers.Length; i++)
-            {
-                DrawLayers[i].DrawBufferToTarget(Window);
-            }
-
-            Window.Display();
-        }
-
-        public void SubmitDraw(in KDrawData dat, in FloatRect rec, int layer = 0)
-        {
-            Vertex[] vertices = ArrayPool<Vertex>.Shared.Rent(4);
-            vertices[0] = new Vertex((rec.Left, rec.Top), dat.Color, dat.Sprite.TopLeft);
-            vertices[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
-            vertices[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
-            vertices[3] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
-
-            DrawLayers[layer].SubmitDraw(vertices, 4);
-            ArrayPool<Vertex>.Shared.Return(vertices);
-        }
-
-        public void SubmitDraw(in KDrawData dat, in KRectangle rec, int layer = 0)
-        {
-            Vertex[] vertices = VertexArrayPool.Rent(4);
-            vertices[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
-            vertices[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
-            vertices[2] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.BottomRight);
-            vertices[3] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);
-            
-            DrawLayers[layer].SubmitDraw(vertices, 4);
-            VertexArrayPool.Return(vertices);
         }
 
         private void ResizeView(object? _, SizeEventArgs e)

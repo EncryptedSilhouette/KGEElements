@@ -10,7 +10,7 @@ namespace Elements
 
         public string ConfigPath;
         public Dictionary<string, KTextureAtlas> TextureAtlases = [];
-        public Dictionary<string, Font> Fonts = [];
+        public Font[] Fonts = [];
 
         public KResourceManager(string configPath)
         {
@@ -57,7 +57,13 @@ namespace Elements
                         break;
 
                     case "fonts":
-                        for (int j = 1; j < values.Length; j++) LoadFont(values[j]);
+                        Fonts = new Font[values.Length];
+
+                        for (int j = 1; j < Fonts.Length; j++) 
+                        {
+                            Fonts[j - 1] = new Font(values[j]);
+                            KProgram.LogManager.DebugLog($"Loading font: {Path.GetFileNameWithoutExtension(values[j])}.");
+                        }
                         break;
 
                     default:
@@ -107,12 +113,6 @@ namespace Elements
                 }
             }  
             TextureAtlases.Add(Path.GetFileNameWithoutExtension(contents[0]), atlas);
-        }
-
-        public void LoadFont(string filePath)
-        {
-            Fonts.Add(Path.GetFileNameWithoutExtension(filePath), new Font(filePath));
-            KProgram.LogManager.DebugLog($"Loading font: {Path.GetFileNameWithoutExtension(filePath)}.");
         }
     }
 }
