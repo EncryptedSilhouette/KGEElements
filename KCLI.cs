@@ -70,6 +70,8 @@ namespace Elements
         {
             if (!_enabled) return;
 
+            SubmitTextDraw();
+
             _textInput.FrameUpdate(renderManager);
         }
 
