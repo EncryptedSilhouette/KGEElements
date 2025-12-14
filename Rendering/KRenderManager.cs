@@ -134,16 +134,14 @@ namespace Elements.Rendering
             VertexArrayPool.Return(vertices); 
         }
 
-        public FloatRect SubmitTextDraw(in KText text, int fontID, float posX, float posY, byte fontSize = 12, int wrapThreshold = 0, int layer = 0)
+        public void SubmitTextDraw(in KText text, int fontID, float posX, float posY, out FloatRect bounds, byte fontSize = 12, int wrapThreshold = 0, int layer = 0)
         {
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
-            var textBox = CreateTextbox(text, fontID, buffer, posX, posY, fontSize, wrapThreshold);
+            bounds = CreateTextbox(text, fontID, buffer, posX, posY, fontSize, wrapThreshold);
             DrawLayers[layer].SubmitDraw(buffer, (uint) text.Text.Length * 4);
 
             ArrayPool<Vertex>.Shared.Return(buffer);
-
-            return textBox; 
         }
 
         //May want to cache this.
@@ -158,7 +156,7 @@ namespace Elements.Rendering
 
             posY += fontSize;
 
-            for (int i = 0, cp = 0; i < buffer.Length / 4; i++)
+            for (int i = 0, cp = 0; i < chars.Length / 4; i++)
             {
                 GlyphHandle handle = new(chars[i], fontSize, text.Bold, text.LineThickness);
 
