@@ -10,39 +10,6 @@ namespace Elements.Rendering
     {
         private record struct GlyphHandle(char Character, byte FontSize, bool Bold, byte LineThickness);
 
-        public struct KDrawLayer
-        {
-            public uint VertexCount = 0;
-            public RenderStates States = RenderStates.Default;
-            public VertexBuffer Buffer;
-
-            
-
-            public KDrawLayer(VertexBuffer buffer)
-            {
-                VertexCount = 0;
-                Buffer = buffer;
-            }
-
-            public void SubmitDraw(Vertex[] vertices, uint length)
-            {
-                Buffer.Update(vertices, length, VertexCount);
-                VertexCount += length;
-            }
-
-            public void DrawBufferToTarget(RenderTarget target)
-            {
-                Buffer.Draw(target, States);
-                VertexCount = 0;
-            }
-
-            public void DrawBufferToTarget(RenderTarget target, in RenderStates states)
-            {
-                Buffer.Draw(target, states);
-                VertexCount = 0;
-            }
-        }
-
         #region static
 
         private static Dictionary<GlyphHandle, Glyph> s_glyphCache = new(128);
@@ -62,8 +29,9 @@ namespace Elements.Rendering
         public RenderStates States;
         public RenderWindow Window;
         public View ScreenView;
-        public KDrawLayer[] DrawLayers;
         public KResourceManager ResourceManager;
+        public KDrawLayer[] DrawLayers;
+        public Vertex[] QuadBuffer;
 
         public float ScreenLeft => 0;
         public float ScreenRight => Window.Size.X;
@@ -82,7 +50,7 @@ namespace Elements.Rendering
             BackgroundColor = Color.Black;
             States = RenderStates.Default;
             ScreenView = Window.GetView();
-
+            QuadBuffer = new Vertex[4];
             DrawLayers = [];
         }
 
@@ -110,31 +78,25 @@ namespace Elements.Rendering
             Window.Display();
         }
 
-        public void SubmitDraw(in KDrawData dat, in FloatRect rec, int layer = 0)
+        public void SubmitDrawQuad(in KDrawData dat, in FloatRect rec, int layer = 0)
         {
-            Vertex[] vertices = ArrayPool<Vertex>.Shared.Rent(4);
-            vertices[0] = new Vertex((rec.Left, rec.Top), dat.Color, dat.Sprite.TopLeft);
-            vertices[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
-            vertices[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
-            vertices[3] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
-
-            DrawLayers[layer].SubmitDraw(vertices, 4);
-            ArrayPool<Vertex>.Shared.Return(vertices);
+            QuadBuffer[0] = new Vertex((rec.Left, rec.Top), dat.Color, dat.Sprite.TopLeft);
+            QuadBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
+            QuadBuffer[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
+            QuadBuffer[3] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
+            DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
         }
 
-        public void SubmitDraw(in KDrawData dat, in KRectangle rec, int layer = 0)
+        public void SubmitDrawQuad(in KDrawData dat, in KRectangle rec, int layer = 0)
         {
-            Vertex[] vertices = VertexArrayPool.Rent(4);
-            vertices[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
-            vertices[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
-            vertices[2] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.BottomRight);
-            vertices[3] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);
-            
-            DrawLayers[layer].SubmitDraw(vertices, 4);
-            VertexArrayPool.Return(vertices); 
+            QuadBuffer[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
+            QuadBuffer[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
+            QuadBuffer[2] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.BottomRight);
+            QuadBuffer[3] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);            
+            DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
         }
 
-        public void SubmitTextDraw(in KText text, int fontID, float posX, float posY, out FloatRect bounds, byte fontSize = 12, int wrapThreshold = 0, int layer = 0)
+        public void SubmitDrawText(in KText text, int fontID, float posX, float posY, out FloatRect bounds, byte fontSize = 12, int wrapThreshold = 0, int layer = 0)
         {
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 

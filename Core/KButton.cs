@@ -72,7 +72,7 @@ namespace Elements.Core
             {
                 
             }
-            renderManager.SubmitDraw(DrawData, Bounds);
+            renderManager.SubmitDrawQuad(DrawData, Bounds);
         }
     }
 }

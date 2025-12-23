@@ -234,9 +234,9 @@ public static class KProgram
             Window.DefaultView,
         };
 
-        var drawLayers = new KRenderManager.KDrawLayer[]
+        var drawLayers = new KDrawLayer[]
         {
-            new KRenderManager.KDrawLayer() //Default layer.
+            new KDrawLayer() //Default layer.
             {
                 Buffer = new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             },
