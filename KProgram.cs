@@ -234,14 +234,10 @@ public static class KProgram
             Window.DefaultView,
         };
 
-        var drawLayers = new KDrawLayer[]
-        {
-            new KDrawLayer() //Default layer.
-            {
-                Buffer = new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
-            },
-            KRenderManager.CreateTextLayer(ResourceManager.Fonts[0], 12), //Default text layer.
-        };
+        var drawLayers = new KDrawLayer[2];
+
+        drawLayers[0] = new KDrawLayer(new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic));
+        drawLayers[1] = KRenderManager.CreateTextLayer(ResourceManager.Fonts[0], 12); //Default text layer.
 
         RenderManager.Init(windowViews, drawLayers);
 
