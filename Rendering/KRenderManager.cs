@@ -30,7 +30,7 @@ namespace Elements.Rendering
         public ArrayPool<Vertex> VertexArrayPool => ArrayPool<Vertex>.Shared;
 
         public static KDrawLayer CreateTextLayer(Font font, byte fontSize = DEFAULT_FONT_SIZE)
-        {
+        {                                           
             KDrawLayer layer = new KDrawLayer(new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Stream));
             layer.States.Texture = font.GetTexture(fontSize);
             return layer;
@@ -47,6 +47,8 @@ namespace Elements.Rendering
         public KResourceManager ResourceManager;
         public KDrawLayer[] DrawLayers;
         public Vertex[] QuadBuffer;
+        
+        public Font? Font;
 
         public float ScreenLeft => 0;
         public float ScreenRight => Window.Size.X;
@@ -70,7 +72,7 @@ namespace Elements.Rendering
         }
 
         //use during scene swapping if additional layers/cameras are needed.
-        public void Init(View[] cameraViews, KDrawLayer[] drawLayers)
+        public void Init(Font font, View[] cameraViews, KDrawLayer[] drawLayers)
         {
             DrawLayers = drawLayers;
             Window.Resized += ResizeView;
@@ -111,11 +113,12 @@ namespace Elements.Rendering
             DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
         }
 
-        public void SubmitDrawText(in KText text, Font font, float posX, float posY, out FloatRect bounds, byte fontSize = DEFAULT_FONT_SIZE, int wrapThreshold = 0, int layer = 0)
+        public void SubmitDrawText(in KText text, float posX, float posY, out FloatRect bounds, byte fontSize = DEFAULT_FONT_SIZE, int wrapThreshold = 0, int layer = 0)
         {
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
-            bounds = CreateTextbox(text, font, buffer, posX, posY, fontSize, wrapThreshold);
+            bounds = CreateTextbox(text, ResourceManager.Fonts[0], buffer, posX, posY, fontSize, wrapThreshold);
+            DrawLayers[layer].States.Texture = ResourceManager.Fonts[0]!.GetTexture(fontSize);
             DrawLayers[layer].SubmitDraw(buffer, (uint) text.Text.Length * 4);
 
             ArrayPool<Vertex>.Shared.Return(buffer);
@@ -132,81 +135,81 @@ namespace Elements.Rendering
 
             posY += fontSize;
 
-            //for (int i = 0, cp = 0; i < chars.Length / 4; i++)
-            //{
-            //    GlyphHandle handle = new(chars[i], fontSize, text.Bold, text.LineThickness);
+            for (int i = 0, cp = 0; i < chars.Length; i++)
+            {
+                GlyphHandle handle = new(chars[i], fontSize, text.Bold, text.LineThickness);
 
-            //    if (!s_glyphCache.TryGetValue(handle, out Glyph glyph))
-            //    {
-            //        glyph = font.GetGlyph(chars[i], fontSize, text.Bold, text.LineThickness);
-            //        s_glyphCache.Add(handle, glyph);
+                if (!s_glyphCache.TryGetValue(handle, out Glyph glyph))
+                {
+                    glyph = font.GetGlyph(chars[i], fontSize, text.Bold, text.LineThickness);
+                    s_glyphCache.Add(handle, glyph);
 
-            //        Console.WriteLine($"Glyph cached: {chars[i]}");
-            //    }
+                    Console.WriteLine($"Glyph cached: {chars[i]}");
+                }
 
-            //    if (chars[i] == '\n')
-            //    {
-            //        buffer[i * 4] = new();
-            //        buffer[i * 4 + 1] = new();
-            //        buffer[i * 4 + 2] = new();
-            //        buffer[i * 4 + 3] = new();
+                if (chars[i] == '\n')
+                {
+                    buffer[i * 4] = new();
+                    buffer[i * 4 + 1] = new();
+                    buffer[i * 4 + 2] = new();
+                    buffer[i * 4 + 3] = new();
 
-            //        xoffset = 0;
-            //        height += fontSize;
+                    xoffset = 0;
+                    height += fontSize;
 
-            //        continue;
-            //    }
-            //    if (chars[i] == ' ')
-            //    {
-            //        cp = i + 1;
-            //        pass = false;
-            //    }
-            //    else if (!pass && wrapThreshold != 0 && xoffset != 0 && xoffset + glyph.Advance > wrapThreshold)
-            //    {
-            //        i = cp;
-            //        xoffset = 0;
-            //        height += fontSize;
-            //        pass = true;
-            //    }
+                    continue;
+                }
+                if (chars[i] == ' ')
+                {
+                    cp = i + 1;
+                    pass = false;
+                }
+                else if (!pass && wrapThreshold != 0 && xoffset != 0 && xoffset + glyph.Advance > wrapThreshold)
+                {
+                    i = cp;
+                    xoffset = 0;
+                    height += fontSize;
+                    pass = true;
+                }
 
-            //    var coords = glyph.TextureRect;
-            //    var rect = glyph.Bounds;
+                var coords = glyph.TextureRect;
+                var rect = glyph.Bounds;
 
-            //    buffer[i * 4] = new()
-            //    {
-            //        Position = (posX + xoffset + rect.Left,
-            //                    posY + height + rect.Top),
-            //        TexCoords = (coords.Left, coords.Top),
-            //        Color = text.Color,
-            //    };
-            //    buffer[i * 4 + 1] = new()
-            //    {
-            //        Position = (posX + xoffset + rect.Left + rect.Width,
-            //                    posY + height + rect.Top),
-            //        TexCoords = (coords.Left + coords.Width, coords.Top),
-            //        Color = text.Color,
-            //    };
-            //    buffer[i * 4 + 2] = new()
-            //    {
-            //        Position = (posX + xoffset + rect.Left + rect.Width,
-            //                    posY + height + rect.Top + rect.Height),
-            //        TexCoords = (coords.Left + coords.Width, coords.Top + coords.Height),
-            //        Color = text.Color,
-            //    };
-            //    buffer[i * 4 + 3] = new()
-            //    {
-            //        Position = (posX + xoffset + rect.Left,
-            //                    posY + height + rect.Top + rect.Height),
-            //        TexCoords = (coords.Left, coords.Top + coords.Height),
-            //        Color = text.Color,
-            //    };
+                buffer[i * 4] = new()
+                {
+                    Position = (posX + xoffset + rect.Left,
+                                posY + height + rect.Top),
+                    TexCoords = (coords.Left, coords.Top),
+                    Color = text.Color,
+                };
+                buffer[i * 4 + 1] = new()
+                {
+                    Position = (posX + xoffset + rect.Left + rect.Width,
+                                posY + height + rect.Top),
+                    TexCoords = (coords.Left + coords.Width, coords.Top),
+                    Color = text.Color,
+                };
+                buffer[i * 4 + 2] = new()
+                {
+                    Position = (posX + xoffset + rect.Left + rect.Width,
+                                posY + height + rect.Top + rect.Height),
+                    TexCoords = (coords.Left + coords.Width, coords.Top + coords.Height),
+                    Color = text.Color,
+                };
+                buffer[i * 4 + 3] = new()
+                {
+                    Position = (posX + xoffset + rect.Left,
+                                posY + height + rect.Top + rect.Height),
+                    TexCoords = (coords.Left, coords.Top + coords.Height),
+                    Color = text.Color,
+                };
 
-            //    xoffset += (int)glyph.Advance;
+                xoffset += (int)glyph.Advance;
 
-            //    if (xoffset > width) width = xoffset;
-            //}
+                if (xoffset > width) width = xoffset;
+            }
 
-            //posY -= fontSize;
+            posY -= fontSize;
             return new FloatRect(posX, posY, width, height);
         }
 

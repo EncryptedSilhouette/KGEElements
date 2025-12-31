@@ -62,7 +62,8 @@ namespace Elements
                         for (int j = 0; j < Fonts.Length; j++) 
                         {
                             Fonts[j] = new Font(values[j + 1]);
-                            KProgram.LogManager.DebugLog($"Loading font: {Path.GetFileNameWithoutExtension(values[j + 1])}.");
+
+                            KProgram.LogManager.DebugLog($"Loading font{j}: {Path.GetFileNameWithoutExtension(values[j + 1])}.");
                         }
                         break;
 

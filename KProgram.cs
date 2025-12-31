@@ -100,8 +100,6 @@ public static class KProgram
         InitAndLoad();
         OnStart?.Invoke();
 
-        LogManager.DebugLog("Working");
-
         StartGameLoop();
 
         OnStop?.Invoke();
@@ -225,7 +223,8 @@ public static class KProgram
     {
         InputManager.Init(Window);
 
-        Load();
+        ResourceManager.Load();
+        OnLoad?.Invoke();
 
         #region Rendering initilization
 
@@ -236,10 +235,10 @@ public static class KProgram
 
         var drawLayers = new KDrawLayer[2];
 
-        drawLayers[0] = new KDrawLayer(new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic));
+        drawLayers[0] = new KDrawLayer(new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic));
         drawLayers[1] = KRenderManager.CreateTextLayer(ResourceManager.Fonts[0]); //Default text layer.
 
-        RenderManager.Init(windowViews, drawLayers);
+        RenderManager.Init(ResourceManager.Fonts[0], windowViews, drawLayers);
 
         #endregion
 
@@ -251,12 +250,6 @@ public static class KProgram
         InputManager.Deinit(Window);
         OnDeinit?.Invoke();
     }
-
-    private static void Load()
-    {
-        ResourceManager.Load();
-        OnLoad?.Invoke();
-    } 
 
     private static void Update(in uint currentUpdate)
     {

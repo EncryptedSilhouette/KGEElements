@@ -74,7 +74,6 @@ namespace Elements
 
             renderManager.SubmitDrawText(
                 new(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG)),
-                _resourceManager.Fonts[0], 
                 0, 0, out FloatRect bounds);
 
             //_textInput.FrameUpdate(renderManager);

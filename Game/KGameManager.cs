@@ -1,4 +1,5 @@
 ﻿using Elements.Rendering;
+using SFML.Graphics;
 
 namespace Elements.Game
 {
@@ -20,6 +21,17 @@ namespace Elements.Game
         public void FrameUpdate(KRenderManager renderManager)
         {
 
+        }
+
+        public void CreateNewGame()
+        {
+            //Create game file
+
+            Texture texture = new Texture(800, 600);
+
+            KGame game = new KGame();
+
+            //Save game file
         }
     }
 }
