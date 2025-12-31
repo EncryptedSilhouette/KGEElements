@@ -92,7 +92,7 @@ public static class KProgram
         GameManager = new();
         LogManager = new();
         Debugger = new();
-        CLI = new(CommandManager);
+        CLI = new(CommandManager, ResourceManager);
     }
 
     public static void Main(string[] args)
@@ -237,7 +237,7 @@ public static class KProgram
         var drawLayers = new KDrawLayer[2];
 
         drawLayers[0] = new KDrawLayer(new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic));
-        drawLayers[1] = KRenderManager.CreateTextLayer(ResourceManager.Fonts[0], 12); //Default text layer.
+        drawLayers[1] = KRenderManager.CreateTextLayer(ResourceManager.Fonts[0]); //Default text layer.
 
         RenderManager.Init(windowViews, drawLayers);
 

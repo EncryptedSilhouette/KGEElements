@@ -57,12 +57,12 @@ namespace Elements
                         break;
 
                     case "fonts":
-                        Fonts = new Font[values.Length];
+                        Fonts = new Font[values.Length - 1];
 
-                        for (int j = 1; j < Fonts.Length; j++) 
+                        for (int j = 0; j < Fonts.Length; j++) 
                         {
-                            Fonts[j - 1] = new Font(values[j]);
-                            KProgram.LogManager.DebugLog($"Loading font: {Path.GetFileNameWithoutExtension(values[j])}.");
+                            Fonts[j] = new Font(values[j + 1]);
+                            KProgram.LogManager.DebugLog($"Loading font: {Path.GetFileNameWithoutExtension(values[j + 1])}.");
                         }
                         break;
 

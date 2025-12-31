@@ -13,6 +13,7 @@ namespace Elements
         private Color _color;
         private StringBuilder _textBuffer = new();
         private KCommandManager _commandManager;
+        private KResourceManager _resourceManager;
 
         //Draw background
         private KDrawData drawData;
@@ -35,11 +36,12 @@ namespace Elements
             set => _color.A = value;
         }
 
-        public KCLI(KCommandManager commandManager)
+        public KCLI(KCommandManager commandManager, KResourceManager resourceManager)
         {
             _color = new(100, 100, 100);
             _commandManager = commandManager;
-            
+            _resourceManager = resourceManager;
+
             drawData = new()
             {
                 Color = _color
@@ -70,7 +72,10 @@ namespace Elements
         {
             if (!_enabled) return;
 
-            //renderManager.SubmitDrawText(new(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG)), 0, 0, 0, out FloatRect bounds);
+            renderManager.SubmitDrawText(
+                new(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG)),
+                _resourceManager.Fonts[0], 
+                0, 0, out FloatRect bounds);
 
             //_textInput.FrameUpdate(renderManager);
         }
