@@ -270,4 +270,17 @@ public static class KProgram
         RenderManager.FrameUpdate();
         Debugger.FrameUpdate();
     }
+
+    public static int GetIndex(int row, int column, int width) => column + row * width;
+    public static void GetIndex(int row, int column, int width, out int index) => index = column + row * width;
+
+    public static (int, int) GetPosition(int index, int width) => (index / width, index % width);
+    public static void GetPosition(int index, int width, out int row, out int column) => (row, column) = GetPosition(index, width);
+
+    public static double Hypotenuse(int x1, int y1, int x2, int y2)
+    {
+        int a = x2 - x1;
+        int b = y2 - y1;
+        return Math.Sqrt(a * a + b * b);
+    }
 }

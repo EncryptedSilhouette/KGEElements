@@ -3,7 +3,7 @@ using SFML.Graphics;
 
 namespace Elements
 {
-    public record struct KTextureAtlas(Texture Texture, Dictionary<string, KRectangle> Sprites);
+    public record struct KTextureAtlas(Texture Texture, Dictionary<string, FloatRect> Sprites);
 
     public class KResourceManager
     {
