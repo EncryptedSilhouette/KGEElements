@@ -96,7 +96,7 @@
         public void GenerateMap(byte rows, byte columns)
         {
             var radius = 10;
-            var distance = =;
+            var distance = 0;
             Map = new byte[rows * columns]; //cache pls
             Array.Fill(Map, (byte) TileType.GROUND);
 
@@ -120,7 +120,10 @@
 
                     GetPosition(nodes[j], columns, out int rb, out int cb); //Gets position of other node.
 
-                    if (Hypotenuse(ra, ca, rb, cb) > leastIntrusive) 
+                    if (Hypotenuse(ra, ca, rb, cb) > leastIntrusive)
+                    {
+
+                    } 
                 }
 
                 nodes[i] = leastIntrusive;
