@@ -86,19 +86,14 @@ namespace Elements.Game.Map
             do
             {
                 loop = false;
-                Console.WriteLine($"spread: {spread}:");
                 for (int i = 0; i < _resources.Length; i++)
                 {
                     int handle = _resources[i];
                     KProgram.GetPosition(handle, Columns, out int col, out int row);
 
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write($"tile:{i}, c:{col}, r:{row} ");
                     //Sets outer ring start positon at the following row: (r - spread).    
                     row -= spread;
-                    Console.WriteLine($"st_row:{row} ");
 
-                    Console.ForegroundColor = ConsoleColor.Yellow;
                     //Fill starting position.
                     int index = KProgram.GetIndex(col, row, columns);
                     if (index >= 0 && index < Nodes.Length && Nodes[index].Type == KTileType.NONE)
@@ -174,13 +169,14 @@ namespace Elements.Game.Map
 
         public void CreateTileMap(KTextureAtlas textureAtlas)
         {
-            Vertex[] vertices = new Vertex[Nodes.Length * 4];
+            Vertex[] vertices = new Vertex[Nodes.Length * 4 + _resources.Length * 4];
+
+            float angle = _random.Next(4) * 90;
 
             for (int i = 0; i < Nodes.Length; i++)
             {
                 FloatRect rec = Nodes[i].Type switch
                 {
-                    KTileType.RESOURCE => textureAtlas.Sprites["tile_resource"],
                     _ => textureAtlas.Sprites["tile_0"],
                 };
 
@@ -192,11 +188,6 @@ namespace Elements.Game.Map
                     KTileFlavor.WATER => new Color(0, 191, 255),
                     _ => Color.White,
                 };
-                //Remove when done
-                if (Nodes[i].Type == KTileType.RESOURCE)
-                {
-                    color = Color.Black;
-                }
 
                 vertices[i * 4] = new Vertex
                 {
@@ -227,7 +218,42 @@ namespace Elements.Game.Map
                     TexCoords = (rec.Left, rec.Top + rec.Height),
                 };
             }
-            _vBuffer = vertices;
+
+            for (int i = 0; i < _resources.Length; i++)
+            {
+                int handle = _resources[i];
+                FloatRect rec = textureAtlas.Sprites["tile_resource"];
+
+                vertices[Nodes.Length * 4 + i * 4] = new Vertex
+                {
+                    Position = (PosX + TileWidth * (handle % Columns),
+                                PosY + TileHeight * (handle / Columns)),
+                    Color = Color.White,
+                    TexCoords = (rec.Left, rec.Top),
+                };
+                vertices[Nodes.Length * 4 + i * 4 + 1] = new Vertex
+                {
+                    Position = (PosX + TileWidth * (handle % Columns) + TileWidth,
+                                PosY + TileHeight * (handle / Columns)),
+                    Color = Color.White,
+                    TexCoords = (rec.Left + rec.Width, rec.Top),
+                };
+                vertices[Nodes.Length * 4 + i * 4 + 2] = new Vertex
+                {
+                    Position = (PosX + TileWidth * (handle % Columns) + TileWidth,
+                                PosY + TileHeight * (handle / Columns) + TileHeight),
+                    Color = Color.White,
+                    TexCoords = (rec.Left + rec.Width, rec.Top + rec.Height),
+                };
+                vertices[Nodes.Length * 4 + i * 4 + 3] = new Vertex
+                {
+                    Position = (PosX + TileWidth * (handle % Columns),
+                                PosY + TileHeight * (handle / Columns) + TileHeight),
+                    Color = Color.White,
+                    TexCoords = (rec.Left, rec.Top + rec.Height),
+                };
+            }
+                _vBuffer = vertices;
         }
     }
 }
