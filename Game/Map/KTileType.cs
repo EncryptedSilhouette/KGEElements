@@ -4,7 +4,6 @@
     {
         NONE = 0,
         GROUND = 1,
-        WALL = 2,
-        WATER = 3,
+        RESOURCE = 2,
     }
 }

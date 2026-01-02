@@ -1,5 +1,5 @@
-﻿using Elements.Rendering;
-using SFML.Graphics;
+﻿using Elements.Game.Map;
+using Elements.Rendering;
 
 namespace Elements.Game
 {
@@ -11,27 +11,28 @@ namespace Elements.Game
 
     public class KGameManager
     {
-        public KMainMenu MainMenu;
+        public KGameMap GameMap;
+        public KResourceManager ResourceManager;
 
-        public KGameManager()
+        public KGameManager(KResourceManager resourceManager)
         {
-            MainMenu = new();
+            ResourceManager = resourceManager;
+            GameMap = new KGameMap(0, 0, 32, 32);
         }
 
-        public void FrameUpdate(KRenderManager renderManager)
+        public void Init()
         {
-
+            GameMap.Init(ResourceManager.TextureAtlases["atlas"], 0, 0, 40, 40, 10);
         }
 
-        public void CreateNewGame()
+        public void Update(in uint currentUpdate)
         {
-            //Create game file
+            GameMap.Update();
+        }
 
-            Texture texture = new Texture(800, 600);
-
-            KGame game = new KGame();
-
-            //Save game file
+        public void FrameUpdate(KRenderManager renderer)
+        {
+            GameMap.FrameUpdate(renderer);
         }
     }
 }

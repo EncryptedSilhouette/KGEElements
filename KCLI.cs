@@ -63,18 +63,18 @@ namespace Elements
 
         public void Update(KInputManager inputManager)
         {
-            if (!_enabled) return;
+            //if (!_enabled) return;
 
-            _textInput.Update(inputManager);
+            //_textInput.Update(inputManager);
         }
 
         public void FrameUpdate(KRenderManager renderManager)
         {
-            if (!_enabled) return;
+            //if (!_enabled) return;
 
-            renderManager.SubmitDrawText(
-                new(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG)),
-                0, 0, out FloatRect bounds);
+            //renderManager.SubmitDrawText(
+            //    new(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG)),
+            //    0, 0, out FloatRect bounds);
 
             //_textInput.FrameUpdate(renderManager);
         }

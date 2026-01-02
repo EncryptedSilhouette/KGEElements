@@ -1,9 +1,12 @@
-﻿using Elements.Core;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 
 namespace Elements
 {
-    public record struct KTextureAtlas(Texture Texture, Dictionary<string, FloatRect> Sprites);
+    public class KTextureAtlas 
+    {
+        public Texture Texture;
+        public Dictionary<string, FloatRect> Sprites;
+    }
 
     public class KResourceManager
     {
@@ -84,7 +87,7 @@ namespace Elements
                 Sprites = new(64) 
             };
             //Add the full texture as default sprite.
-            atlas.Sprites.Add(string.Empty, new(atlas.Texture.Size.X, atlas.Texture.Size.Y));
+            atlas.Sprites.Add(string.Empty, new((0, 0), (atlas.Texture.Size.X, atlas.Texture.Size.Y)));
 
             KProgram.LogManager.DebugLog($"Loading texture atlas: {Path.GetFileNameWithoutExtension(filePath)}.");
 
@@ -95,13 +98,10 @@ namespace Elements
                 switch (values[0])
                 {
                     case "sprite":
-                        atlas.Sprites.Add(values[1], new KRectangle()
+                        atlas.Sprites.Add(values[1], new FloatRect()
                         {
-                            Transform = new()
-                            {
-                                PosX = Convert.ToInt32(values[2]),
-                                PosY = Convert.ToInt32(values[3])
-                            },
+                            Left = Convert.ToInt32(values[2]),
+                            Top = Convert.ToInt32(values[3]),
                             Width = Convert.ToInt32(values[4]),
                             Height = Convert.ToInt32(values[5])
                         });

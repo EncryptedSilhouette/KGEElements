@@ -2,7 +2,6 @@
 {
     public class KScene
     {
-        public KGameMap Map;
 
     }
 }

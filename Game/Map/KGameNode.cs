@@ -12,12 +12,11 @@
         public int Handle;
         public KTileType Type; 
         public KTileFlavor Flavor;
-        public KGameNodeFlags Flags;
-
+            
         public KGameNode(int handle) =>
-            (Handle, Flags) = (handle, KGameNodeFlags.NONE);
+            (Handle) = (handle);
 
         public KGameNode(int handle, KGameNodeFlags flags) =>
-            (Handle, Flags) = (handle, flags);    
+            (Handle) = (handle);    
     }
 }

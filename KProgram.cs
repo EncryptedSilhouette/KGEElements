@@ -1,4 +1,24 @@
-﻿using Elements;
+﻿#region Preamble (WIP)
+//Apologies for the lack of comments, that will be improved.
+//This project exists for a number or purposes.
+//  1.) This is a hobby project, but also an item to add to my Portfolio as a developer.
+//  2.) This is a goal I set for myself; To finish a project and make a game using all that I have learned throughout my years as a developer.
+//  3.) This is a art showcase I wish for others to see.
+//      I want people to be able to observe a fully made game, in the hopes that it may spark their interest.
+
+//A personal philosophy of mine is art is anything you can put your soul into; blood, sweat, and tears, but most importantly passion.
+//All works contain traces of their artist, and programming is no different. 
+//The way people write code is different for everyone.
+//One of the reason I like programming as more of a hobby is I can explore so many ways of programming and find my own way.
+
+//Now I subscribed to a few programming philosophies in the creation of this project. 
+//  1.) Reduce, cache, and recycle objects.
+//  2.) Use classes for data management, use structs for data.
+//  3.) AVOID null at all costs. Exception for delegates; use a null check (D?.Invoke()).
+
+#endregion
+
+using Elements;
 using Elements.Dev;
 using Elements.Rendering;
 using Elements.Game;
@@ -83,13 +103,12 @@ public static class KProgram
         //Defaults
         UpdateInterval = MS_PER_SECOND / UpdateTarget;
 
-        //System managers
+        //Managers
         ResourceManager = new("config.csv");
         InputManager = new();
         CommandManager = new();
-
         RenderManager = new(Window, ResourceManager);
-        GameManager = new();
+        GameManager = new(ResourceManager);
         LogManager = new();
         Debugger = new();
         CLI = new(CommandManager, ResourceManager);
@@ -235,10 +254,18 @@ public static class KProgram
 
         var drawLayers = new KDrawLayer[2];
 
+        foreach (var item in ResourceManager.TextureAtlases.Keys)
+        {
+            Console.WriteLine(item);
+        }
+
         drawLayers[0] = new KDrawLayer(new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic));
+        drawLayers[0].States.Texture = ResourceManager.TextureAtlases["atlas"].Texture;
+
         drawLayers[1] = KRenderManager.CreateTextLayer(ResourceManager.Fonts[0]); //Default text layer.
 
         RenderManager.Init(ResourceManager.Fonts[0], windowViews, drawLayers);
+        GameManager.Init();
 
         #endregion
 
@@ -260,7 +287,7 @@ public static class KProgram
         CommandManager.Update();
 
         Debugger.Update();
-        //GameManager.Update(currentUpdate);
+        GameManager.Update(currentUpdate);
     }
 
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame, in double deltaTime)
@@ -271,11 +298,11 @@ public static class KProgram
         Debugger.FrameUpdate();
     }
 
-    public static int GetIndex(int row, int column, int width) => column + row * width;
-    public static void GetIndex(int row, int column, int width, out int index) => index = column + row * width;
+    public static int GetIndex(int column, int row, int width) => column + row * width;
+    public static void GetIndex(int column, int row, int width, out int index) => index = column + row * width;
 
-    public static (int, int) GetPosition(int index, int width) => (index / width, index % width);
-    public static void GetPosition(int index, int width, out int row, out int column) => (row, column) = GetPosition(index, width);
+    public static (int c, int r) GetPosition(int index, int width) => (index % width, index / width);
+    public static void GetPosition(int index, int width, out int column, out int row) => (column, row) = GetPosition(index, width);
 
     public static double Hypotenuse(int x1, int y1, int x2, int y2)
     {

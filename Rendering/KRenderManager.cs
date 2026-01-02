@@ -95,6 +95,8 @@ namespace Elements.Rendering
             Window.Display();
         }
 
+        public void SubmitDrawQuad(Vertex[] vertices, uint vCount, int layer = 0) => DrawLayers[layer].SubmitDraw(vertices, vCount);
+
         public void SubmitDrawQuad(in KDrawData dat, in FloatRect rec, int layer = 0)
         {
             QuadBuffer[0] = new Vertex((rec.Left, rec.Top), dat.Color, dat.Sprite.TopLeft);

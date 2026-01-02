@@ -8,6 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ECS\**" />
+    <Compile Remove="Game\Hardcoded\**" />
+    <EmbeddedResource Remove="ECS\**" />
+    <EmbeddedResource Remove="Game\Hardcoded\**" />
+    <None Remove="ECS\**" />
+    <None Remove="Game\Hardcoded\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="SFML.Net" Version="2.6.1" />
   </ItemGroup>
 
@@ -27,11 +36,6 @@
     <None Update="res\texture_data.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ECS\" />
-    <Folder Include="Game\Hardcoded\" />
   </ItemGroup>
 
 </Project>
