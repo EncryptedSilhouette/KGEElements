@@ -1,7 +1,6 @@
-﻿using Elements.Game.Map;
+﻿using Elements.Core;
+using Elements.Game.Map;
 using Elements.Rendering;
-using SFML.Graphics;
-using SFML.Window;
 
 namespace Elements.Game
 {
@@ -25,36 +24,41 @@ namespace Elements.Game
         public KInputManager InputManager;
         public KCameraCrontroller CameraCrontroller;
 
-        public KGameManager(KResourceManager resourceManager)
+        public KButton Button;
+
+        public KGameManager(KResourceManager resourceManager, KRenderManager renderer, KInputManager inputManager)
         {
             ResourceManager = resourceManager;
+            InputManager = inputManager;
             GameMap = new KGameMap(0, 0, 32, 32);
+            CameraCrontroller = new KCameraCrontroller(renderer.Window.GetView());
+
+            Button = new(50,50,64,64,"Button");
         }
 
         public void Init()
         {
-            GameMap.Init(ResourceManager.TextureAtlases["atlas"], 0, 0, 40, 40, 10);
+            GameMap.Init(ResourceManager.TextureAtlases["atlas"], 0, 0, 100, 100, 20);
         }
 
         public void Update(in uint currentUpdate)
         {
-
             GameUpdate(currentUpdate);
+            Button.Update(InputManager.MousePosX, InputManager.MousePosY);
+            CameraCrontroller.Update();
             GameMap.Update();
         }
 
         public void FrameUpdate(KRenderManager renderer)
         {
+            CameraCrontroller.FrameUpdate(InputManager, renderer);
             GameMap.FrameUpdate(renderer);
+            Button.FrameUpdate(renderer);
         }
 
         public void GameUpdate(in uint currentUpdate)
         {
-            if (InputManager.MousePosX < 16) CameraCrontroller.View.Move((-1, 0));
-            if (InputManager.MousePosX > 16) CameraCrontroller.View.Move((1, 0));
-
-            if (InputManager.MousePosX < 16) CameraCrontroller.View.Move((-1, 0));
-            if (InputManager.MousePosX < 16) CameraCrontroller.View.Move((-1, 0));
+            
         }
     }
 }

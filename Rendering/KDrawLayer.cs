@@ -22,13 +22,13 @@ namespace Elements.Rendering
 
         public void DrawBufferToTarget(RenderTarget target)
         {
-            Buffer.Draw(target, States);
+            Buffer.Draw(target, 0, VertexCount, States);
             VertexCount = 0;
         }
 
         public void DrawBufferToTarget(RenderTarget target, in RenderStates states)
         {
-            Buffer.Draw(target, states);
+            Buffer.Draw(target, 0, VertexCount, states);
             VertexCount = 0;
         }
     }

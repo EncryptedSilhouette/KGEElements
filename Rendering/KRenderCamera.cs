@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Elements.Game;
+using SFML.Graphics;
 using SFML.System;
 
 namespace Elements.Rendering
@@ -13,7 +14,6 @@ namespace Elements.Rendering
         public KRenderCamera(View view)
         {
             View = view;
-
         }
     }
 }

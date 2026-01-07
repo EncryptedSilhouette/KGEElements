@@ -49,15 +49,12 @@ namespace Elements.Game.Map
 
         public void Update()
         {
-            for (int i = 0; i < Nodes.Length; i++)
-            {
-                
-            }
+          
         }
 
         public void FrameUpdate(KRenderManager renderer)
         {
-            renderer.SubmitDrawQuad(_vBuffer, (uint)_vBuffer.Length, 0);
+            renderer.SubmitDrawRect(_vBuffer, (uint)_vBuffer.Length, 0);
         }
 
         public void GenerateGameMap(int rows, int columns, int resourceCount = 10)
@@ -182,9 +179,9 @@ namespace Elements.Game.Map
 
                 Color color = Nodes[i].Flavor switch
                 {
-                    KTileFlavor.EARTH => new Color(139, 69, 19),
-                    KTileFlavor.WIND => new Color(135, 206, 235),
-                    KTileFlavor.FIRE => new Color(255, 69, 0),
+                    KTileFlavor.EARTH => new Color(0, 200, 0),
+                    KTileFlavor.WIND => new Color(150, 150, 150),
+                    KTileFlavor.FIRE => new Color(200, 69, 0),
                     KTileFlavor.WATER => new Color(0, 191, 255),
                     _ => Color.White,
                 };
@@ -253,7 +250,7 @@ namespace Elements.Game.Map
                     TexCoords = (rec.Left, rec.Top + rec.Height),
                 };
             }
-                _vBuffer = vertices;
+            _vBuffer = vertices;
         }
     }
 }

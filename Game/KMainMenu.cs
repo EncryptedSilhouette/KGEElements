@@ -54,7 +54,7 @@ namespace Elements.Game
         {
             for (int i = 0; i < _elements.Length; i++)
             {
-                renderManager.SubmitDrawQuad(_elements[i], _elementBounds[i]);
+                renderManager.SubmitDrawRect(_elements[i], _elementBounds[i]);
             }
         }
     }

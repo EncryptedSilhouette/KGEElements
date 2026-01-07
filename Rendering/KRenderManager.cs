@@ -3,6 +3,7 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Buffers;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Elements.Rendering
 {
@@ -40,6 +41,8 @@ namespace Elements.Rendering
 
         public const int DEFAULT_FONT_SIZE = 12;
 
+        private View _view;
+
         public Color BackgroundColor;
         public RenderStates States;
         public RenderWindow Window;
@@ -60,8 +63,20 @@ namespace Elements.Rendering
         public Vector2f ScreenBottomLeft => (0, Window.Size.Y);
         public Vector2f ScreenCenter => (Vector2f) Window.Size / 2;
 
+        public View View
+        {
+            get => _view;
+            set
+            {
+                _view = value;
+                Window.SetView(_view);
+            }
+        }
+
         public KRenderManager(RenderWindow window, KResourceManager resourceManager)
         {
+            _view = window.GetView();
+
             Window = window;
             ResourceManager = resourceManager;
             BackgroundColor = Color.Black;
@@ -95,18 +110,37 @@ namespace Elements.Rendering
             Window.Display();
         }
 
-        public void SubmitDrawQuad(Vertex[] vertices, uint vCount, int layer = 0) => DrawLayers[layer].SubmitDraw(vertices, vCount);
+        public void SubmitDrawRect(Vertex[] vertices, uint vCount, int layer = 0) => 
+            DrawLayers[layer].SubmitDraw(vertices, vCount);
 
-        public void SubmitDrawQuad(in KDrawData dat, in FloatRect rec, int layer = 0)
+        public void SubmitDrawRect(float x, float y, float width, float height, Color color, int layer = 0)
         {
-            QuadBuffer[0] = new Vertex((rec.Left, rec.Top), dat.Color, dat.Sprite.TopLeft);
+            QuadBuffer[0] = new Vertex((x, y), color);
+            QuadBuffer[1] = new Vertex((x + width, y), color);
+            QuadBuffer[2] = new Vertex((x + width, y + height), color);
+            QuadBuffer[3] = new Vertex((x, y + height), color);
+            DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
+        }
+
+        public void SubmitDrawRect(FloatRect rec, Color color, int layer = 0)
+        {
+            QuadBuffer[0] = new Vertex(rec.Position, color);
+            QuadBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), color);
+            QuadBuffer[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), color);
+            QuadBuffer[3] = new Vertex((rec.Left, rec.Top + rec.Height), color);
+            DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
+        }
+
+        public void SubmitDrawRect(in KDrawData dat, in FloatRect rec, int layer = 0)
+        {
+            QuadBuffer[0] = new Vertex(rec.Position, dat.Color, dat.Sprite.TopLeft);
             QuadBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
             QuadBuffer[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
             QuadBuffer[3] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
             DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
         }
 
-        public void SubmitDrawQuad(in KDrawData dat, in KRectangle rec, int layer = 0)
+        public void SubmitDrawRect(in KDrawData dat, in KRectangle rec, int layer = 0)
         {
             QuadBuffer[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
             QuadBuffer[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
@@ -115,8 +149,24 @@ namespace Elements.Rendering
             DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
         }
 
+        //Quad by points
+        //public void SubmitDrawQuad(in KDrawData dat, in KRectangle rec, int layer = 0)
+        //{
+        //    QuadBuffer[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
+        //    QuadBuffer[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
+        //    QuadBuffer[2] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.BottomRight);
+        //    QuadBuffer[3] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);
+        //    DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
+        //}
+
         public void SubmitDrawText(in KText text, float posX, float posY, out FloatRect bounds, byte fontSize = DEFAULT_FONT_SIZE, int wrapThreshold = 0, int layer = 0)
         {
+            if (string.IsNullOrEmpty(text.Text))
+            {
+                bounds = new FloatRect();
+                return;
+            }
+
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
             bounds = CreateTextbox(text, ResourceManager.Fonts[0], buffer, posX, posY, fontSize, wrapThreshold);
@@ -212,7 +262,7 @@ namespace Elements.Rendering
             }
 
             posY -= fontSize;
-            return new FloatRect(posX, posY, width, height);
+            return new FloatRect(posX, posY, width, height < 1 ? fontSize : height);
         }
 
         private void ResizeView(object? _, SizeEventArgs e)

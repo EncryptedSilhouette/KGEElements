@@ -120,7 +120,7 @@ public static class KProgram
         InputManager = new();
         CommandManager = new();
         RenderManager = new(Window, ResourceManager);
-        GameManager = new(ResourceManager);
+        GameManager = new(ResourceManager, RenderManager, InputManager);
         LogManager = new();
         Debugger = new();
         CLI = new(CommandManager, ResourceManager);
