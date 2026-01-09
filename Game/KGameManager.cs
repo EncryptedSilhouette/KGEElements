@@ -20,15 +20,13 @@ namespace Elements.Game
     {
         public KGameStates GameStates;
         public KGameMap GameMap;
-        public KResourceManager ResourceManager;
         public KInputManager InputManager;
         public KCameraCrontroller CameraCrontroller;
 
         public KButton Button;
 
-        public KGameManager(KResourceManager resourceManager, KRenderManager renderer, KInputManager inputManager)
+        public KGameManager(KRenderManager renderer, KInputManager inputManager)
         {
-            ResourceManager = resourceManager;
             InputManager = inputManager;
             GameMap = new KGameMap(0, 0, 32, 32);
             CameraCrontroller = new KCameraCrontroller(renderer.Window.GetView());
@@ -38,7 +36,7 @@ namespace Elements.Game
 
         public void Init()
         {
-            GameMap.Init(ResourceManager.TextureAtlases["atlas"], 0, 0, 100, 100, 20);
+            GameMap.Init(KProgram.TextureAtlases[0], 0, 0, 100, 100, 20);
         }
 
         public void Update(in uint currentUpdate)

@@ -3,7 +3,6 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Buffers;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Elements.Rendering
 {
@@ -47,7 +46,6 @@ namespace Elements.Rendering
         public RenderStates States;
         public RenderWindow Window;
         public View ScreenView;
-        public KResourceManager ResourceManager;
         public KDrawLayer[] DrawLayers;
         public Vertex[] QuadBuffer;
         
@@ -73,12 +71,11 @@ namespace Elements.Rendering
             }
         }
 
-        public KRenderManager(RenderWindow window, KResourceManager resourceManager)
+        public KRenderManager(RenderWindow window)
         {
             _view = window.GetView();
 
             Window = window;
-            ResourceManager = resourceManager;
             BackgroundColor = Color.Black;
             States = RenderStates.Default;
             ScreenView = Window.GetView();
@@ -87,7 +84,7 @@ namespace Elements.Rendering
         }
 
         //use during scene swapping if additional layers/cameras are needed.
-        public void Init(Font font, View[] cameraViews, KDrawLayer[] drawLayers)
+        public void Init(Font font, KDrawLayer[] drawLayers)
         {
             DrawLayers = drawLayers;
             Window.Resized += ResizeView;
@@ -169,8 +166,8 @@ namespace Elements.Rendering
 
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
-            bounds = CreateTextbox(text, ResourceManager.Fonts[0], buffer, posX, posY, fontSize, wrapThreshold);
-            DrawLayers[layer].States.Texture = ResourceManager.Fonts[0]!.GetTexture(fontSize);
+            bounds = CreateTextbox(text, KProgram.Fonts[0], buffer, posX, posY, fontSize, wrapThreshold);
+            DrawLayers[layer].States.Texture = KProgram.Fonts[0]!.GetTexture(fontSize);
             DrawLayers[layer].SubmitDraw(buffer, (uint) text.Text.Length * 4);
 
             ArrayPool<Vertex>.Shared.Return(buffer);

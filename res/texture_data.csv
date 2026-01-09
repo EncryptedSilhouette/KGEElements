@@ -1,6 +1,16 @@
 res/atlas.png
 
-#Tiles
+#Legend:
+#index 0: sprite name
+#index 1: sprite id
+#index 2: sprite pos x
+#index 3: sprite pos y
+#index 4: sprite width
+#index 5: sprite height
+#index 6: sprite rotation center x
+#index 7: sprite rotation center y
+
+#Tiles 0 - 10
 sprite,tile_0,0,0,16,16,0,0
 sprite,tile_1,16,0,16,16,0,0
 sprite,tile_2,32,0,16,16,0,0
@@ -13,7 +23,7 @@ sprite,tile_rock_1,128,0,16,16,0,0
 sprite,tile_rock_2,144,0,16,16,0,0
 sprite,tile_resource,160,0,16,16,0,0
 
-#Symbols
+#Symbols 11 - 22
 sprite,sym_dot_0,0,32,16,16,0,0
 sprite,sym_dot_1,16,32,16,16,0,0
 sprite,sym_dot_2,32,32,16,16,0,0
@@ -26,7 +36,7 @@ sprite,sym_lines,128,32,16,16,0,0
 sprite,sym_plus,144,32,16,16,0,0
 sprite,sym_e,176,160,16,16,0,0
 
-#Elemental Symbols
+#Elemental Symbols 23 - 33
 sprite,sym_fire,0,48,16,16,0,0
 sprite,sym_wind,16,48,16,16,0,0
 sprite,sym_earth,32,48,16,16,0,0
@@ -39,7 +49,7 @@ sprite,sym_destruction,128,48,16,16,0,0
 sprite,sym_space,144,48,16,16,0,0
 sprite,sym_time,160,48,16,16,0,0
 
-#Unit icons
+#Unit icons 34 - 41
 sprite,unit_triangle_up,0,64,32,32,0,0
 sprite,unit_triangle_down,32,64,32,32,0,0
 sprite,unit_diamiond,64,64,32,32,0,0

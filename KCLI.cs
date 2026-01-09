@@ -13,7 +13,6 @@ namespace Elements
         private Color _color;
         private StringBuilder _textBuffer = new();
         private KCommandManager _commandManager;
-        private KResourceManager _resourceManager;
 
         //Draw background
         private KDrawData drawData;
@@ -36,11 +35,10 @@ namespace Elements
             set => _color.A = value;
         }
 
-        public KCLI(KCommandManager commandManager, KResourceManager resourceManager)
+        public KCLI(KCommandManager commandManager)
         {
             _color = new(100, 100, 100);
             _commandManager = commandManager;
-            _resourceManager = resourceManager;
 
             drawData = new()
             {
