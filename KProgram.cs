@@ -34,7 +34,6 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
-using System.IO;
 
 public record struct KTextureAtlas(Texture Texture, KSprite[] Sprites);
 public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCoords);
