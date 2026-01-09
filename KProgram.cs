@@ -102,6 +102,11 @@ public static class KProgram
         }
     }
 
+    public static uint FontSize 
+    {
+        get; set;
+    }
+
     static KProgram() //Static constructor; initializes static members.
     {
         RNG = new();
@@ -110,6 +115,7 @@ public static class KProgram
 
         //configs
         Title = "Elements";
+        FontSize = 14;
         UpdateTarget = 30;
         FrameLimit = UpdateTarget;
         TargetResolution = Window.Size;

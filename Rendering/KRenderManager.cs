@@ -29,16 +29,7 @@ namespace Elements.Rendering
 
         public ArrayPool<Vertex> VertexArrayPool => ArrayPool<Vertex>.Shared;
 
-        public static KDrawLayer CreateTextLayer(Font font, byte fontSize = DEFAULT_FONT_SIZE)
-        {                                           
-            KDrawLayer layer = new KDrawLayer(new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Stream));
-            layer.States.Texture = font.GetTexture(fontSize);
-            return layer;
-        }
-
         #endregion
-
-        public const int DEFAULT_FONT_SIZE = 12;
 
         private View _view;
 
@@ -48,6 +39,8 @@ namespace Elements.Rendering
         public View ScreenView;
         public KDrawLayer[] DrawLayers;
         public Vertex[] QuadBuffer;
+
+        public RenderLayer Layer;
         
         public Font? Font;
 
@@ -84,7 +77,7 @@ namespace Elements.Rendering
         }
 
         //use during scene swapping if additional layers/cameras are needed.
-        public void Init(Font font, KDrawLayer[] drawLayers)
+        public void Init(Font font, View[] cameraViews, KDrawLayer[] drawLayers)
         {
             DrawLayers = drawLayers;
             Window.Resized += ResizeView;
@@ -156,7 +149,7 @@ namespace Elements.Rendering
         //    DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
         //}
 
-        public void SubmitDrawText(in KText text, float posX, float posY, out FloatRect bounds, byte fontSize = DEFAULT_FONT_SIZE, int wrapThreshold = 0, int layer = 0)
+        public void SubmitDrawText(in KText text, float posX, float posY, out FloatRect bounds, int wrapThreshold = 0, int layer = 0)
         {
             if (string.IsNullOrEmpty(text.Text))
             {
@@ -166,15 +159,15 @@ namespace Elements.Rendering
 
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
-            bounds = CreateTextbox(text, KProgram.Fonts[0], buffer, posX, posY, fontSize, wrapThreshold);
-            DrawLayers[layer].States.Texture = KProgram.Fonts[0]!.GetTexture(fontSize);
+            bounds = CreateTextbox(text, ResourceManager.Fonts[0], buffer, posX, posY, KProgram.FontSize, wrapThreshold);
+            DrawLayers[layer].States.Texture = ResourceManager.Fonts[0]!.GetTexture(KProgram.FontSize);
             DrawLayers[layer].SubmitDraw(buffer, (uint) text.Text.Length * 4);
 
             ArrayPool<Vertex>.Shared.Return(buffer);
         }
 
         //May want to cache this.
-        public FloatRect CreateTextbox(in KText text, Font font, Vertex[] buffer, float posX, float posY, byte fontSize = 12, int wrapThreshold = 0)
+        public FloatRect CreateTextbox(in KText text, Font font, Vertex[] buffer, float posX, float posY, uint fontSize = 12, int wrapThreshold = 0)
         {
             bool pass = false;
             float width = 0;
@@ -186,7 +179,7 @@ namespace Elements.Rendering
 
             for (int i = 0, cp = 0; i < chars.Length; i++)
             {
-                GlyphHandle handle = new(chars[i], fontSize, text.Bold, text.LineThickness);
+                GlyphHandle handle = new(chars[i], (byte)fontSize, text.Bold, text.LineThickness);
 
                 if (!s_glyphCache.TryGetValue(handle, out Glyph glyph))
                 {

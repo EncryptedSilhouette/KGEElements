@@ -32,11 +32,15 @@ namespace Elements.Game
             CameraCrontroller = new KCameraCrontroller(renderer.Window.GetView());
 
             Button = new(50,50,64,64,"Button");
+            Button.OnPressed += () => Console.WriteLine("Press");
+            Button.OnHold += () => Console.WriteLine("Hold");
+            Button.OnReleased += () => Console.WriteLine("Release");
+
         }
 
         public void Init()
         {
-            GameMap.Init(KProgram.TextureAtlases[0], 0, 0, 100, 100, 20);
+            GameMap.Init(ResourceManager.TextureAtlases["atlas"], 0, 0, 30, 30, 5);
         }
 
         public void Update(in uint currentUpdate)
@@ -55,6 +59,11 @@ namespace Elements.Game
         }
 
         public void GameUpdate(in uint currentUpdate)
+        {
+            
+        }
+
+        public void ButtonPressed()
         {
             
         }
