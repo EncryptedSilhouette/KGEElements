@@ -5,8 +5,10 @@ namespace Elements.Rendering
     public struct KDrawLayer
     {
         public uint VertexCount = 0;
-        public RenderStates States;
-        public VertexBuffer Buffer;
+        required public RenderStates States;
+        required public VertexBuffer Buffer;
+
+        public KDrawLayer() { }
 
         public KDrawLayer(VertexBuffer buffer, RenderStates states)
         {

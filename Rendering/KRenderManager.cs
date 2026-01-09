@@ -31,6 +31,8 @@ namespace Elements.Rendering
 
         #endregion
 
+        //TODO add support for points, lines, and polygons.
+
         private View _view;
 
         public Color BackgroundColor;
@@ -77,7 +79,7 @@ namespace Elements.Rendering
         }
 
         //use during scene swapping if additional layers/cameras are needed.
-        public void Init(Font font, View[] cameraViews, KDrawLayer[] drawLayers)
+        public void Init(Font font, KDrawLayer[] drawLayers)
         {
             DrawLayers = drawLayers;
             Window.Resized += ResizeView;
@@ -139,16 +141,6 @@ namespace Elements.Rendering
             DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
         }
 
-        //Quad by points
-        //public void SubmitDrawQuad(in KDrawData dat, in KRectangle rec, int layer = 0)
-        //{
-        //    QuadBuffer[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
-        //    QuadBuffer[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
-        //    QuadBuffer[2] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.BottomRight);
-        //    QuadBuffer[3] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);
-        //    DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
-        //}
-
         public void SubmitDrawText(in KText text, float posX, float posY, out FloatRect bounds, int wrapThreshold = 0, int layer = 0)
         {
             if (string.IsNullOrEmpty(text.Text))
@@ -159,8 +151,8 @@ namespace Elements.Rendering
 
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
-            bounds = CreateTextbox(text, ResourceManager.Fonts[0], buffer, posX, posY, KProgram.FontSize, wrapThreshold);
-            DrawLayers[layer].States.Texture = ResourceManager.Fonts[0]!.GetTexture(KProgram.FontSize);
+            bounds = CreateTextbox(text, KProgram.Fonts[0], buffer, posX, posY, KProgram.FontSize, wrapThreshold);
+            DrawLayers[layer].States.Texture = KProgram.Fonts[0]!.GetTexture(KProgram.FontSize);
             DrawLayers[layer].SubmitDraw(buffer, (uint) text.Text.Length * 4);
 
             ArrayPool<Vertex>.Shared.Return(buffer);

@@ -99,7 +99,7 @@ namespace Elements.Game.Map
                     }
 
                     //Fills in the boarder, moving clockwise, starting at 12:00.
-                    for (int j = 0; j < spread; j++) //Q1
+                    for (int j = 0; j < spread; j++) //Quadrant 1
                     {
                         col += 1;
                         row += 1;
@@ -111,7 +111,7 @@ namespace Elements.Game.Map
                             Nodes[index].Flavor = Nodes[handle].Flavor;
                         }
                     }
-                    for (int j = 0; j < spread; j++) //Q2
+                    for (int j = 0; j < spread; j++) //Quadrant 2
                     {
                         col -= 1;
                         row += 1;
@@ -123,7 +123,7 @@ namespace Elements.Game.Map
                             Nodes[index].Flavor = Nodes[handle].Flavor;
                         }
                     }
-                    for (int j = 0; j < spread; j++) //Q3
+                    for (int j = 0; j < spread; j++) //Quadrant 3
                     {
                         col -= 1;
                         row -= 1;
@@ -135,7 +135,7 @@ namespace Elements.Game.Map
                             Nodes[index].Flavor = Nodes[handle].Flavor;
                         }
                     }
-                    for (int j = 0; j < spread; j++) //Q4
+                    for (int j = 0; j < spread; j++) //Quadrant 4
                     {
                         col += 1;
                         row -= 1;

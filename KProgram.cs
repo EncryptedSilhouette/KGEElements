@@ -288,23 +288,29 @@ public static class KProgram
 
         OnLoad?.Invoke();
 
-        #region Rendering initilization
+        #region Draw layers
 
         //Draw layers.
         var drawLayers = new KDrawLayer[2];
         //Default render layer.
-        drawLayers[0] = new KDrawLayer(new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic));
-        drawLayers[0].States.Texture = TextureAtlases[0].Texture; 
+        drawLayers[0] = new KDrawLayer
+        {
+            Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+            States = new(TextureAtlases[0].Texture)
+        };
 
         //Default text layer.
-        drawLayers[1] = KRenderManager.CreateTextLayer(Fonts[0]);
-
-        RenderManager.Init(Fonts[0], drawLayers);
-        GameManager.Init();
+        drawLayers[1] = new KDrawLayer
+        {
+            Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+            States = new(Fonts[0].GetTexture(12))
+        };
 
         #endregion
 
+        RenderManager.Init(Fonts[0], drawLayers);
         InputManager.Init(Window);
+        GameManager.Init();
 
         OnInit?.Invoke();
     }
@@ -382,7 +388,8 @@ public static class KProgram
         return new KTextureAtlas(texture, sprites.ToArray());
     }
 
-    //Math functions. Here for now, may move later.
+    //Leaving utility functions here for now, may move later.
+    //Math functions.
     public static int GetIndex(int column, int row, int width) => column + row * width;
     public static void GetIndex(int column, int row, int width, out int index) => index = column + row * width;
 

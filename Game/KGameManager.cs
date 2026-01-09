@@ -40,7 +40,7 @@ namespace Elements.Game
 
         public void Init()
         {
-            GameMap.Init(ResourceManager.TextureAtlases["atlas"], 0, 0, 30, 30, 5);
+            GameMap.Init(KProgram.TextureAtlases[0], 0, 0, 30, 30, 5);
         }
 
         public void Update(in uint currentUpdate)
