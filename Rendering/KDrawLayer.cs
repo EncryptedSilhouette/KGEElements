@@ -5,18 +5,19 @@ namespace Elements.Rendering
     public struct KDrawLayer
     {
         public uint VertexCount = 0;
-        public RenderStates States = RenderStates.Default;
+        public RenderStates States;
         public VertexBuffer Buffer;
 
-        public KDrawLayer(VertexBuffer buffer)
+        public KDrawLayer(VertexBuffer buffer, RenderStates states)
         {
             VertexCount = 0;
+            States = states;
             Buffer = buffer;
         }
 
         public void SubmitDraw(Vertex[] vertices, uint length)
         {
-            Buffer.Update(vertices, length, VertexCount);
+            var b = Buffer.Update(vertices, length, VertexCount);
             VertexCount += length;
         }
 

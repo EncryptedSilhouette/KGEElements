@@ -100,6 +100,11 @@ public static class KProgram
         }
     }
 
+    public static uint FontSize 
+    {
+        get; set;
+    }
+
     static KProgram() //Static constructor; initializes static members.
     {
         RNG = new();
@@ -108,6 +113,7 @@ public static class KProgram
 
         //configs
         Title = "Elements";
+        FontSize = 14;
         UpdateTarget = 30;
         FrameLimit = UpdateTarget;
         TargetResolution = Window.Size;
@@ -211,12 +217,15 @@ public static class KProgram
         var drawLayers = new KDrawLayer[2];
 
         //Default render layer.
-        drawLayers[0] = new KDrawLayer(new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic));
-        drawLayers[0].States.Texture = ResourceManager.TextureAtlases["atlas"].Texture; 
+        drawLayers[0] = new KDrawLayer(
+            new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic), 
+            new RenderStates(ResourceManager.TextureAtlases["atlas"].Texture));
 
-        drawLayers[1] = KRenderManager.CreateTextLayer(ResourceManager.Fonts[0]); //Default text layer.
-
-        RenderManager.Init(ResourceManager.Fonts[0], windowViews, drawLayers);
+        drawLayers[1] = new KDrawLayer(
+            new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+            new RenderStates(ResourceManager.Fonts[0].GetTexture(FontSize)));
+        
+        RenderManager.Init(drawLayers);
         GameManager.Init();
 
         #endregion
