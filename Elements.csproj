@@ -24,7 +24,7 @@
     <None Update="config.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="res\atlas.png">
+    <None Update="res\atlas0.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Dev\template.txt">
@@ -33,7 +33,7 @@
     <None Update="res\roboto_black.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="res\texture_data.csv">
+    <None Update="res\atlas0.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

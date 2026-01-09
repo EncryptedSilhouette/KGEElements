@@ -3,5 +3,5 @@ frame_target,60
 vsync,true
 resolution,2560,1440
 
-atlases,res/texture_data.csv
+atlases,res/atlas0.csv
 fonts,res/roboto_black.ttf

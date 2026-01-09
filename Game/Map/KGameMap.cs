@@ -173,7 +173,7 @@ namespace Elements.Game.Map
             {
                 FloatRect rec = Nodes[i].Type switch
                 {
-                    _ => KProgram.TextureAtlases[0].Sprites[0].TextureCoords,
+                    _ => KProgram.TextureAtlases[0].Sprites[1].TextureCoords,
                 };
 
                 Color color = Nodes[i].Flavor switch
@@ -218,7 +218,7 @@ namespace Elements.Game.Map
             for (int i = 0; i < _resources.Length; i++)
             {
                 int handle = _resources[i];
-                FloatRect rec = KProgram.TextureAtlases[0].Sprites[10].TextureCoords;
+                FloatRect rec = KProgram.TextureAtlases[0].Sprites[11].TextureCoords;
 
                 vertices[Nodes.Length * 4 + i * 4] = new Vertex
                 {

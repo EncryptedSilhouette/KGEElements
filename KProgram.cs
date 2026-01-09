@@ -28,12 +28,13 @@
 #endregion
 
 using Elements;
-using Elements.Rendering;
 using Elements.Game;
+using Elements.Rendering;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
+using System.IO;
 
 public record struct KTextureAtlas(Texture Texture, KSprite[] Sprites);
 public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCoords);
@@ -46,12 +47,12 @@ public static class KProgram
     private static bool s_vSync = false;
     private static uint s_frameLimit;
     private static string s_title = string.Empty;
+    private static string s_configPath;
 
     public static bool Running = false;
     public static uint UpdateTarget;
     public static double UpdateInterval;
     public static Vector2u TargetResolution;
-    public static string ConfigPath;
     public static Random RNG;
     public static RenderWindow Window;
     public static KInputManager InputManager;       //Needs a rework.
@@ -71,6 +72,22 @@ public static class KProgram
     public static event Action? OnDeinit;
 
     //Getters and Setters
+
+    public static uint FontSize
+    {
+        get; set;
+    }
+
+    public static float AspectX
+    {
+        get; set;
+    }
+
+    public static float AspectY
+    {
+        get; set;
+    }
+
     public static bool VSync
     {
         get => s_vSync;
@@ -102,10 +119,7 @@ public static class KProgram
         }
     }
 
-    public static uint FontSize 
-    {
-        get; set;
-    }
+    public static float AspectRatio => AspectX / AspectY;
 
     static KProgram() //Static constructor; initializes static members.
     {
@@ -114,12 +128,12 @@ public static class KProgram
         Window.Closed += (_, _) => Running = false;
 
         //configs
+        s_configPath = "config.csv";
         Title = "Elements";
         FontSize = 14;
         UpdateTarget = 30;
         FrameLimit = UpdateTarget;
         TargetResolution = Window.Size;
-        ConfigPath = "config.csv";
 
         //Defaults
         UpdateInterval = MS_PER_SECOND / UpdateTarget;
@@ -206,7 +220,7 @@ public static class KProgram
         //Loading
         #region Load Configs
 
-        var lines = File.ReadAllLines(ConfigPath);
+        var lines = File.ReadAllLines(s_configPath);
 
         for (int i = 0; i < lines.Length; i++)
         {
@@ -239,7 +253,7 @@ public static class KProgram
                 case "vsync":
                     try 
                     { 
-                        VSync = bool.TrueString == values[1]; 
+                        VSync = values[1] == bool.TrueString; 
                     }
                     catch (Exception) 
                     { 
@@ -254,7 +268,7 @@ public static class KProgram
                     }
                     catch (Exception) 
                     { 
-                        Console.WriteLine("failed to read \'resolution\'"); 
+                        Console.WriteLine("failed to read \"resolution\""); 
                     }
                     break;
 
@@ -343,12 +357,31 @@ public static class KProgram
     {
         //Reads from texture data file.
         var lines = File.ReadAllLines(filePath);
-
-        //loads texture file at first line. 
+        
+        //Loads the whole atlas as a sprite at index 0.
         Texture texture = new(lines[0]);
-        List<KSprite> sprites = new();
+        List<KSprite> sprites =
+        [
+            new KSprite
+            {
+                ID = string.Empty,
+                TextureCoords = new FloatRect
+                {
+                    Left = 0,
+                    Top = 0,
+                    Width = texture.Size.X,
+                    Height = texture.Size.Y,
+                },
+                Rotocenter = new Vector2f
+                {
+                    X = 0,
+                    Y = 0
+                }
+            }
+        ];
 
         #region Data entry legend
+        //This is how data is layed out in csv texture data files:
         //index 0: sprite name
         //index 1: sprite id
         //index 2: sprite pos x
@@ -359,32 +392,31 @@ public static class KProgram
         //index 7: sprite rotation center y
         #endregion
 
-        for (int i = 0; i < lines.Length; i++) //Iterate over lines
+        for (int i = 1; i < lines.Length; i++) //Iterate over lines
         {
             var contents = lines[i].Split(','); //Split line into values
 
-            switch (contents[0]) 
+            if (contents[0] == "sprite")
             {
-                case "sprite":
-                    sprites.Add(new KSprite
+                sprites.Add(new KSprite
+                {
+                    ID = contents[1],
+                    TextureCoords = new FloatRect
                     {
-                        ID = contents[1],
-                        TextureCoords = new FloatRect
-                        {
-                            Left = Convert.ToInt32(contents[2]),
-                            Top = Convert.ToInt32(contents[3]),
-                            Width = Convert.ToInt32(contents[4]),
-                            Height = Convert.ToInt32(contents[5]),
-                        },
-                        Rotocenter = new Vector2f 
-                        {
-                            X = Convert.ToInt32(contents[6]),
-                            Y = Convert.ToInt32(contents[7])
-                        }
-                    });
-                    break;
+                        Left = Convert.ToInt32(contents[2]),
+                        Top = Convert.ToInt32(contents[3]),
+                        Width = Convert.ToInt32(contents[4]),
+                        Height = Convert.ToInt32(contents[5]),
+                    },
+                    Rotocenter = new Vector2f
+                    {
+                        X = Convert.ToInt32(contents[6]),
+                        Y = Convert.ToInt32(contents[7])
+                    }
+                });
             }
         }
+
         return new KTextureAtlas(texture, sprites.ToArray());
     }
 

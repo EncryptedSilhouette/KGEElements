@@ -35,7 +35,6 @@ namespace Elements.Game
             Button.OnPressed += () => Console.WriteLine("Press");
             Button.OnHold += () => Console.WriteLine("Hold");
             Button.OnReleased += () => Console.WriteLine("Release");
-
         }
 
         public void Init()
