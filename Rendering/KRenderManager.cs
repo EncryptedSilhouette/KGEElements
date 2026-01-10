@@ -33,17 +33,19 @@ namespace Elements.Rendering
 
         //TODO add support for points, lines, and polygons.
 
+
+        private uint _vertexCount;
         private View _view;
 
         public Color BackgroundColor;
+        public Color RenderColor;
         public RenderStates States;
         public RenderWindow Window;
         public View ScreenView;
+        public VertexBuffer ScreenBuffer;
         public KDrawLayer[] DrawLayers;
         public Vertex[] QuadBuffer;
 
-        public RenderLayer Layer;
-        
         public Font? Font;
 
         public float ScreenLeft => 0;
@@ -66,16 +68,18 @@ namespace Elements.Rendering
             }
         }
 
-        public KRenderManager(RenderWindow window)
+        public KRenderManager(RenderWindow window, VertexBuffer screenBuffer)
         {
             _view = window.GetView();
 
             Window = window;
             BackgroundColor = Color.Black;
+            RenderColor = Color.White;
             States = RenderStates.Default;
             ScreenView = Window.GetView();
             QuadBuffer = new Vertex[4];
             DrawLayers = [];
+            ScreenBuffer = screenBuffer;
         }
 
         //use during scene swapping if additional layers/cameras are needed.
@@ -94,51 +98,69 @@ namespace Elements.Rendering
         {
             Window.Clear(BackgroundColor);
 
+            QuadBuffer[0] = new Vertex((0, 0), RenderColor, (0, 0));
+            QuadBuffer[1] = new Vertex((Window.Size.X, 0), RenderColor, (Window.Size.X, 0));
+            QuadBuffer[2] = new Vertex((Window.Size.X, Window.Size.Y), RenderColor, (Window.Size.X, Window.Size.Y));
+            QuadBuffer[3] = new Vertex((0, Window.Size.Y), RenderColor, (0, Window.Size.Y));
+
             for (int i = 0; i < DrawLayers.Length; i++)
             {
-                DrawLayers[i].DrawBufferToTarget(Window);
+                Window.Draw(QuadBuffer, PrimitiveType.Quads, 
+                    new RenderStates(DrawLayers[i].RenderFrame()));
+            }
+
+            if (_vertexCount > 0)
+            {
+                ScreenBuffer.Draw(Window, States);
+                _vertexCount = 0;
             }
 
             Window.Display();
         }
 
-        public void SubmitDrawRect(Vertex[] vertices, uint vCount, int layer = 0) => 
-            DrawLayers[layer].SubmitDraw(vertices, vCount);
+        public void DrawBuffer(Vertex[] vertices, uint vCount, int layer = 0) => 
+            DrawLayers[layer].Draw(vertices, vCount);
 
-        public void SubmitDrawRect(float x, float y, float width, float height, Color color, int layer = 0)
+        public void DrawRect(float x, float y, float width, float height, Color color, int layer = 0)
         {
             QuadBuffer[0] = new Vertex((x, y), color);
             QuadBuffer[1] = new Vertex((x + width, y), color);
             QuadBuffer[2] = new Vertex((x + width, y + height), color);
             QuadBuffer[3] = new Vertex((x, y + height), color);
-            DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
+            DrawLayers[layer].Draw(QuadBuffer, 4);
         }
 
-        public void SubmitDrawRect(FloatRect rec, Color color, int layer = 0)
+        public void DrawRect(FloatRect rec, Color color, int layer = 0)
         {
             QuadBuffer[0] = new Vertex(rec.Position, color);
             QuadBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), color);
             QuadBuffer[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), color);
             QuadBuffer[3] = new Vertex((rec.Left, rec.Top + rec.Height), color);
-            DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
+            DrawLayers[layer].Draw(QuadBuffer, 4);
         }
 
-        public void SubmitDrawRect(in KDrawData dat, in FloatRect rec, int layer = 0)
+        public void DrawRect(in KDrawData dat, in FloatRect rec, int layer = 0)
         {
             QuadBuffer[0] = new Vertex(rec.Position, dat.Color, dat.Sprite.TopLeft);
             QuadBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
             QuadBuffer[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
             QuadBuffer[3] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
-            DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
+            DrawLayers[layer].Draw(QuadBuffer, 4);
         }
 
-        public void SubmitDrawRect(in KDrawData dat, in KRectangle rec, int layer = 0)
+        public void DrawRect(in KDrawData dat, in KRectangle rec, int layer = 0)
         {
             QuadBuffer[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
             QuadBuffer[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
             QuadBuffer[2] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.BottomRight);
-            QuadBuffer[3] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);            
-            DrawLayers[layer].SubmitDraw(QuadBuffer, 4);
+            QuadBuffer[3] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);
+            DrawLayers[layer].Draw(QuadBuffer, 4);
+        }
+
+        public void SubmitDrawScreen(Vertex[] vertices, uint vCount, int layer = 0)
+        {
+            ScreenBuffer.Update(vertices, vCount, _vertexCount);
+            _vertexCount += vCount;
         }
 
         public void SubmitDrawText(in KText text, float posX, float posY, out FloatRect bounds, int wrapThreshold = 0, int layer = 0)
@@ -153,7 +175,7 @@ namespace Elements.Rendering
 
             bounds = CreateTextbox(text, KProgram.Fonts[0], buffer, posX, posY, KProgram.FontSize, wrapThreshold);
             DrawLayers[layer].States.Texture = KProgram.Fonts[0]!.GetTexture(KProgram.FontSize);
-            DrawLayers[layer].SubmitDraw(buffer, (uint) text.Text.Length * 4);
+            DrawLayers[layer].Draw(buffer, (uint) text.Text.Length * 4);
 
             ArrayPool<Vertex>.Shared.Return(buffer);
         }

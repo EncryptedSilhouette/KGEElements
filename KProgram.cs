@@ -140,7 +140,7 @@ public static class KProgram
         //Managers
         InputManager = new();
         CommandManager = new();
-        RenderManager = new(Window);
+        RenderManager = new(Window, new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Stream));
         GameManager = new(RenderManager, InputManager);
         LogManager = new();
         CLI = new(CommandManager);
@@ -309,14 +309,16 @@ public static class KProgram
         drawLayers[0] = new KDrawLayer
         {
             Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
-            States = new(TextureAtlases[0].Texture)
+            States = new(TextureAtlases[0].Texture),
+            RenderTexture = new(Window.Size.X, Window.Size.Y)
         };
 
         //Default text layer.
         drawLayers[1] = new KDrawLayer
         {
             Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
-            States = new(Fonts[0].GetTexture(12))
+            States = new(Fonts[0].GetTexture(12)),
+            RenderTexture = new(Window.Size.X, Window.Size.Y)
         };
 
         #endregion

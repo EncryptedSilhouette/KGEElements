@@ -69,7 +69,7 @@ namespace Elements.Core
         public void FrameUpdate(KRenderManager renderManager)
         {
             renderManager.SubmitDrawText(new(TextBox.Text), 50, 50, out FloatRect bounds, layer: 1);
-            renderManager.SubmitDrawRect(bounds, Color.Blue);
+            renderManager.DrawRect(bounds, Color.Blue);
         }
     }
 }

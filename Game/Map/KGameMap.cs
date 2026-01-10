@@ -53,7 +53,7 @@ namespace Elements.Game.Map
 
         public void FrameUpdate(KRenderManager renderer)
         {
-            renderer.SubmitDrawRect(_vBuffer, (uint)_vBuffer.Length, 0);
+            renderer.DrawBuffer(_vBuffer, (uint)_vBuffer.Length, 0);
         }
 
         public void GenerateGameMap(int rows, int columns, int resourceCount = 10)
