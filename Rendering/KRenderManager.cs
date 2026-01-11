@@ -34,8 +34,7 @@ namespace Elements.Rendering
         //TODO add support for points, lines, and polygons.
 
 
-        private uint _vertexCount;
-        private View _view;
+        private uint ScreenVertexCount;
 
         public Color BackgroundColor;
         public Color RenderColor;
@@ -60,17 +59,17 @@ namespace Elements.Rendering
 
         public View View
         {
-            get => _view;
+            get => ScreenView;
             set
             {
-                _view = value;
-                Window.SetView(_view);
+                ScreenView = value;
+                Window.SetView(ScreenView);
             }
         }
 
         public KRenderManager(RenderWindow window, VertexBuffer screenBuffer)
         {
-            _view = window.GetView();
+            ScreenView = window.GetView();
 
             Window = window;
             BackgroundColor = Color.Black;
@@ -83,7 +82,7 @@ namespace Elements.Rendering
         }
 
         //use during scene swapping if additional layers/cameras are needed.
-        public void Init(Font font, KDrawLayer[] drawLayers)
+        public void Init(KDrawLayer[] drawLayers)
         {
             DrawLayers = drawLayers;
             Window.Resized += ResizeView;
@@ -109,10 +108,10 @@ namespace Elements.Rendering
                     new RenderStates(DrawLayers[i].RenderFrame()));
             }
 
-            if (_vertexCount > 0)
+            if (ScreenVertexCount > 0)
             {
                 ScreenBuffer.Draw(Window, States);
-                _vertexCount = 0;
+                ScreenVertexCount = 0;
             }
 
             Window.Display();
@@ -159,8 +158,8 @@ namespace Elements.Rendering
 
         public void SubmitDrawScreen(Vertex[] vertices, uint vCount, int layer = 0)
         {
-            ScreenBuffer.Update(vertices, vCount, _vertexCount);
-            _vertexCount += vCount;
+            ScreenBuffer.Update(vertices, vCount, ScreenVertexCount);
+            ScreenVertexCount += vCount;
         }
 
         public void SubmitDrawText(in KText text, float posX, float posY, out FloatRect bounds, int wrapThreshold = 0, int layer = 0)
@@ -181,7 +180,7 @@ namespace Elements.Rendering
         }
 
         //May want to cache this.
-        public FloatRect CreateTextbox(in KText text, Font font, Vertex[] buffer, float posX, float posY, uint fontSize = 12, int wrapThreshold = 0)
+        public static FloatRect CreateTextbox(in KText text, Font font, Vertex[] buffer, float posX, float posY, uint fontSize = 12, int wrapThreshold = 0)
         {
             bool pass = false;
             float width = 0;
@@ -195,6 +194,7 @@ namespace Elements.Rendering
             {
                 GlyphHandle handle = new(chars[i], (byte)fontSize, text.Bold, text.LineThickness);
 
+                //Glyph caching
                 if (!s_glyphCache.TryGetValue(handle, out Glyph glyph))
                 {
                     glyph = font.GetGlyph(chars[i], fontSize, text.Bold, text.LineThickness);

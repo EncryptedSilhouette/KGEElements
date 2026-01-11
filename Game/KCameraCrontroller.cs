@@ -59,7 +59,7 @@ namespace Elements.Game
             }
 
             View.Move(panAmount);
-            renderManager.View = View;
+            renderManager.DrawLayers[0].RenderTexture.SetView(View);
         }
 
         public void ZoomCamera(KInputManager inputManager, KRenderManager renderManager)

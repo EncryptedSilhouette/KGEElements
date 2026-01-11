@@ -149,11 +149,11 @@ public static class KProgram
     public static void Main(string[] args) //Program entry point.
     {
         InitAndLoad();
+
         OnStart?.Invoke();
-
         StartGameLoop();
-
         OnStop?.Invoke();
+        
         Deinit();
     }
 
@@ -303,18 +303,16 @@ public static class KProgram
 
         #region Draw layers
 
-        //Draw layers.
-        var drawLayers = new KDrawLayer[2];
-        //Default render layer.
-        drawLayers[0] = new KDrawLayer
+        var drawLayers = new KDrawLayer[2]; //Draw layers.
+
+        drawLayers[0] = new KDrawLayer //Default render layer.
         {
             Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             States = new(TextureAtlases[0].Texture),
             RenderTexture = new(Window.Size.X, Window.Size.Y)
         };
 
-        //Default text layer.
-        drawLayers[1] = new KDrawLayer
+        drawLayers[1] = new KDrawLayer //Default text layer.
         {
             Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             States = new(Fonts[0].GetTexture(12)),
@@ -323,7 +321,7 @@ public static class KProgram
 
         #endregion
 
-        RenderManager.Init(Fonts[0], drawLayers);
+        RenderManager.Init(drawLayers);
         InputManager.Init(Window);
         GameManager.Init();
 

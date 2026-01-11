@@ -1,5 +1,6 @@
 ﻿using Elements.Rendering;
 using SFML.Graphics;
+using System.Buffers;
 
 namespace Elements.Core
 {
@@ -68,8 +69,15 @@ namespace Elements.Core
 
         public void FrameUpdate(KRenderManager renderManager)
         {
-            renderManager.SubmitDrawText(new(TextBox.Text), 50, 50, out FloatRect bounds, layer: 1);
-            renderManager.DrawRect(bounds, Color.Blue);
+            KText text = new(TextBox.Text);
+
+            Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
+
+            var bounds = KRenderManager.CreateTextbox(text, KProgram.Fonts[0], buffer, 50, 50, KProgram.FontSize);
+            //renderManager.DrawRect(bounds, Color.Blue, layer: 1);
+            renderManager.DrawBuffer(buffer, (uint)text.Text.Length * 4, layer: 1);
+
+            ArrayPool<Vertex>.Shared.Return(buffer);
         }
     }
 }
