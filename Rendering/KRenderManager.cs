@@ -3,6 +3,8 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Buffers;
+using System.Reflection.Emit;
+using static Elements.Rendering.KRenderManager;
 
 namespace Elements.Rendering
 {
@@ -14,6 +16,7 @@ namespace Elements.Rendering
 
         //will need to update when font is changed.
         private static Dictionary<GlyphHandle, Glyph> s_glyphCache = new(128);
+        private static Dictionary<Font, Texture> s_glyphset = new();
 
         private static Dictionary<GlyphHandle, Glyph> GlyphCache 
         { 
@@ -28,6 +31,95 @@ namespace Elements.Rendering
         public static Action<Dictionary<GlyphHandle, Glyph>, Dictionary<GlyphHandle, Glyph>>? OnFontChange;
 
         public ArrayPool<Vertex> VertexArrayPool => ArrayPool<Vertex>.Shared;
+
+        public static FloatRect CreateTextbox(in KText text, Font font, Vertex[] buffer, float posX, float posY, uint fontSize = 12, int wrapThreshold = 0)
+        {
+            bool pass = false;
+            float width = 0;
+            float height = 0;
+            float xoffset = 0;
+            var chars = text.Text.AsSpan();
+
+            posY += fontSize;
+
+            for (int i = 0, cp = 0; i < chars.Length; i++)
+            {
+                GlyphHandle handle = new(chars[i], (byte)fontSize, text.Bold, text.LineThickness);
+
+                //Glyph caching
+                if (!s_glyphCache.TryGetValue(handle, out Glyph glyph))
+                {
+                    glyph = font.GetGlyph(chars[i], fontSize, text.Bold, text.LineThickness);
+                    s_glyphCache.Add(handle, glyph);
+
+                    Console.WriteLine($"Glyph cached: {chars[i]}");
+                }
+
+                if (chars[i] == '\n')
+                {
+                    buffer[i * 4] = new();
+                    buffer[i * 4 + 1] = new();
+                    buffer[i * 4 + 2] = new();
+                    buffer[i * 4 + 3] = new();
+
+                    xoffset = 0;
+                    height += fontSize;
+
+                    continue;
+                }
+                if (chars[i] == ' ')
+                {
+                    cp = i + 1;
+                    pass = false;
+                }
+                else if (!pass && wrapThreshold != 0 && xoffset != 0 && xoffset + glyph.Advance > wrapThreshold)
+                {
+                    i = cp;
+                    xoffset = 0;
+                    height += fontSize;
+                    pass = true;
+                }
+
+                var coords = glyph.TextureRect;
+                var rect = glyph.Bounds;
+
+                buffer[i * 4] = new()
+                {
+                    Position = (posX + xoffset + rect.Left,
+                                posY + height + rect.Top),
+                    TexCoords = (coords.Left, coords.Top),
+                    Color = text.Color,
+                };
+                buffer[i * 4 + 1] = new()
+                {
+                    Position = (posX + xoffset + rect.Left + rect.Width,
+                                posY + height + rect.Top),
+                    TexCoords = (coords.Left + coords.Width, coords.Top),
+                    Color = text.Color,
+                };
+                buffer[i * 4 + 2] = new()
+                {
+                    Position = (posX + xoffset + rect.Left + rect.Width,
+                                posY + height + rect.Top + rect.Height),
+                    TexCoords = (coords.Left + coords.Width, coords.Top + coords.Height),
+                    Color = text.Color,
+                };
+                buffer[i * 4 + 3] = new()
+                {
+                    Position = (posX + xoffset + rect.Left,
+                                posY + height + rect.Top + rect.Height),
+                    TexCoords = (coords.Left, coords.Top + coords.Height),
+                    Color = text.Color,
+                };
+
+                xoffset += (int)glyph.Advance;
+
+                if (xoffset > width) width = xoffset;
+            }
+
+            posY -= fontSize;
+            return new FloatRect(posX, posY, width, height < 1 ? fontSize : height);
+        }
 
         #endregion
 
@@ -120,6 +212,7 @@ namespace Elements.Rendering
         public void DrawBuffer(Vertex[] vertices, uint vCount, int layer = 0) => 
             DrawLayers[layer].Draw(vertices, vCount);
 
+
         public void DrawRect(float x, float y, float width, float height, Color color, int layer = 0)
         {
             QuadBuffer[0] = new Vertex((x, y), color);
@@ -173,100 +266,10 @@ namespace Elements.Rendering
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
             bounds = CreateTextbox(text, KProgram.Fonts[0], buffer, posX, posY, KProgram.FontSize, wrapThreshold);
-            DrawLayers[layer].States.Texture = KProgram.Fonts[0]!.GetTexture(KProgram.FontSize);
+            DrawLayers[layer].States.Texture = KProgram.Fonts[0].GetTexture(KProgram.FontSize);
             DrawLayers[layer].Draw(buffer, (uint) text.Text.Length * 4);
 
             ArrayPool<Vertex>.Shared.Return(buffer);
-        }
-
-        //May want to cache this.
-        public static FloatRect CreateTextbox(in KText text, Font font, Vertex[] buffer, float posX, float posY, uint fontSize = 12, int wrapThreshold = 0)
-        {
-            bool pass = false;
-            float width = 0;
-            float height = 0;
-            float xoffset = 0;
-            var chars = text.Text.AsSpan();
-
-            posY += fontSize;
-
-            for (int i = 0, cp = 0; i < chars.Length; i++)
-            {
-                GlyphHandle handle = new(chars[i], (byte)fontSize, text.Bold, text.LineThickness);
-
-                //Glyph caching
-                if (!s_glyphCache.TryGetValue(handle, out Glyph glyph))
-                {
-                    glyph = font.GetGlyph(chars[i], fontSize, text.Bold, text.LineThickness);
-                    s_glyphCache.Add(handle, glyph);
-
-                    Console.WriteLine($"Glyph cached: {chars[i]}");
-                }
-
-                if (chars[i] == '\n')
-                {
-                    buffer[i * 4] = new();
-                    buffer[i * 4 + 1] = new();
-                    buffer[i * 4 + 2] = new();
-                    buffer[i * 4 + 3] = new();
-
-                    xoffset = 0;
-                    height += fontSize;
-
-                    continue;
-                }
-                if (chars[i] == ' ')
-                {
-                    cp = i + 1;
-                    pass = false;
-                }
-                else if (!pass && wrapThreshold != 0 && xoffset != 0 && xoffset + glyph.Advance > wrapThreshold)
-                {
-                    i = cp;
-                    xoffset = 0;
-                    height += fontSize;
-                    pass = true;
-                }
-
-                var coords = glyph.TextureRect;
-                var rect = glyph.Bounds;
-
-                buffer[i * 4] = new()
-                {
-                    Position = (posX + xoffset + rect.Left,
-                                posY + height + rect.Top),
-                    TexCoords = (coords.Left, coords.Top),
-                    Color = text.Color,
-                };
-                buffer[i * 4 + 1] = new()
-                {
-                    Position = (posX + xoffset + rect.Left + rect.Width,
-                                posY + height + rect.Top),
-                    TexCoords = (coords.Left + coords.Width, coords.Top),
-                    Color = text.Color,
-                };
-                buffer[i * 4 + 2] = new()
-                {
-                    Position = (posX + xoffset + rect.Left + rect.Width,
-                                posY + height + rect.Top + rect.Height),
-                    TexCoords = (coords.Left + coords.Width, coords.Top + coords.Height),
-                    Color = text.Color,
-                };
-                buffer[i * 4 + 3] = new()
-                {
-                    Position = (posX + xoffset + rect.Left,
-                                posY + height + rect.Top + rect.Height),
-                    TexCoords = (coords.Left, coords.Top + coords.Height),
-                    Color = text.Color,
-                };
-
-                xoffset += (int)glyph.Advance;
-
-                if (xoffset > width) width = xoffset;
-            }
-
-            posY -= fontSize;
-            return new FloatRect(posX, posY, width, height < 1 ? fontSize : height);
         }
 
         private void ResizeView(object? _, SizeEventArgs e)

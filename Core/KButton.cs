@@ -74,8 +74,8 @@ namespace Elements.Core
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
             var bounds = KRenderManager.CreateTextbox(text, KProgram.Fonts[0], buffer, 50, 50, KProgram.FontSize);
-            //renderManager.DrawRect(bounds, Color.Blue, layer: 1);
-            renderManager.DrawBuffer(buffer, (uint)text.Text.Length * 4, layer: 1);
+            renderManager.DrawRect(bounds, Color.Blue, layer: 1);
+            //renderManager.SubmitDrawText(text, KProgram.Fonts[0], 50, 50, KProgram.FontSize, Color.White, layer: 1);
 
             ArrayPool<Vertex>.Shared.Return(buffer);
         }
