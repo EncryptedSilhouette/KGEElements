@@ -18,6 +18,8 @@ namespace Elements.Game
 
     public class KGameManager
     {
+        public bool allowCameraMovement = false;
+
         public KGameStates GameStates;
         public KGameMap GameMap;
         public KInputManager InputManager;
@@ -46,13 +48,13 @@ namespace Elements.Game
         {
             GameUpdate(currentUpdate);
             Button.Update(InputManager.MousePosX, InputManager.MousePosY);
-            CameraCrontroller.Update();
+            if (allowCameraMovement) CameraCrontroller.Update();
             GameMap.Update();
         }
 
         public void FrameUpdate(KRenderManager renderer)
         {
-            CameraCrontroller.FrameUpdate(InputManager, renderer);
+            if (allowCameraMovement) CameraCrontroller.FrameUpdate(InputManager, renderer);
             GameMap.FrameUpdate(renderer);
             Button.FrameUpdate(renderer);
         }

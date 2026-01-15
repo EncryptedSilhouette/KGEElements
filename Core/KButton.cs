@@ -75,7 +75,7 @@ namespace Elements.Core
 
             var bounds = KRenderManager.CreateTextbox(text, KProgram.Fonts[0], buffer, 50, 50, KProgram.FontSize);
             renderManager.DrawRect(bounds, Color.Blue, layer: 1);
-            //renderManager.SubmitDrawText(text, KProgram.Fonts[0], 50, 50, KProgram.FontSize, Color.White, layer: 1);
+            renderManager.DrawText(text, 50, 50, layer: 1);
 
             ArrayPool<Vertex>.Shared.Return(buffer);
         }

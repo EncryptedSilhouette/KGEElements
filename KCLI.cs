@@ -70,7 +70,7 @@ namespace Elements
         {
             //if (!_enabled) return;
 
-            //renderManager.SubmitDrawText(
+            //renderManager.DrawText(
             //    new(KProgram.LogManager.GetLog(KLogManager.DEBUG_LOG)),
             //    0, 0, out FloatRect bounds);
 

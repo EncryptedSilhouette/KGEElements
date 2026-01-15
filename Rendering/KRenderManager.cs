@@ -212,7 +212,6 @@ namespace Elements.Rendering
         public void DrawBuffer(Vertex[] vertices, uint vCount, int layer = 0) => 
             DrawLayers[layer].Draw(vertices, vCount);
 
-
         public void DrawRect(float x, float y, float width, float height, Color color, int layer = 0)
         {
             QuadBuffer[0] = new Vertex((x, y), color);
@@ -249,27 +248,42 @@ namespace Elements.Rendering
             DrawLayers[layer].Draw(QuadBuffer, 4);
         }
 
-        public void SubmitDrawScreen(Vertex[] vertices, uint vCount, int layer = 0)
+        public void DrawText(in KText text, float posX, float posY, int wrapThreshold = 0, int layer = 0)
         {
-            ScreenBuffer.Update(vertices, vCount, ScreenVertexCount);
-            ScreenVertexCount += vCount;
+            if (string.IsNullOrEmpty(text.Text)) return;
+
+            Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
+
+            //Cursed but works for now. 
+            CreateTextbox(text, KProgram.Fonts[0], buffer, posX, posY, KProgram.FontSize, wrapThreshold);
+            DrawLayers[layer].States.Texture = KProgram.Fonts[0].GetTexture(KProgram.FontSize); //Heap go brrrrrrrr.
+            DrawLayers[layer].Draw(buffer, (uint) text.Text.Length * 4);
+
+            ArrayPool<Vertex>.Shared.Return(buffer);
         }
 
-        public void SubmitDrawText(in KText text, float posX, float posY, out FloatRect bounds, int wrapThreshold = 0, int layer = 0)
+        public void DrawTextBox(in KText text, float posX, float posY, out FloatRect box, int wrapThreshold = 0, int layer = 0)
         {
             if (string.IsNullOrEmpty(text.Text))
             {
-                bounds = new FloatRect();
+                box = new FloatRect();
                 return;
             }
 
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
-            bounds = CreateTextbox(text, KProgram.Fonts[0], buffer, posX, posY, KProgram.FontSize, wrapThreshold);
+            //Cursed but works for now.
+            box = CreateTextbox(text, KProgram.Fonts[0], buffer, posX, posY, KProgram.FontSize, wrapThreshold);
             DrawLayers[layer].States.Texture = KProgram.Fonts[0].GetTexture(KProgram.FontSize);
-            DrawLayers[layer].Draw(buffer, (uint) text.Text.Length * 4);
+            DrawLayers[layer].Draw(buffer, (uint)text.Text.Length * 4);
 
             ArrayPool<Vertex>.Shared.Return(buffer);
+        }
+
+        public void DrawToScreen(Vertex[] vertices, uint vCount, int layer = 0)
+        {
+            ScreenBuffer.Update(vertices, vCount, ScreenVertexCount);
+            ScreenVertexCount += vCount;
         }
 
         private void ResizeView(object? _, SizeEventArgs e)
