@@ -1,15 +1,16 @@
 ﻿using Elements.Rendering;
 using SFML.Graphics;
-using System.Buffers;
 
 namespace Elements.Core
 {
     public struct KButton
     {
-        private bool _isDown;
+        private bool _isDown = false;
 
+        public Color Color;
         public Color HeldColor;
-        public KRectangle Bounds;
+        public Color DownColor;
+        public FloatRect Bounds;
         public KDrawData DrawData;
         public KText TextBox;
 
@@ -17,67 +18,58 @@ namespace Elements.Core
         public Action? OnPressed;
         public Action? OnHold;
         public Action? OnReleased;
+        public Action? OnExit;
 
         public KButton(float x, float y, float width, float height, string text)
         {
-            HeldColor = Color.White;
+            Color = new(200, 200, 200);
+            HeldColor = new(150, 150, 150);
+            DownColor = new(100, 100, 100);
             DrawData = new();
             TextBox = new(text);
-            _isDown = false;
 
-            Bounds = new()
-            {
-                Width = width,
-                Height = height,
-                Transform = new()
-                {
-                    PosX = x,
-                    PosY = y,
-                }
-            };
+            Bounds = new(x, y, width, height);
         }
 
         public void Update(in float mPosX, in float mPosY)
         {
-            if (KCollision.CheckRectPointCollision(Bounds, mPosX, mPosY))
+            if (KProgram.CheckRectPointCollision(Bounds, mPosX, mPosY))
             {
-                DrawData.Color = HeldColor;
                 OnHover?.Invoke();
-            }
-            else if (_isDown) //Not in bounds but m1 still held, release button.
-            {
-                _isDown = false;
-                OnReleased?.Invoke();
-                return;
-            }
-            else return;
+                DrawData.Color = HeldColor;
 
-            if (KProgram.InputManager.IsMouseReleased(KMouseStates.Mouse_1))
+                if (KProgram.InputManager.IsMouseDown(KMouseStates.Mouse_1))
+                {
+                    if (!_isDown)
+                    {
+                        _isDown = true;
+                        OnPressed?.Invoke();
+                    }
+                    OnHold?.Invoke();
+                }
+                else if (_isDown)
+                {
+                    _isDown = false;
+                    OnReleased?.Invoke();
+                }
+            }
+            else if (_isDown)
             {
                 _isDown = false;
+                DrawData.Color = Color;
                 OnReleased?.Invoke();
-                return;
+                OnExit?.Invoke();
             }
-            if (KProgram.InputManager.IsMousePressed(KMouseStates.Mouse_1))
+            else
             {
-                _isDown = true;
-                OnPressed?.Invoke();
+                DrawData.Color = Color;
             }
-            //Can only reach if in bounds and m1 held.
-            OnHold?.Invoke();
         }
 
         public void FrameUpdate(KRenderManager renderManager)
         {
-            KText text = new(TextBox.Text);
-
-            Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
-
-            var bounds = KRenderManager.CreateTextbox(text, KProgram.Fonts[0], buffer, 50, 50, KProgram.FontSize);
-            renderManager.DrawRect(bounds, Color.Blue, layer: 1);
-            renderManager.DrawText(text, 50, 50, layer: 1);
-
-            ArrayPool<Vertex>.Shared.Return(buffer);
+            renderManager.DrawRect(Bounds, DrawData.Color, layer: 1);
+            renderManager.DrawText(TextBox, 50, 50, wrapThreshold: (int)Bounds.Width, layer: 1);
         }
     }
 }

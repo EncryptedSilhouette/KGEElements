@@ -19,7 +19,7 @@ namespace Elements
         private KRectangle drawBounds;
 
         //Input box
-        private KTextInput _textInput;
+        //private KTextInput _textInput;
 
         public Color TextColor;
 
@@ -55,8 +55,8 @@ namespace Elements
                     PosY = 800
                 }
             };
-            _textInput = new(0, KProgram.Window.Size.Y - 148, KProgram.Window.Size.X, 48, "type here");
-            _textInput.Button.DrawData.Color = new(50,50,50);
+            //_textInput = new(0, KProgram.Window.Size.Y - 148, KProgram.Window.Size.X, 48, "type here");
+            //_textInput.Button.DrawData.Color = new(50,50,50);
         }
 
         public void Update(KInputManager inputManager)

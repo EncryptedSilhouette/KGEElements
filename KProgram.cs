@@ -28,12 +28,14 @@
 #endregion
 
 using Elements;
+using Elements.Core;
 using Elements.Game;
 using Elements.Rendering;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
+using System.Drawing;
 
 public record struct KTextureAtlas(Texture Texture, KSprite[] Sprites);
 public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCoords);
@@ -64,7 +66,7 @@ public static class KProgram
     public static KTextureAtlas[] TextureAtlases = [];
 
     //Events for extension. 
-    public static event Action? OnInit;             
+    public static event Action? OnInit;
     public static event Action? OnLoad;
     public static event Action? OnStart;
     public static event Action? OnStop;
@@ -153,7 +155,7 @@ public static class KProgram
         OnStart?.Invoke();
         StartGameLoop();
         OnStop?.Invoke();
-        
+
         Deinit();
     }
 
@@ -228,35 +230,35 @@ public static class KProgram
             switch (values[0])
             {
                 case "title":
-                    try 
-                    { 
-                        Title = values[1]; 
+                    try
+                    {
+                        Title = values[1];
                     }
-                    catch (Exception) 
-                    { 
-                        Console.WriteLine("failed to read \"title\""); 
+                    catch (Exception)
+                    {
+                        Console.WriteLine("failed to read \"title\"");
                     }
                     break;
 
                 case "frame_target":
-                    try 
-                    { 
-                        FrameLimit = Convert.ToUInt32(values[1]); 
+                    try
+                    {
+                        FrameLimit = Convert.ToUInt32(values[1]);
                     }
-                    catch (Exception) 
-                    { 
-                        Console.WriteLine("failed to read \"frame_target\""); 
+                    catch (Exception)
+                    {
+                        Console.WriteLine("failed to read \"frame_target\"");
                     }
                     break;
 
                 case "vsync":
-                    try 
-                    { 
-                        VSync = values[1] == bool.TrueString; 
+                    try
+                    {
+                        VSync = values[1] == bool.TrueString;
                     }
-                    catch (Exception) 
-                    { 
-                        Console.WriteLine("failed to read \"vsync\""); 
+                    catch (Exception)
+                    {
+                        Console.WriteLine("failed to read \"vsync\"");
                     }
                     break;
 
@@ -265,9 +267,9 @@ public static class KProgram
                     {
                         TargetResolution = new Vector2u(Convert.ToUInt32(values[1]), Convert.ToUInt32(values[2]));
                     }
-                    catch (Exception) 
-                    { 
-                        Console.WriteLine("failed to read \"resolution\""); 
+                    catch (Exception)
+                    {
+                        Console.WriteLine("failed to read \"resolution\"");
                     }
                     break;
 
@@ -356,7 +358,7 @@ public static class KProgram
     {
         //Reads from texture data file.
         var lines = File.ReadAllLines(filePath);
-        
+
         //Loads the whole atlas as a sprite at index 0.
         Texture texture = new(lines[0]);
         List<KSprite> sprites =
@@ -383,12 +385,12 @@ public static class KProgram
         //This is how data is layed out in csv texture data files:
         //index 0: sprite name
         //index 1: sprite id
-        //index 2: sprite pos x
-        //index 3: sprite pos y
-        //index 4: sprite width
-        //index 5: sprite height
-        //index 6: sprite rotation center x
-        //index 7: sprite rotation center y
+        //index 2: sprite pos x1
+        //index 3: sprite pos y1
+        //index 4: sprite y2
+        //index 5: sprite y2
+        //index 6: sprite rotation center x1
+        //index 7: sprite rotation center y1
         #endregion
 
         for (int i = 1; i < lines.Length; i++) //Iterate over lines
@@ -420,6 +422,9 @@ public static class KProgram
     }
 
     //Leaving utility functions here for now, may move later.
+
+    #region Math Utilities
+
     //Math functions.
     public static int GetIndex(int column, int row, int width) => column + row * width;
     public static void GetIndex(int column, int row, int width, out int index) => index = column + row * width;
@@ -427,18 +432,73 @@ public static class KProgram
     public static (int c, int r) GetPosition(int index, int width) => (index % width, index / width);
     public static void GetPosition(int index, int width, out int column, out int row) => (column, row) = GetPosition(index, width);
 
-    public static double Hypotenuse(int x1, int y1, int x2, int y2)
+    public static float Hypotenuse(float x1, float y1, float x2, float y2)
     {
-        int a = x2 - x1;
-        int b = y2 - y1;
-        return Math.Sqrt(a * a + b * b);
+        float a = x1 - x2;
+        float b = y1 - y2;
+        return MathF.Sqrt(a * a + b * b);
     }
+    #endregion
+
+    #region Collision Utilities
+
+    //Collision functions.
+    public static bool CheckCirclePointCollision(float centerX, float centerY, float radius, float posX, float posY)
+    {
+        double distX = posX - centerX;
+        double distY = posY - centerY;
+        return distX * distX + distY * distY <= radius * radius;
+    }
+
+    public static bool CheckRectPointCollision(float x, float y, float width, float height, float posX, float posY) =>
+        posX >= x && posX <= x + width &&
+        posY >= y && posY <= y + height;
+
+    public static bool CheckRectPointCollision(in FloatRect rectangle, float posX, float posY) =>
+        posX >= rectangle.Left && posX <= rectangle.Left + rectangle.Width &&
+        posY >= rectangle.Top && posY <= rectangle.Top + rectangle.Height;
+
+    #endregion
 }
 
+#if DEBUG
 //Ignore.
 #region Old code
 
 #if false
+
+ //Collision functions.
+    public static bool CheckCirclePointCollision(in float centerX, in float centerY, in float radius, in float posX, in float posY)
+    {
+        double distX = posX - centerX;
+        double distY = posY - centerY;
+        //checks hypotenuse without sqrt. Squareing negates negatives.
+        //  a^2   +         b^2              c^2
+        if (distX * distX + distY * distY <= radius * radius) return true;
+        else return false;
+    }
+
+    public static bool CheckRectPointCollision(in float centerX, in float centerY, in float width, in float height, in float posX, in float posY)
+    {
+        float halfWidth = width / 2;
+        float halfHeight = height / 2;
+
+        //if within x bounds
+        if (posX >= centerX - halfWidth && posX <= centerX + halfWidth)
+        {
+            //if within y bounds
+            if (posY >= centerY - halfHeight && posY <= centerY + halfHeight) return true;
+        }
+        return false;
+    }
+
+    public static bool CheckRectPointCollision(in KRectangle rectangle, in float posX, in float posY) =>
+        CheckRectPointCollision(
+            rectangle.Transform.PosX, rectangle.Transform.PosY,
+            rectangle.Width * rectangle.Transform.ScaleX, rectangle.Height * rectangle.Transform.ScaleY,
+            posX, posY);
+//Other shit
+
 var contents = File.ReadAllLines(filePath);
 List<KTextureAtlas> atlases = new(contents.Length - 1);
 
@@ -535,3 +595,5 @@ private static void StartGameLoop()
 #endif
 
 #endregion
+
+#endif

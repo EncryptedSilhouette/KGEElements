@@ -18,13 +18,10 @@ namespace Elements.Game
 
     public class KGameManager
     {
-        public bool allowCameraMovement = false;
-
         public KGameStates GameStates;
         public KGameMap GameMap;
         public KInputManager InputManager;
         public KCameraCrontroller CameraCrontroller;
-
         public KButton Button;
 
         public KGameManager(KRenderManager renderer, KInputManager inputManager)
@@ -34,7 +31,7 @@ namespace Elements.Game
             CameraCrontroller = new KCameraCrontroller(renderer.Window.GetView());
 
             Button = new(50,50,64,64,"Button");
-            Button.OnPressed += () => Console.WriteLine("Press");
+
             Button.OnHold += () => Console.WriteLine("Hold");
             Button.OnReleased += () => Console.WriteLine("Release");
         }
@@ -48,13 +45,13 @@ namespace Elements.Game
         {
             GameUpdate(currentUpdate);
             Button.Update(InputManager.MousePosX, InputManager.MousePosY);
-            if (allowCameraMovement) CameraCrontroller.Update();
+            CameraCrontroller.Update();
             GameMap.Update();
         }
 
         public void FrameUpdate(KRenderManager renderer)
         {
-            if (allowCameraMovement) CameraCrontroller.FrameUpdate(InputManager, renderer);
+            CameraCrontroller.FrameUpdate(InputManager, renderer);
             GameMap.FrameUpdate(renderer);
             Button.FrameUpdate(renderer);
         }

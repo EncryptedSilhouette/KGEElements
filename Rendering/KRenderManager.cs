@@ -3,8 +3,6 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Buffers;
-using System.Reflection.Emit;
-using static Elements.Rendering.KRenderManager;
 
 namespace Elements.Rendering
 {
@@ -221,7 +219,7 @@ namespace Elements.Rendering
             DrawLayers[layer].Draw(QuadBuffer, 4);
         }
 
-        public void DrawRect(FloatRect rec, Color color, int layer = 0)
+        public void DrawRect(in FloatRect rec, Color color, int layer = 0)
         {
             QuadBuffer[0] = new Vertex(rec.Position, color);
             QuadBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), color);
