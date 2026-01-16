@@ -10,52 +10,52 @@ namespace Elements.Game.UI
     //    public bool DisplayLast = true;
     //    public bool Active = false;
     //    public int maxLength = 256;
-    //    public KButton Button;
+    //    public KButton ResetWindowButton;
     //    public StringBuilder TextBuffer = new();
 
     //    public Action? OnEnter;
 
     //    public KRectangle Bounds
     //    {
-    //        get => Button.Bounds;
-    //        set => Button.Bounds = value;
+    //        get => ResetWindowButton.Bounds;
+    //        set => ResetWindowButton.Bounds = value;
     //    }
 
     //    public KTransform Transform
     //    {
-    //        get => Button.Bounds.Transform; 
-    //        set => Button.Bounds.Transform = value;
+    //        get => ResetWindowButton.Bounds.Transform; 
+    //        set => ResetWindowButton.Bounds.Transform = value;
     //    }
 
     //    public KText Text
     //    {
-    //        get => Button.TextBox;
-    //        set => Button.TextBox = value;
+    //        get => ResetWindowButton.TextBox;
+    //        set => ResetWindowButton.TextBox = value;
     //    }
 
     //    public KTextInput(float x, float y, float width, float height)
     //    {
-    //        Button = new KButton(x, y, width, height, string.Empty);
+    //        ResetWindowButton = new KButton(x, y, width, height, string.Empty);
     //    }
 
     //    public KTextInput(float x, float y, float width, float height, string prompt)
     //    {
-    //        Button = new KButton(x, y, width, height, prompt);
+    //        ResetWindowButton = new KButton(x, y, width, height, prompt);
     //    }
 
     //    public void Init()
     //    {
-    //        Button.OnPressed += Pressed;
+    //        ResetWindowButton.OnPressed += Pressed;
     //    }
 
     //    public void Deinit()
     //    {
-    //        Button.OnPressed -= Pressed;
+    //        ResetWindowButton.OnPressed -= Pressed;
     //    }
 
     //    public void Update(KInputManager inputManager)
     //    {
-    //        Button.Update(inputManager.MousePosX, inputManager.MousePosY);
+    //        ResetWindowButton.Update(inputManager.MousePosX, inputManager.MousePosY);
                 
     //        if (Active)
     //        {
@@ -68,7 +68,7 @@ namespace Elements.Game.UI
     //            if (inputManager.BufferCharCount > 0)
     //            {
     //                TextBuffer.Append(inputManager.ReadTextBuffer());
-    //                Button.TextBox.Text = TextBuffer.ToString();
+    //                ResetWindowButton.TextBox.Text = TextBuffer.ToString();
     //            }
     //            //OnEnter?.Invoke();
     //        }
@@ -76,7 +76,7 @@ namespace Elements.Game.UI
 
     //    public void FrameUpdate(KRenderManager renderManager)
     //    {
-    //        Button.FrameUpdate(renderManager);
+    //        ResetWindowButton.FrameUpdate(renderManager);
     //    }
 
     //    private void Pressed()

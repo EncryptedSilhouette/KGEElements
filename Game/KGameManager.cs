@@ -3,7 +3,6 @@ using Elements.Game.Map;
 using Elements.Game.Units;
 using Elements.Rendering;
 using SFML.Graphics;
-using SFML.Graphics.Glsl;
 using SFML.System;
 
 namespace Elements.Game
@@ -29,7 +28,8 @@ namespace Elements.Game
         public KGameMap GameMap;
         public KInputManager InputManager;
         public KCameraCrontroller CameraCrontroller;
-        public KButton Button;
+        public KButton ResetWindowButton;
+
         public KUnit[] Units;
 
         public KGameManager(KRenderManager renderer, KInputManager inputManager)
@@ -38,11 +38,16 @@ namespace Elements.Game
             GameMap = new KGameMap(0, 0, 32, 32);
             CameraCrontroller = new KCameraCrontroller(renderer.Window.GetView());
 
-            Button = new(50,50,64,64,"Button");
-            Button.OnPressed += SpawnUnit;
+            ResetWindowButton = new(50,50,64,64,"Reset Window");
+            ResetWindowButton.OnPressed += ResetWindow; //SpawnUnit;
 
             _unitCount = 0;
             Units = [];
+        }
+
+        public void ResetWindow()
+        {
+            //CameraCrontroller.View.Size = KProgram.;
         }
 
         public void Init()
@@ -53,7 +58,7 @@ namespace Elements.Game
 
         public void Update(in uint currentUpdate)
         {
-            Button.Update(InputManager.MousePosX, InputManager.MousePosY);
+            ResetWindowButton.Update(InputManager.MousePosX, InputManager.MousePosY);
             CameraCrontroller.Update();
             GameMap.Update();
         }
@@ -65,7 +70,9 @@ namespace Elements.Game
         {
             CameraCrontroller.FrameUpdate(InputManager, renderer);
             GameMap.FrameUpdate(renderer);
-            Button.FrameUpdate(renderer);
+            ResetWindowButton.FrameUpdate(renderer);
+
+            
 
             if (InputManager.IsMousePressed(KMouseStates.Mouse_1) && !select)
             {
@@ -82,7 +89,6 @@ namespace Elements.Game
             {
                 PointB = (InputManager.MousePosX, InputManager.MousePosY);
                 renderer.DrawRect(PointA, PointB, new(0, 0, 200, 100));
-
             }
 
             for (int i = 0; i < _unitCount; i++)

@@ -6,16 +6,20 @@ namespace Elements.Rendering
     {
         public uint VertexCount = 0;
         public Color ClearColor;
+        public FloatRect DrawBounds;
+        required public RenderTexture RenderTexture;
         required public RenderStates States;
         required public VertexBuffer Buffer;
-        required public RenderTexture RenderTexture;
 
-        public KDrawLayer() { }
+        public KDrawLayer() 
+        {
+            ClearColor = Color.Transparent;
+            DrawBounds = new();
+        }
 
-        public KDrawLayer(VertexBuffer buffer, RenderStates states)
+        public KDrawLayer(VertexBuffer buffer, in RenderStates states, in FloatRect bounds) : this()
         {
             VertexCount = 0;
-            ClearColor = Color.Transparent;
             States = states;
             Buffer = buffer;
         }

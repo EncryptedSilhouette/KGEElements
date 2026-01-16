@@ -7,17 +7,16 @@ namespace Elements.Game
     public class KCameraCrontroller
     {
         private float _zoomLevel = 1.1f;
-        private float _zoomStrength = 1.1f;
 
-        public float ZoomSpeed = 50f;
+        public float resolutionX;
+        public float resolutionY;
+
         public int PanSpeed = 16;
         public int PanBorderSize = 4;
         public View View;
 
-        public KCameraCrontroller(View cameraView)
+        public KCameraCrontroller()
         {
-            _zoomLevel = _zoomStrength;
-            View = cameraView;
         }
 
         public void Init(KRenderManager renderManager)
@@ -60,7 +59,6 @@ namespace Elements.Game
 
             View.Move(panAmount);
             renderManager.DrawLayers[0].RenderTexture.SetView(View);
-            Console.WriteLine(View);
         }
 
         public void ZoomCamera(KInputManager inputManager, KRenderManager renderManager)

@@ -56,7 +56,7 @@ namespace Elements
                 }
             };
             //_textInput = new(0, KProgram.Window.Size.Y - 148, KProgram.Window.Size.X, 48, "type here");
-            //_textInput.Button.DrawData.Color = new(50,50,50);
+            //_textInput.ResetWindowButton.DrawData.Color = new(50,50,50);
         }
 
         public void Update(KInputManager inputManager)

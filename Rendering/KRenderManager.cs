@@ -187,15 +187,18 @@ namespace Elements.Rendering
         {
             Window.Clear(BackgroundColor);
 
-            QuadBuffer[0] = new Vertex((0, 0), RenderColor, (0, 0));
-            QuadBuffer[1] = new Vertex((Window.Size.X, 0), RenderColor, (Window.Size.X, 0));
-            QuadBuffer[2] = new Vertex((Window.Size.X, Window.Size.Y), RenderColor, (Window.Size.X, Window.Size.Y));
-            QuadBuffer[3] = new Vertex((0, Window.Size.Y), RenderColor, (0, Window.Size.Y));
 
             for (int i = 0; i < DrawLayers.Length; i++)
             {
-                Window.Draw(QuadBuffer, PrimitiveType.Quads, 
-                    new RenderStates(DrawLayers[i].RenderFrame()));
+                ref var bounds = ref DrawLayers[i].DrawBounds;
+                var texture = DrawLayers[i].RenderFrame();
+
+                QuadBuffer[0] = new Vertex((bounds.Left, bounds.Top), Color.White, (0, 0));
+                QuadBuffer[1] = new Vertex((bounds.Left + bounds.Width, bounds.Top), Color.White, (texture.Size.X, 0));
+                QuadBuffer[2] = new Vertex((bounds.Left + bounds.Width, bounds.Top + bounds.Height), Color.White, (texture.Size.X, texture.Size.Y));
+                QuadBuffer[3] = new Vertex((bounds.Left, bounds.Top + bounds.Height), Color.White, (0, texture.Size.Y));
+
+                Window.Draw(QuadBuffer, PrimitiveType.Quads, new RenderStates(texture));
             }
 
             if (ScreenVertexCount > 0)

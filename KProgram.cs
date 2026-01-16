@@ -52,12 +52,13 @@ public static class KProgram
     public static uint UpdateTarget;
     public static double UpdateInterval;
     public static Vector2u TargetResolution;
-    public static Random RNG;
     public static RenderWindow Window;
+    public static Random RNG;
     public static KInputManager InputManager;       //Needs a rework.
     public static KRenderManager RenderManager;     //Finished. 
     public static KGameManager GameManager;         //WIP
     public static KLogManager LogManager;           //Unfinished.
+    public static VideoMode[] VideoModes;
     public static Font[] Fonts = [];
     public static KTextureAtlas[] TextureAtlases = [];
 
@@ -69,7 +70,6 @@ public static class KProgram
     public static event Action? OnDeinit;
 
     //Getters and Setters
-
     public static uint FontSize
     {
         get; set;
@@ -84,6 +84,8 @@ public static class KProgram
     {
         get; set;
     }
+
+    public static float AspectRatio => AspectX / AspectY;
 
     public static bool VSync
     {
@@ -105,7 +107,7 @@ public static class KProgram
             if (!s_vSync) Window.SetFramerateLimit(value);
         }
     }
-
+    
     public static string Title
     {
         get => s_title;
@@ -116,13 +118,13 @@ public static class KProgram
         }
     }
 
-    public static float AspectRatio => AspectX / AspectY;
 
     static KProgram() //Static constructor; initializes static members.
     {
         RNG = new();
         Window = new(VideoMode.DesktopMode, s_title);
         Window.Closed += (_, _) => Running = false;
+        VideoModes = VideoMode.FullscreenModes;
 
         //configs
         s_configPath = "config.csv";
@@ -305,14 +307,16 @@ public static class KProgram
         {
             Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             States = new(TextureAtlases[0].Texture),
-            RenderTexture = new(Window.Size.X, Window.Size.Y)
+            RenderTexture = new(Window.Size.X, Window.Size.Y),
+            DrawBounds = new(0, 0, Window.Size.X, Window.Size.Y)
         };
 
         drawLayers[1] = new KDrawLayer //Default text layer.
         {
             Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
             States = new(Fonts[0].GetTexture(12)),
-            RenderTexture = new(Window.Size.X, Window.Size.Y)
+            RenderTexture = new(Window.Size.X, Window.Size.Y),
+            DrawBounds = new(0, 0, Window.Size.X, Window.Size.Y)
         };
 
         #endregion
