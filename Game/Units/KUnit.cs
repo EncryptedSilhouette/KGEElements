@@ -1,6 +1,11 @@
-﻿namespace Elements.Game.Units
+﻿using Elements.Core;
+using Elements.Rendering;
+
+namespace Elements.Game.Units
 {
-    public class KUnit
+    public struct KUnit
     {
+        public KRectangle Bounds;
+        public KDrawData DrawData;
     }
 }

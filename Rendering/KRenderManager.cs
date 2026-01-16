@@ -218,6 +218,15 @@ namespace Elements.Rendering
             QuadBuffer[3] = new Vertex((x, y + height), color);
             DrawLayers[layer].Draw(QuadBuffer, 4);
         }
+        public void DrawRect(Vector2f a, Vector2f b, Color color, int layer = 0)
+        {
+            QuadBuffer[0] = new Vertex(a, color);
+            QuadBuffer[1] = new Vertex((b.X, a.Y), color);
+            QuadBuffer[2] = new Vertex((b.X, b.Y), color);
+            QuadBuffer[3] = new Vertex((a.X, b.Y), color);
+            DrawLayers[layer].Draw(QuadBuffer, 4);
+        }
+
 
         public void DrawRect(in FloatRect rec, Color color, int layer = 0)
         {

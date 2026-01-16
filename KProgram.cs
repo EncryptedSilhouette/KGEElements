@@ -28,14 +28,12 @@
 #endregion
 
 using Elements;
-using Elements.Core;
 using Elements.Game;
 using Elements.Rendering;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
-using System.Drawing;
 
 public record struct KTextureAtlas(Texture Texture, KSprite[] Sprites);
 public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCoords);
@@ -57,11 +55,9 @@ public static class KProgram
     public static Random RNG;
     public static RenderWindow Window;
     public static KInputManager InputManager;       //Needs a rework.
-    public static KCommandManager CommandManager;   //Unfinished.
     public static KRenderManager RenderManager;     //Finished. 
     public static KGameManager GameManager;         //WIP
     public static KLogManager LogManager;           //Unfinished.
-    public static KCLI CLI;                         //Unfinished.
     public static Font[] Fonts = [];
     public static KTextureAtlas[] TextureAtlases = [];
 
@@ -141,11 +137,9 @@ public static class KProgram
 
         //Managers
         InputManager = new();
-        CommandManager = new();
         RenderManager = new(Window, new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Stream));
         GameManager = new(RenderManager, InputManager);
         LogManager = new();
-        CLI = new(CommandManager);
     }
 
     public static void Main(string[] args) //Program entry point.
@@ -341,16 +335,12 @@ public static class KProgram
         InputManager.Update();      //Must update first or else inputs will be cleared before processed.
         Window.DispatchEvents();    //Processes new input events here. Do NOT change the order of these two.
 
-        CLI.Update(InputManager);
-        CommandManager.Update();
-
         GameManager.Update(currentUpdate);
     }
 
     private static void FrameUpdate(in uint currentUpdate, in uint currentFrame, in double deltaTime)
     {
         GameManager.FrameUpdate(RenderManager);
-        CLI.FrameUpdate(RenderManager);
         RenderManager.FrameUpdate();
     }
 

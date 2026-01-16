@@ -11,7 +11,7 @@ namespace Elements.Game
 
         public float ZoomSpeed = 50f;
         public int PanSpeed = 16;
-        public int PanBorderSize = 128;
+        public int PanBorderSize = 4;
         public View View;
 
         public KCameraCrontroller(View cameraView)
@@ -60,6 +60,7 @@ namespace Elements.Game
 
             View.Move(panAmount);
             renderManager.DrawLayers[0].RenderTexture.SetView(View);
+            Console.WriteLine(View);
         }
 
         public void ZoomCamera(KInputManager inputManager, KRenderManager renderManager)
