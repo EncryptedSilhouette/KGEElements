@@ -23,7 +23,7 @@ namespace Elements.Core
         public KButton(float x, float y, float width, float height, string text)
         {
             Color = new(200, 200, 200);
-            HeldColor = new(150, 150, 150);
+            HeldColor = new(125, 125, 125);
             DownColor = new(100, 100, 100);
             DrawData = new();
             TextBox = new(text);
@@ -31,16 +31,16 @@ namespace Elements.Core
             Bounds = new(x, y, width, height);
         }
 
-        public void Update(in float mPosX, in float mPosY)
+        public void Update(KInputManager inputManager, in float mPosX, in float mPosY)
         {
             if (KProgram.CheckRectPointCollision(Bounds, mPosX, mPosY))
             {
                 OnHover?.Invoke();
                 DrawData.Color = HeldColor;
 
-                if (KProgram.InputManager.IsMouseDown(KMouseStates.Mouse_1))
+                if (inputManager.IsMouseDown(KMouseStates.Mouse_1))
                 {
-                    if (!_isDown)
+                    if (!_isDown && !inputManager.PreviousMouseStates.HasFlag(KMouseStates.Mouse_1))
                     {
                         _isDown = true;
                         OnPressed?.Invoke();
@@ -69,7 +69,14 @@ namespace Elements.Core
         public void FrameUpdate(KRenderManager renderManager)
         {
             renderManager.DrawRect(Bounds, DrawData.Color, layer: 1);
-            renderManager.DrawText(TextBox, 50, 50, wrapThreshold: (int)Bounds.Width, layer: 1);
+            renderManager.DrawText(TextBox, Bounds.Position.X, Bounds.Position.Y, wrapThreshold: (int)Bounds.Width, layer: 1);
         }
     }
 }
+
+#if false
+x -= IMG_SIZE / 2; 
+y -= IMG_SIZE / 2; 
+center->x -= (x * new_zoom) - (x * old_zoom); 
+center->y -= (y * new_zoom) - (y * old_zoom);
+#endif

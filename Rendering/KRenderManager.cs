@@ -124,7 +124,7 @@ namespace Elements.Rendering
         //TODO add support for points, lines, and polygons.
 
 
-        private uint ScreenVertexCount;
+        private uint _sBuffvCount; //I give up naming this.
 
         public Color BackgroundColor;
         public Color RenderColor;
@@ -201,10 +201,10 @@ namespace Elements.Rendering
                 Window.Draw(QuadBuffer, PrimitiveType.Quads, new RenderStates(texture));
             }
 
-            if (ScreenVertexCount > 0)
+            if (_sBuffvCount > 0)
             {
                 ScreenBuffer.Draw(Window, States);
-                ScreenVertexCount = 0;
+                _sBuffvCount = 0;
             }
 
             Window.Display();
@@ -261,7 +261,6 @@ namespace Elements.Rendering
         public void DrawText(in KText text, float posX, float posY, int wrapThreshold = 0, int layer = 0)
         {
             if (string.IsNullOrEmpty(text.Text)) return;
-
             Vertex[] buffer = ArrayPool<Vertex>.Shared.Rent(text.Text.Length * 4);
 
             //Cursed but works for now. 
@@ -290,10 +289,20 @@ namespace Elements.Rendering
             ArrayPool<Vertex>.Shared.Return(buffer);
         }
 
-        public void DrawToScreen(Vertex[] vertices, uint vCount, int layer = 0)
+        public void DrawToScreen(Vertex[] vertices, uint vCount)
         {
-            ScreenBuffer.Update(vertices, vCount, ScreenVertexCount);
-            ScreenVertexCount += vCount;
+            ScreenBuffer.Update(vertices, vCount, _sBuffvCount);
+            _sBuffvCount += vCount;
+        }
+
+        public void DrawRectToScreen(Vector2f a, Vector2f b, Color color)
+        {
+            QuadBuffer[0] = new Vertex(a, color);
+            QuadBuffer[1] = new Vertex((b.X, a.Y), color);
+            QuadBuffer[2] = new Vertex((b.X, b.Y), color);
+            QuadBuffer[3] = new Vertex((a.X, b.Y), color);
+            ScreenBuffer.Update(QuadBuffer, 4, _sBuffvCount);
+            _sBuffvCount += 4;
         }
 
         private void ResizeView(object? _, SizeEventArgs e)

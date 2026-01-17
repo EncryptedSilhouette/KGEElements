@@ -1,27 +1,31 @@
 ﻿using Elements.Rendering;
 using SFML.Graphics;
 using SFML.System;
+using SFML.Window;
+using static SFML.Window.Mouse;
 
 namespace Elements.Game
 {
     public class KCameraCrontroller
     {
-        private float _zoomLevel = 1.1f;
+        private float _zoomLevel = 1f;
+        private float _zoomStrength = 0.1f;
 
         public float resolutionX;
         public float resolutionY;
 
         public int PanSpeed = 16;
-        public int PanBorderSize = 4;
+        public int PanBorderSize = 8;
         public View View;
 
-        public KCameraCrontroller()
+        public KCameraCrontroller(View view)
         {
+            View = view;
         }
 
         public void Init(KRenderManager renderManager)
         {
-            View.Center = (0, 0);
+
         }
 
         public void Update()
@@ -31,7 +35,7 @@ namespace Elements.Game
 
         public void FrameUpdate(KInputManager inputManager, KRenderManager renderManager)
         {
-            ZoomCamera(inputManager, renderManager);
+            ZoomCamera(inputManager, renderManager, in renderManager.DrawLayers[0]);
             PanCamera(inputManager, renderManager);
         }
 
@@ -61,35 +65,58 @@ namespace Elements.Game
             renderManager.DrawLayers[0].RenderTexture.SetView(View);
         }
 
-        public void ZoomCamera(KInputManager inputManager, KRenderManager renderManager)
+        public void ZoomCamera(KInputManager inputManager, KRenderManager renderManager, in KDrawLayer layer)
         {
             if (inputManager.ScrollDelta == 0) return;
 
-            for (int i = 0; i < MathF.Abs(inputManager.ScrollDelta); i++)
-            {
-                if (inputManager.ScrollDelta >= 1 && _zoomLevel < 4) 
-                {
-                    _zoomLevel *= _zoomStrength;
-                    renderManager.View.Zoom(_zoomStrength);
-                }
-                else if (inputManager.ScrollDelta <= -1 && _zoomLevel > 0.5f)
-                {
-                    _zoomLevel /= _zoomStrength;
-                    renderManager.View.Zoom(1 / _zoomStrength);
-                }
-            }
-        }
+            _zoomLevel += (inputManager.ScrollDelta > 0) ? -_zoomStrength : _zoomStrength;
+            if (_zoomLevel <= 0) _zoomLevel = 0.1f;
 
-        public void RotateCamera(float angle)
-        {
-            View.Rotate(angle);
+            var baseRes = layer.RenderTexture.Size;
+            var newSize = new Vector2f(_zoomLevel * renderManager.Window.Size.X, _zoomLevel * renderManager.Window.Size.Y);
+
+            var screenRatio = new Vector2f
+            {
+                X = (float) inputManager.MousePosX / renderManager.Window.Size.X,
+                Y = (float) inputManager.MousePosY / renderManager.Window.Size.Y,
+            };
+
+            Console.WriteLine($"A:{inputManager.MousePosX}, {inputManager.MousePosY}.");
+
+            var mouse = new Vector2f
+            {
+                X = View.Size.X * screenRatio.X,
+                Y = View.Size.Y * screenRatio.Y,
+            };
+
+            Console.WriteLine($"B:{mouse.X}, {mouse.Y}.");
+
+            View.Size = newSize;
+            View.Center = new Vector2f 
+            {
+                X = View.Size.X * screenRatio.X,
+                Y = View.Size.Y * screenRatio.Y,
+            };
+
+            layer.RenderTexture.SetView(View);
         }
 
         public void ResetCamera()
         {
-            View.Center = (0, 0);
-            View.Rotation = 0;
-            View.Size = new Vector2f(800, 600);
+            View = KProgram.RenderManager.Window.DefaultView;
+            _zoomLevel = 1;
         }
+
+        //public void RotateCamera(float angle)
+        //{
+        //    View.Rotate(angle);
+        //}
+
+        //public void ResetCamera()
+        //{
+        //    View.Center = (0, 0);
+        //    View.Rotation = 0;
+        //    View.Size = new Vector2f(800, 600);
+        //}
     }
 }

@@ -23,7 +23,7 @@
 //  Types belonging to this assembly are prefixed with 'K'.
 //  Much of the code follows C#'s coding-style and coding-conventions: https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions
 //  KProgram is a static class that serves as the the first layer and foundation for this app. 
-//      This class takes care of loading and initialization, and contains refrences to managers, gobal variables, and serves as the entry point of the program.
+//      This class takes care of loading and initialization, and contains refrences to managers, gobal variables, and serves as the entry coords of the program.
 //  To Be Continued...
 #endregion
 
@@ -34,6 +34,7 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 public record struct KTextureAtlas(Texture Texture, KSprite[] Sprites);
 public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCoords);
@@ -41,7 +42,7 @@ public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCo
 public static class KProgram
 {
     //Other values are initialized in the static constructor for this class.
-    const double MS_PER_SECOND = 1000.0d; //Using double for floating point precision.
+    const double MS_PER_SECOND = 1000.0d; //Using double for floating coords precision.
 
     private static bool s_vSync = false;
     private static uint s_frameLimit;
@@ -144,7 +145,7 @@ public static class KProgram
         LogManager = new();
     }
 
-    public static void Main(string[] args) //Program entry point.
+    public static void Main(string[] args) //Program entry coords.
     {
         InitAndLoad();
 
@@ -451,6 +452,12 @@ public static class KProgram
     public static bool CheckRectPointCollision(in FloatRect rectangle, float posX, float posY) =>
         posX >= rectangle.Left && posX <= rectangle.Left + rectangle.Width &&
         posY >= rectangle.Top && posY <= rectangle.Top + rectangle.Height;
+
+    public static Vector2i MapCoordsToPixel(float x, float y, View view) => Window.MapCoordsToPixel((x, y), view);
+    public static Vector2i MapCoordsToPixel(Vector2f coords, View view) => Window.MapCoordsToPixel(coords, view);
+
+    public static Vector2f MapPixelToCoords(int x, int y, View view) => Window.MapPixelToCoords((x, y), view);
+    public static Vector2f MapPixelToCoords(Vector2i pixelCoords, View view) => Window.MapPixelToCoords(pixelCoords, view);
 
     #endregion
 }

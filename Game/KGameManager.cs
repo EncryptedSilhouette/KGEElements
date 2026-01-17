@@ -2,7 +2,6 @@
 using Elements.Game.Map;
 using Elements.Game.Units;
 using Elements.Rendering;
-using SFML.Graphics;
 using SFML.System;
 
 namespace Elements.Game
@@ -36,18 +35,13 @@ namespace Elements.Game
         {
             InputManager = inputManager;
             GameMap = new KGameMap(0, 0, 32, 32);
-            CameraCrontroller = new KCameraCrontroller(renderer.Window.GetView());
+            CameraCrontroller = new KCameraCrontroller(renderer.Window.DefaultView);
 
-            ResetWindowButton = new(50,50,64,64,"Reset Window");
-            ResetWindowButton.OnPressed += ResetWindow; //SpawnUnit;
+            ResetWindowButton = new(4,4,64,64,"Reset Window");
+            ResetWindowButton.OnPressed += CameraCrontroller.ResetCamera; //ResetCamera;
 
             _unitCount = 0;
             Units = [];
-        }
-
-        public void ResetWindow()
-        {
-            //CameraCrontroller.View.Size = KProgram.;
         }
 
         public void Init()
@@ -58,7 +52,7 @@ namespace Elements.Game
 
         public void Update(in uint currentUpdate)
         {
-            ResetWindowButton.Update(InputManager.MousePosX, InputManager.MousePosY);
+            ResetWindowButton.Update(InputManager, InputManager.MousePosX, InputManager.MousePosY);
             CameraCrontroller.Update();
             GameMap.Update();
         }
@@ -72,45 +66,25 @@ namespace Elements.Game
             GameMap.FrameUpdate(renderer);
             ResetWindowButton.FrameUpdate(renderer);
 
-            
-
             if (InputManager.IsMousePressed(KMouseStates.Mouse_1) && !select)
             {
                 select = true;
                 PointA = (InputManager.MousePosX, InputManager.MousePosY);
-                Console.WriteLine("start selection");
             }
             else if (InputManager.IsMouseReleased(KMouseStates.Mouse_1) && select)
             {
                 select = false;
-                Console.WriteLine("end selection");
             }
             if (select)
             {
                 PointB = (InputManager.MousePosX, InputManager.MousePosY);
-                renderer.DrawRect(PointA, PointB, new(0, 0, 200, 100));
+                renderer.DrawRectToScreen(PointA, PointB, new(0, 0, 200, 100));
             }
 
             for (int i = 0; i < _unitCount; i++)
             {
                 renderer.DrawRect(Units[i].DrawData, Units[i].Bounds);
             }
-        }
-
-        public void SpawnUnit()
-        {
-            if (_unitCount >= Units.Length) return;
-
-            Units[_unitCount] = new KUnit
-            {
-                Bounds = new(16, 16, new(0, 0)),
-                DrawData = new()
-                {
-                    Color = Color.White,
-                    Sprite = new()
-                }
-            };
-            _unitCount++;
         }
     }
 }
