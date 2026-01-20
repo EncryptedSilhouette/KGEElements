@@ -1,8 +1,6 @@
 ﻿using Elements.Rendering;
 using SFML.Graphics;
 using SFML.System;
-using SFML.Window;
-using static SFML.Window.Mouse;
 
 namespace Elements.Game
 {
@@ -35,8 +33,10 @@ namespace Elements.Game
 
         public void FrameUpdate(KInputManager inputManager, KRenderManager renderManager)
         {
-            ZoomCamera(inputManager, renderManager, in renderManager.DrawLayers[0]);
+            ref var layer = ref renderManager.DrawLayers[0];
+            ZoomCamera(inputManager, renderManager, in layer);
             PanCamera(inputManager, renderManager);
+            layer.RenderTexture.SetView(View);
         }
 
         public void PanCamera(KInputManager inputManager, KRenderManager renderManager)
@@ -62,7 +62,6 @@ namespace Elements.Game
             }
 
             View.Move(panAmount);
-            renderManager.DrawLayers[0].RenderTexture.SetView(View);
         }
 
         public void ZoomCamera(KInputManager inputManager, KRenderManager renderManager, in KDrawLayer layer)
@@ -81,15 +80,11 @@ namespace Elements.Game
                 Y = (float) inputManager.MousePosY / renderManager.Window.Size.Y,
             };
 
-            Console.WriteLine($"A:{inputManager.MousePosX}, {inputManager.MousePosY}.");
-
             var mouse = new Vector2f
             {
                 X = View.Size.X * screenRatio.X,
                 Y = View.Size.Y * screenRatio.Y,
             };
-
-            Console.WriteLine($"B:{mouse.X}, {mouse.Y}.");
 
             View.Size = newSize;
             View.Center = new Vector2f 
@@ -97,8 +92,6 @@ namespace Elements.Game
                 X = View.Size.X * screenRatio.X,
                 Y = View.Size.Y * screenRatio.Y,
             };
-
-            layer.RenderTexture.SetView(View);
         }
 
         public void ResetCamera()

@@ -188,9 +188,9 @@ public static class KProgram
             if (debugTimer.ElapsedMilliseconds / MS_PER_SECOND >= 1)
             {
                 debugTimer.Restart();
-#if DEBUG
-                Console.Write($"\rups: {ups}, fps: {fps}");
-#endif
+//#if DEBUG
+//                Console.Write($"\r\rups: {ups}, fps: {fps}");
+//#endif
                 ups = fps = 0;
             }
 
@@ -434,6 +434,10 @@ public static class KProgram
         float b = y1 - y2;
         return MathF.Sqrt(a * a + b * b);
     }
+
+    public static float Hypotenuse(Vector2f pointA, Vector2f pointB) =>
+        Hypotenuse(pointA.X, pointA.Y, pointB.X, pointB.Y);
+
     #endregion
 
     #region Collision Utilities
@@ -453,6 +457,10 @@ public static class KProgram
     public static bool CheckRectPointCollision(in FloatRect rectangle, float posX, float posY) =>
         posX >= rectangle.Left && posX <= rectangle.Left + rectangle.Width &&
         posY >= rectangle.Top && posY <= rectangle.Top + rectangle.Height;
+
+    public static bool CheckRectPointCollision(in FloatRect rectangle, Vector2f pos) =>
+        pos.X >= rectangle.Left && pos.X <= rectangle.Left + rectangle.Width &&
+        pos.Y >= rectangle.Top && pos.Y <= rectangle.Top + rectangle.Height;
 
     public static Vector2i MapCoordsToPixel(float x, float y, View view) => Window.MapCoordsToPixel((x, y), view);
     public static Vector2i MapCoordsToPixel(Vector2f coords, View view) => Window.MapCoordsToPixel(coords, view);

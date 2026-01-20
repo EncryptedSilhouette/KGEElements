@@ -152,14 +152,14 @@ namespace Elements
         public bool IsMouseReleased(KMouseStates mouseStates) =>
             !MouseStates.HasFlag(mouseStates) && PreviousMouseStates.HasFlag(mouseStates);
 
-        public bool CheckKeyStates(in byte keyCode, in KKeyStates states) =>
+        public bool CheckKeyStates(byte keyCode, KKeyStates states) =>
             keyCode < MAX_KEYS ? _keyStates[keyCode].HasFlag(states) : false;
 
-        public bool IsKeyDown(in byte keyCode) => !CheckKeyStates(keyCode, KKeyStates.RELEASED);
+        public bool IsKeyDown(byte keyCode) => !CheckKeyStates(keyCode, KKeyStates.RELEASED);
 
-        public bool IsKeyPressed(in byte keyCode) => CheckKeyStates(keyCode, KKeyStates.PRESSED);
+        public bool IsKeyPressed(byte keyCode) => CheckKeyStates(keyCode, KKeyStates.PRESSED);
 
-        public bool IsKeyReleased(in byte keyCode) => CheckKeyStates(keyCode, KKeyStates.RELEASED);
+        public bool IsKeyReleased(byte keyCode) => CheckKeyStates(keyCode, KKeyStates.RELEASED);
 
         //SFML support
         public bool IsKeyDown(in Keyboard.Key key) => !CheckKeyStates((byte)key, KKeyStates.RELEASED);

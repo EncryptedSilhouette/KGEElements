@@ -1,4 +1,6 @@
-﻿namespace Elements.Core
+﻿using SFML.System;
+
+namespace Elements.Core
 {
     public struct KTransform
     {
@@ -7,6 +9,8 @@
         public float ScaleX;
         public float ScaleY;
         public float Rotation;
+
+        public Vector2f Position => new(PosX, PosY);
 
         public KTransform() => (PosX, PosY, ScaleX, ScaleY, Rotation) = (0, 0, 1, 1, 0);
 
