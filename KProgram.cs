@@ -425,6 +425,7 @@ public static class KProgram
     public static void GetIndex(int column, int row, int width, out int index) => index = column + row * width;
 
     public static (int c, int r) GetPosition(int index, int width) => (index % width, index / width);
+    
     public static void GetPosition(int index, int width, out int column, out int row) => (column, row) = GetPosition(index, width);
 
     public static float Hypotenuse(float x1, float y1, float x2, float y2)
