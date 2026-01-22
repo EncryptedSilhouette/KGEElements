@@ -108,18 +108,25 @@ namespace Elements.Game
                 SelectionBox.Selected = false;
                 SelectedUnits = new(Units.Length);
 
+                var pointAWorld = KProgram.MapPixelToCoords((Vector2i)SelectionBox.A, renderer.DrawLayers[0].RenderTexture.GetView());
+                var selectionSizeWorld = KProgram.MapPixelToCoords((Vector2i)SelectionBox.B, renderer.DrawLayers[0].RenderTexture.GetView()) -
+                    pointAWorld;
                 for (int i = 0; i < Units.Length; i++)
                 {
-                    ref var unit = ref Units[i];
-                    
-                    if (KProgram.CheckRectPointCollision(
-                        new FloatRect(SelectionBox.A, SelectionBox.B - SelectionBox.A), 
-                        unit.Bounds.Transform.Position))
+                    var sBoxWorld = new FloatRect(pointAWorld, selectionSizeWorld); 
+                    if (KProgram.CheckRectPointCollision(sBoxWorld, Units[i].Bounds.Transform.Position))
                     {
                         SelectedUnits.Add(i);
-                        Console.WriteLine($"Selected Unit {i}");
                     }
                 }
+                
+                Console.WriteLine($"Selected units:{SelectedUnits.Count}");
+
+                for (int i = 0; i < SelectedUnits.Count; i++)
+                {
+                    Console.Write($"{i}, ");
+                }
+                Console.WriteLine();
             }
 
             for (int i = 0; i < _unitCount; i++)

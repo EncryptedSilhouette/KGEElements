@@ -34,7 +34,6 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 public record struct KTextureAtlas(Texture Texture, KSprite[] Sprites);
 public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCoords);
@@ -71,7 +70,7 @@ public static class KProgram
     public static event Action? OnDeinit;
 
     //Getters and Setters
-    public static uint FontSize
+    public static byte FontSize
     {
         get; set;
     }
@@ -140,7 +139,7 @@ public static class KProgram
 
         //Managers
         InputManager = new();
-        RenderManager = new(Window, new VertexBuffer(4096, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Stream));
+        RenderManager = new(Window, new VertexBuffer(4096, PrimitiveType.Triangles, VertexBuffer.UsageSpecifier.Stream));
         GameManager = new(RenderManager, InputManager);
         LogManager = new();
     }
@@ -306,18 +305,18 @@ public static class KProgram
 
         drawLayers[0] = new KDrawLayer //Default render layer.
         {
-            Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+            Buffer = new VertexBuffer(16384, PrimitiveType.Triangles, VertexBuffer.UsageSpecifier.Dynamic),
             States = new(TextureAtlases[0].Texture),
-            RenderTexture = new(Window.Size.X, Window.Size.Y),
-            DrawBounds = new(0, 0, Window.Size.X, Window.Size.Y)
+            RenderTexture = new(Window.Size),
+            DrawBounds = new((0, 0), (Vector2f) Window.Size)
         };
 
         drawLayers[1] = new KDrawLayer //Default text layer.
         {
-            Buffer = new VertexBuffer(16384, PrimitiveType.Quads, VertexBuffer.UsageSpecifier.Dynamic),
+            Buffer = new VertexBuffer(16384, PrimitiveType.Triangles, VertexBuffer.UsageSpecifier.Dynamic),
             States = new(Fonts[0].GetTexture(12)),
-            RenderTexture = new(Window.Size.X, Window.Size.Y),
-            DrawBounds = new(0, 0, Window.Size.X, Window.Size.Y)
+            RenderTexture = new(Window.Size),
+            DrawBounds = new((0, 0), (Vector2f)Window.Size)
         };
 
         #endregion
@@ -363,10 +362,8 @@ public static class KProgram
                 ID = string.Empty,
                 TextureCoords = new FloatRect
                 {
-                    Left = 0,
-                    Top = 0,
-                    Width = texture.Size.X,
-                    Height = texture.Size.Y,
+                    Position = (0,0),
+                    Size = (Vector2f)texture.Size,
                 },
                 Rotocenter = new Vector2f
                 {
@@ -399,10 +396,8 @@ public static class KProgram
                     ID = contents[1],
                     TextureCoords = new FloatRect
                     {
-                        Left = Convert.ToInt32(contents[2]),
-                        Top = Convert.ToInt32(contents[3]),
-                        Width = Convert.ToInt32(contents[4]),
-                        Height = Convert.ToInt32(contents[5]),
+                        Position = (Convert.ToInt32(contents[2]), Convert.ToInt32(contents[3])),
+                        Size = (Convert.ToInt32(contents[4]), Convert.ToInt32(contents[5])),
                     },
                     Rotocenter = new Vector2f
                     {
