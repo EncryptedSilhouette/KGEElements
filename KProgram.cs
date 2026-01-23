@@ -37,6 +37,7 @@ using System.Diagnostics;
 
 public record struct KTextureAtlas(Texture Texture, KSprite[] Sprites);
 public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCoords);
+public record struct KGlyphHandle(byte fontID, char chr, byte size, bool bold, byte lnThickness);
 
 public static class KProgram
 {
@@ -47,6 +48,7 @@ public static class KProgram
     private static uint s_frameLimit;
     private static string s_title = string.Empty;
     private static string s_configPath;
+    private static Dictionary<KGlyphHandle, Glyph> s_glyphCache = new(52);
 
     public static bool Running = false;
     public static uint UpdateTarget;
@@ -68,6 +70,7 @@ public static class KProgram
     public static event Action? OnStart;
     public static event Action? OnStop;
     public static event Action? OnDeinit;
+    public static event Action<int, KGlyphHandle>? GlyphCacheUpdated; //int: fontID
 
     //Getters and Setters
     public static byte FontSize
@@ -118,6 +121,25 @@ public static class KProgram
         }
     }
 
+    public static Glyph GetGlyphFromCache(int fontID, KGlyphHandle handle)
+    {
+        if (!s_glyphCache.TryGetValue(handle, out Glyph g))
+        {
+            g = Fonts[fontID].GetGlyph(handle.chr, handle.size, handle.bold, handle.lnThickness);
+            s_glyphCache.Add(handle, g);
+#if DEBUG
+            LogManager.DebugLog($"Glyph cached: fontID: {handle.fontID}, char: {handle.chr}, bold: {handle.bold}, lnThickness: {handle.lnThickness}");
+
+#endif
+            GlyphCacheUpdated?.Invoke(fontID, handle);
+        }
+        return g;
+    }
+
+    public static void UpdateTextLayer()
+    {
+        
+    }
 
     static KProgram() //Static constructor; initializes static members.
     {
@@ -321,7 +343,7 @@ public static class KProgram
 
         #endregion
 
-        RenderManager.Init(drawLayers);
+        RenderManager.Init(drawLayers, Fonts);
         InputManager.Init(Window);
         GameManager.Init();
 

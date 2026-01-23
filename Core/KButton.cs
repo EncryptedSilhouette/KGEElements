@@ -1,5 +1,6 @@
 ﻿using Elements.Rendering;
 using SFML.Graphics;
+using SFML.System;
 
 namespace Elements.Core
 {
@@ -26,10 +27,13 @@ namespace Elements.Core
             HeldColor = new(125, 125, 125);
             DownColor = new(100, 100, 100);
             DrawData = new();
-            TextBox = new(text);
+            TextBox = new(text, new Vertex[text.Length * 6]);
 
-            Bounds = new(x, y, width, height);
+            Bounds = new((x, y), (width, height));
         }
+
+        public KButton(Vector2f position, Vector2f size, string text) : 
+            this(position.X, position.Y, size.X, size.Y, text) { }
 
         public void Update(KInputManager inputManager, in float mPosX, in float mPosY)
         {
@@ -68,8 +72,8 @@ namespace Elements.Core
 
         public void FrameUpdate(KRenderManager renderManager)
         {
-            renderManager.DrawRect(Bounds, DrawData.Color, layer: 1);
-            renderManager.DrawText(TextBox, Bounds.Position.X, Bounds.Position.Y, wrapThreshold: (int)Bounds.Width, layer: 1);
+            //renderManager.DrawRect(Bounds, DrawData.Color, layer: 1);
+            //renderManager.DrawText(TextBox, Bounds.Position.X, Bounds.Position.Y, wrapThreshold: (int)Bounds.Width, layer: 1);
         }
     }
 }

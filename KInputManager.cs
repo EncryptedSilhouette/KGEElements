@@ -106,7 +106,7 @@ namespace Elements
         }
 
         private void UpdateMousePosition(object? ignored, MouseMoveEventArgs e) => 
-            (MousePosX, MousePosY) = (e.X, e.Y);
+            (MousePosX, MousePosY) = e.Position;
 
         private void UpdateScrollDelta(object? ignored, MouseWheelScrollEventArgs e) => ScrollDelta += e.Delta;
 

@@ -165,7 +165,7 @@ namespace Elements.Game.Map
 
         public void CreateTileMap(KTextureAtlas textureAtlas)
         {
-            Vertex[] vertices = new Vertex[Nodes.Length * 4 + _resources.Length * 4];
+            Vertex[] vertices = new Vertex[Nodes.Length * 6 + _resources.Length * 6];
 
             float angle = _random.Next(4) * 90;
 
@@ -185,28 +185,45 @@ namespace Elements.Game.Map
                     _ => Color.White,
                 };
 
-                vertices[i * 4] = new Vertex
+                //Find a better way for the love of god.
+                //ABD
+                vertices[i * 6] = new Vertex
                 {
                     Position = (PosX + TileWidth * (i % Columns), 
                                 PosY + TileHeight * (i / Columns)),
                     Color = color,
                     TexCoords = (rec.Left, rec.Top),
                 };
-                vertices[i * 4 + 1] = new Vertex
+                vertices[i * 6 + 1] = new Vertex
                 {
                     Position = (PosX + TileWidth * (i % Columns) + TileWidth,
                                 PosY + TileHeight * (i / Columns)),
                     Color = color,
                     TexCoords = (rec.Left + rec.Width, rec.Top),
                 };
-                vertices[i * 4 + 2] = new Vertex
+                vertices[i * 6 + 2] = new Vertex
+                {
+                    Position = (PosX + TileWidth * (i % Columns),
+                                PosY + TileHeight * (i / Columns) + TileHeight),
+                    Color = color,
+                    TexCoords = (rec.Left, rec.Top + rec.Height),
+                };
+                //BCD
+                vertices[i * 6 + 3] = new Vertex
+                {
+                    Position = (PosX + TileWidth * (i % Columns) + TileWidth,
+                                PosY + TileHeight * (i / Columns)),
+                    Color = color,
+                    TexCoords = (rec.Left + rec.Width, rec.Top),
+                };
+                vertices[i * 6 + 4] = new Vertex
                 {
                     Position = (PosX + TileWidth * (i % Columns) + TileWidth,
                                 PosY + TileHeight * (i / Columns) + TileHeight),
                     Color = color,
                     TexCoords = (rec.Left + rec.Width, rec.Top + rec.Height),
                 };
-                vertices[i * 4 + 3] = new Vertex
+                vertices[i * 6 + 5] = new Vertex
                 {
                     Position = (PosX + TileWidth * (i % Columns),
                                 PosY + TileHeight * (i / Columns) + TileHeight),
@@ -219,29 +236,44 @@ namespace Elements.Game.Map
             {
                 int handle = _resources[i];
                 FloatRect rec = KProgram.TextureAtlases[0].Sprites[11].TextureCoords;
-
-                vertices[Nodes.Length * 4 + i * 4] = new Vertex
+                
+                vertices[Nodes.Length * 6 + i * 6] = new Vertex
                 {
                     Position = (PosX + TileWidth * (handle % Columns),
                                 PosY + TileHeight * (handle / Columns)),
                     Color = Color.White,
                     TexCoords = (rec.Left, rec.Top),
                 };
-                vertices[Nodes.Length * 4 + i * 4 + 1] = new Vertex
+                vertices[Nodes.Length * 6 + i * 6 + 1] = new Vertex
                 {
                     Position = (PosX + TileWidth * (handle % Columns) + TileWidth,
                                 PosY + TileHeight * (handle / Columns)),
                     Color = Color.White,
                     TexCoords = (rec.Left + rec.Width, rec.Top),
                 };
-                vertices[Nodes.Length * 4 + i * 4 + 2] = new Vertex
+                vertices[Nodes.Length * 6 + i * 6 + 2] = new Vertex
+                {
+                    Position = (PosX + TileWidth * (handle % Columns),
+                                PosY + TileHeight * (handle / Columns) + TileHeight),
+                    Color = Color.White,
+                    TexCoords = (rec.Left, rec.Top + rec.Height),
+                };
+
+                vertices[Nodes.Length * 6 + i * 6 + 3] = new Vertex
+                {
+                    Position = (PosX + TileWidth * (handle % Columns) + TileWidth,
+                                PosY + TileHeight * (handle / Columns)),
+                    Color = Color.White,
+                    TexCoords = (rec.Left + rec.Width, rec.Top),
+                };
+                vertices[Nodes.Length * 6 + i * 6 + 4] = new Vertex
                 {
                     Position = (PosX + TileWidth * (handle % Columns) + TileWidth,
                                 PosY + TileHeight * (handle / Columns) + TileHeight),
                     Color = Color.White,
                     TexCoords = (rec.Left + rec.Width, rec.Top + rec.Height),
                 };
-                vertices[Nodes.Length * 4 + i * 4 + 3] = new Vertex
+                vertices[Nodes.Length * 6 + i * 6 + 5] = new Vertex
                 {
                     Position = (PosX + TileWidth * (handle % Columns),
                                 PosY + TileHeight * (handle / Columns) + TileHeight),
