@@ -7,13 +7,13 @@ namespace Elements.Rendering
 {
     public class KRenderManager
     {
-        private uint _sBuffvCount; //I give up naming this.
+        private uint _bufferOffset;
+        private View _view;
 
         public Color BackgroundColor;
         public Color RenderColor;
         public RenderStates States;
         public RenderWindow Window;
-        public View ScreenView;
         public VertexBuffer ScreenBuffer;
         public KDrawLayer[] DrawLayers;
         public Vertex[] drawBuffer;
@@ -28,25 +28,15 @@ namespace Elements.Rendering
         public Vector2f ScreenBottomLeft => (0, Window.Size.Y);
         public Vector2f ScreenCenter => (Vector2f) Window.Size / 2;
 
-        public View View
-        {
-            get => ScreenView;
-            set
-            {
-                ScreenView = value;
-                Window.SetView(ScreenView);
-            }
-        }
-
         public KRenderManager(RenderWindow window, VertexBuffer screenBuffer)
         {
-            BackgroundColor = Color.Black;
-            RenderColor = Color.White;
-            States = RenderStates.Default;
+            _bufferOffset = 0;
+            _view = window.DefaultView;
 
+            BackgroundColor = Color.Black;
+            States = RenderStates.Default;
             Window = window;
             ScreenBuffer = screenBuffer;
-            ScreenView = window.GetView();
             drawBuffer = new Vertex[6];
             DrawLayers = [];
         }
@@ -67,18 +57,11 @@ namespace Elements.Rendering
         {
             Window.Clear(BackgroundColor);
 
-
             for (int i = 0; i < DrawLayers.Length; i++)
             {
                 ref var bounds = ref DrawLayers[i].DrawBounds;
                 var texture = DrawLayers[i].RenderFrame();
 
-                //Old (SFML 2.6.2)
-                //A QuadBuffer[0] = new Vertex((bounds.Left, bounds.Top), Color.White, (0, 0)); 
-                //B QuadBuffer[1] = new Vertex((bounds.Left + bounds.Width, bounds.Top), Color.White, (texture.Size.X, 0)); 
-                //C QuadBuffer[2] = new Vertex((bounds.Left + bounds.Width, bounds.Top + bounds.Height), Color.White, (texture.Size.X, texture.Size.Y)); 
-                //D QuadBuffer[3] = new Vertex((bounds.Left, bounds.Top + bounds.Height), Color.White, (0, texture.Size.Y)); 
-                
                 //ABD
                 drawBuffer[0] = new Vertex((bounds.Left, bounds.Top), Color.White, (0, 0)); 
                 drawBuffer[1] = new Vertex((bounds.Left + bounds.Width, bounds.Top), Color.White, (texture.Size.X, 0)); 
@@ -91,22 +74,20 @@ namespace Elements.Rendering
                 Window.Draw(drawBuffer, PrimitiveType.Triangles, new RenderStates(texture));
             }
 
-            if (_sBuffvCount > 0)
+            if (_bufferOffset > 0)
             {
                 ScreenBuffer.Draw(Window, States);
-                _sBuffvCount = 0;
+                _bufferOffset = 0;
             }
 
             Window.Display();
         }
 
-        public void DrawBuffer(Vertex[] vertices, uint vCount, int layer = 0) => 
-            DrawLayers[layer].Draw(vertices, vCount);
-
-            public void DrawToScreen(Vertex[] vertices, uint vCount)
+        //Draw to screen. 
+        public void DrawBufferToScreen(Vertex[] vertices, uint vCount)
         {
-            ScreenBuffer.Update(vertices, vCount, _sBuffvCount);
-            _sBuffvCount += vCount;
+            ScreenBuffer.Update(vertices, vCount, _bufferOffset);
+            _bufferOffset += vCount;
         }
 
         public void DrawRectToScreen(Vector2f a, Vector2f b, Color color)
@@ -120,23 +101,14 @@ namespace Elements.Rendering
             drawBuffer[4] = new Vertex((b.X, b.Y), color);
             drawBuffer[5] = new Vertex((a.X, b.Y), color);
 
-            ScreenBuffer.Update(drawBuffer, 4, _sBuffvCount);
-            _sBuffvCount += 4;
+            ScreenBuffer.Update(drawBuffer, 6, _bufferOffset);
+            _bufferOffset += 6;
         }
 
-        public void DrawRect(float x, float y, float width, float height, Color color, int layer = 0)
-        {
-            //ABD
-            drawBuffer[0] = new Vertex((x, y), color);
-            drawBuffer[1] = new Vertex((x + width, y), color);
-            drawBuffer[2] = new Vertex((x, y + height), color);
-            //BCD
-            drawBuffer[3] = new Vertex((x + width, y), color);
-            drawBuffer[4] = new Vertex((x + width, y + height), color);
-            drawBuffer[5] = new Vertex((x, y + height), color);
-            
-            DrawLayers[layer].Draw(drawBuffer, 6);
-        }
+        //Draw Layers.
+        public void DrawBuffer(Vertex[] vertices, uint vCount, int layer = 0) => 
+            DrawLayers[layer].Draw(vertices, vCount);
+
         public void DrawRect(Vector2f a, Vector2f b, Color color, int layer = 0)
         {
             //ABD
@@ -151,21 +123,10 @@ namespace Elements.Rendering
             DrawLayers[layer].Draw(drawBuffer, 6);
         }
 
-
-        public void DrawRect(in FloatRect rec, Color color, int layer = 0)
-        {
-            //ABD
-            drawBuffer[0] = new Vertex(rec.Position, color);
-            drawBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), color);
-            drawBuffer[2] = new Vertex((rec.Left, rec.Top + rec.Height), color);
-            //BCD
-            drawBuffer[3] = new Vertex((rec.Left + rec.Width, rec.Top), color);
-            drawBuffer[4] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), color);
-            drawBuffer[5] = new Vertex((rec.Left, rec.Top + rec.Height), color);
-
-            DrawLayers[layer].Draw(drawBuffer, 6);
-        }
-
+        public void DrawRect(in FloatRect rec, Color color, int layer = 0) => 
+            DrawRect(rec.Position, rec.Size, color, layer = 0);
+        
+        //Draw w/ texture data.
         public void DrawRect(in KDrawData dat, in FloatRect rec, int layer = 0)
         {
             //ABD
@@ -194,17 +155,15 @@ namespace Elements.Rendering
             DrawLayers[layer].Draw(drawBuffer, 6);
         }
 
-        public void DrawText(KTextBox textBox, int layer = 1)
-        {
-            DrawLayers[layer].Draw(textBox.Text.VertexBuffer, textBox.Text.VertexCount);
-        }
+        //Draw text.
+        public void DrawText(in KText text, int layer = 1) =>
+            DrawLayers[layer].Draw(SFML.Graphics.Text.VertexBuffer, SFML.Graphics.Text.VertexCount);
 
         private void ResizeView(object? _, SizeEventArgs e)
         {
-            
-            ScreenView.Size = (Vector2f)e.Size;
-            ScreenView.Center = ScreenView.Size / 2;
-            Window.SetView(ScreenView);
+            _view.Size = (Vector2f)e.Size;
+            _view.Center = _view.Size / 2;
+            Window.SetView(_view);
         }
     }
 }
