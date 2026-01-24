@@ -39,6 +39,17 @@ namespace Elements.Rendering
 
             RenderTexture.Display();
             return RenderTexture.Texture;
-        }
+        } 
+
+        public Texture RenderFrame(in RenderStates states)
+        {
+            RenderTexture.Clear(ClearColor);
+            
+            Buffer.Draw(RenderTexture, 0, VertexCount, states);
+            VertexCount = 0;
+
+            RenderTexture.Display();
+            return RenderTexture.Texture;
+        } 
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using Elements.Core;
+﻿using Elements.Core;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
