@@ -7,6 +7,8 @@ namespace Elements.Rendering
 {
     public class KRenderManager
     {
+        public const int SCREEN_LAYER = 0; 
+
         private uint _bufferOffset;
         private View _view;
 
@@ -154,10 +156,6 @@ namespace Elements.Rendering
 
             DrawLayers[layer].Draw(drawBuffer, 6);
         }
-
-        //Draw text.
-        public void DrawText(in KText text, int layer = 1) =>
-            DrawLayers[layer].Draw(SFML.Graphics.Text.VertexBuffer, SFML.Graphics.Text.VertexCount);
 
         private void ResizeView(object? _, SizeEventArgs e)
         {

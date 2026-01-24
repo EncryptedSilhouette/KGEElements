@@ -1,11 +1,19 @@
 using SFML.Graphics;
+using SFML.System;
 
 namespace Elements.Rendering
 {
+    public record struct KTextLayer(int Handle, byte FontID, byte FontSize); 
+    public record struct KTextBox(FloatRect bounds, KGlyphHandle[] glyphs);
+    public record struct KGlyphHandle(byte FontID, char Chr, byte Size, bool Bold);
+    
     public class KTextManager
     {
-        public int[] TextLayers;
+        private Dictionary<KGlyphHandle, Glyph> _glyphCache = new(52);
+
         public Font[] Fonts;
+        public KTextLayer[] TextLayers;
+        public event Action<KGlyphHandle>? GlyphCacheUpdated; //int: fontID
 
         public KTextManager()
         {
@@ -13,7 +21,7 @@ namespace Elements.Rendering
             Fonts = [];
         }
 
-        public KTextManager(int[] textLayers, Font[] fonts)
+        public KTextManager(KTextLayer[] textLayers, Font[] fonts)
         {
             TextLayers = textLayers;
             Fonts = fonts;
@@ -26,45 +34,77 @@ namespace Elements.Rendering
 
         public void FrameUpdate(KRenderManager renderer)
         {
+            if (Fonts.Length < 1 || TextLayers.Length < 1) return;
+                
+            Font font;
+
             for (int i = 0; i < TextLayers.Length; i++)
             {
-                renderer.DrawLayers[i].Draw();
+                font = Fonts[TextLayers[i].FontID];
+
+                
+
+                renderer.DrawLayers[TextLayers[i].Handle].RenderFrame(
+                    new RenderStates(font.GetTexture(TextLayers[i].FontSize)));
             }
         }
 
-        public KTextBox CreateTextBox(int fontID, Vector2f position, Color color, 
+        public KTextBox CreateTextBox(byte fontID, byte fontSize, string text, Vector2f position, Color color, 
             bool bold = false, 
             byte lnSpacing = 4,
-            byte lnThickness = 0, 
-            byte fontSize = 14, 
             int wrapThreshold = 0)
         {
             FloatRect bounds = new FloatRect(position, (0,0));
 
-            if (string.IsNullOrEmpty(Text)) return new KTextBox(bounds, this);
+            if (string.IsNullOrEmpty(text)) return new KTextBox(bounds, []);
 
-            var chars = Text.AsSpan();
+            var chars = text.AsSpan();
+            var buffer = new KGlyphHandle[chars.Length];
 
-            for (int i = 0; i < chars.Length && i * 6 <= VertexBuffer.Length; i++)
+            for (int i = 0; i < chars.Length; i++)
             {
+                var handle = new KGlyphHandle(fontID, chars[fontID], fontSize, bold);
+
                 if (chars[i] == '\n')
                 {
                     bounds.Position.X = 0;
                     bounds.Position.Y -= fontSize + lnSpacing;
+                    buffer[i] = new KGlyphHandle(fontID, chars[i], fontSize, bold);
                     continue;    
                 }
 
-                KGlyphHandle handle = new(0, chars[fontID], fontSize, false, 0);
+                var glyph = GetGlyphFromCache(handle);
 
-                var glyph = KProgram.GetGlyphFromCache(0, handle);
+                buffer[i] = new KGlyphHandle(fontID, chars[i], fontSize, bold);
 
                 if (wrapThreshold > 0 && bounds.Size.X + glyph.Advance > wrapThreshold)
                 {
                     bounds.Position.X = 0;
                     bounds.Position.Y -= fontSize + lnSpacing;
                 }
+            }
+            return new KTextBox(new FloatRect(position, bounds.Size), buffer);
+        }
 
-                //ABC
+        public Glyph GetGlyphFromCache(KGlyphHandle handle)
+        {
+            if (!_glyphCache.TryGetValue(handle, out Glyph glyph))
+            {
+                glyph = Fonts[handle.FontID].GetGlyph(handle.Chr, handle.Size, handle.Bold, 0);
+                _glyphCache.Add(handle, glyph);
+#if DEBUG
+                KProgram.LogManager.DebugLog($"Glyph cached: fontID: {handle.FontID}, char: {handle.Chr}, bold: {handle.Bold}");
+
+#endif
+                GlyphCacheUpdated?.Invoke(handle);
+            }
+            return glyph;
+        }
+    }
+}
+
+#if false
+//ABC
                 VertexBuffer[i * 6] = new()
                 {
                     Position = (position.X + bounds.Position.X + glyph.Bounds.Left,
@@ -110,8 +150,4 @@ namespace Elements.Rendering
                 };
                 bounds.Position.X += glyph.Advance;
             }
-
-            return new KTextBox(bounds, this);
-        }
-    }
-}
+#endif

@@ -13,7 +13,7 @@ namespace Elements.Core
         public Color DownColor;
         public FloatRect Bounds;
         public KDrawData DrawData;
-        public KText TextBox;
+        //public KText TextBox;
 
         public Action? OnHover;
         public Action? OnPressed;
@@ -27,7 +27,7 @@ namespace Elements.Core
             HeldColor = new(125, 125, 125);
             DownColor = new(100, 100, 100);
             DrawData = new();
-            TextBox = new(text, new Vertex[text.Length * 6]);
+            //TextBox = new(text, new Vertex[text.Length * 6]);
 
             Bounds = new((x, y), (width, height));
         }
