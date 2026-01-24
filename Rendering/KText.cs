@@ -49,7 +49,7 @@ namespace Elements.Rendering
 
                 KGlyphHandle handle = new(0, chars[fontID], fontSize, false, 0);
 
-                var glyph = KProgram.GetGlyphFromCache(0, handle);
+                var glyph = KProgram.GetGlyphFromCache(handle);
 
                 if (wrapThreshold > 0 && bounds.Size.X + glyph.Advance > wrapThreshold)
                 {

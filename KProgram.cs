@@ -37,7 +37,7 @@ using System.Diagnostics;
 
 public record struct KTextureAtlas(Texture Texture, KSprite[] Sprites);
 public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCoords);
-public record struct KGlyphHandle(byte fontID, char chr, byte size, bool bold, byte lnThickness);
+public record struct KGlyphHandle(byte FontID, char chr, byte size, bool bold, byte lnThickness);
 
 public static class KProgram
 {
@@ -70,13 +70,7 @@ public static class KProgram
     public static event Action? OnStart;
     public static event Action? OnStop;
     public static event Action? OnDeinit;
-    public static event Action<int, KGlyphHandle>? GlyphCacheUpdated; //int: fontID
-
-    //Getters and Setters
-    public static byte FontSize
-    {
-        get; set;
-    }
+    public static event Action<KGlyphHandle>? GlyphCacheUpdated; //int: fontID
 
     public static float AspectX
     {
@@ -121,19 +115,19 @@ public static class KProgram
         }
     }
 
-    public static Glyph GetGlyphFromCache(int fontID, KGlyphHandle handle)
+    public static Glyph GetGlyphFromCache(KGlyphHandle handle)
     {
-        if (!s_glyphCache.TryGetValue(handle, out Glyph g))
+        if (!s_glyphCache.TryGetValue(handle, out Glyph glyph))
         {
-            g = Fonts[fontID].GetGlyph(handle.chr, handle.size, handle.bold, handle.lnThickness);
-            s_glyphCache.Add(handle, g);
+            glyph = Fonts[handle.FontID].GetGlyph(handle.chr, handle.size, handle.bold, handle.lnThickness);
+            s_glyphCache.Add(handle, glyph);
 #if DEBUG
-            LogManager.DebugLog($"Glyph cached: fontID: {handle.fontID}, char: {handle.chr}, bold: {handle.bold}, lnThickness: {handle.lnThickness}");
+            LogManager.DebugLog($"Glyph cached: fontID: {handle.FontID}, char: {handle.chr}, bold: {handle.bold}, lnThickness: {handle.lnThickness}");
 
 #endif
-            GlyphCacheUpdated?.Invoke(fontID, handle);
+            GlyphCacheUpdated?.Invoke(handle);
         }
-        return g;
+        return glyph;
     }
 
     public static void UpdateTextLayer()
@@ -151,7 +145,6 @@ public static class KProgram
         //configs
         s_configPath = "config.csv";
         Title = "Elements";
-        FontSize = 14;
         UpdateTarget = 30;
         FrameLimit = UpdateTarget;
         TargetResolution = Window.Size;
@@ -487,140 +480,3 @@ public static class KProgram
 
     #endregion
 }
-
-#if DEBUG
-//Ignore.
-#region Old code
-
-#if false
-
- //Collision functions.
-    public static bool CheckCirclePointCollision(in float centerX, in float centerY, in float radius, in float posX, in float posY)
-    {
-        double distX = posX - centerX;
-        double distY = posY - centerY;
-        //checks hypotenuse without sqrt. Squareing negates negatives.
-        //  a^2   +         b^2              c^2
-        if (distX * distX + distY * distY <= radius * radius) return true;
-        else return false;
-    }
-
-    public static bool CheckRectPointCollision(in float centerX, in float centerY, in float width, in float height, in float posX, in float posY)
-    {
-        float halfWidth = width / 2;
-        float halfHeight = height / 2;
-
-        //if within x bounds
-        if (posX >= centerX - halfWidth && posX <= centerX + halfWidth)
-        {
-            //if within y bounds
-            if (posY >= centerY - halfHeight && posY <= centerY + halfHeight) return true;
-        }
-        return false;
-    }
-
-    public static bool CheckRectPointCollision(in KRectangle rectangle, in float posX, in float posY) =>
-        CheckRectPointCollision(
-            rectangle.Transform.PosX, rectangle.Transform.PosY,
-            rectangle.Width * rectangle.Transform.ScaleX, rectangle.Height * rectangle.Transform.ScaleY,
-            posX, posY);
-//Other shit
-
-var contents = File.ReadAllLines(filePath);
-List<KTextureAtlas> atlases = new(contents.Length - 1);
-
-//First line should be the texture path.
-KTextureAtlas atlas = new()
-{
-    Texture = new(contents[0]),
-    Sprites = []
-};
-
-//Add the full texture as default sprite.
-sprites.Add(new((0, 0), (atlas.Texture.Size.X, atlas.Texture.Size.Y)));
-
-LogManager.DebugLog($"Loading texture atlas: {Path.GetFileNameWithoutExtension(filePath)}.");
-
-for (int i = 1; i < contents.Length; i++)
-{
-    var values = contents[i].Split(',');
-
-    switch (values[0])
-    {
-        case "sprite":
-            sprites.Add(new FloatRect()
-            {
-                Left = Convert.ToInt32(values[2]),
-                Top = Convert.ToInt32(values[3]),
-                Width = Convert.ToInt32(values[4]),
-                Height = Convert.ToInt32(values[5])
-            });
-            LogManager
-                .DebugLog($"Added sprite: {values[1]} to atlas: {Path.GetFileNameWithoutExtension(filePath)}.");
-            break;
-
-        default:
-            break;
-    }
-}
-
-TextureAtlases.Add(Path.GetFileNameWithoutExtension(contents[0]), atlas);
-
-
-
-private static void StartGameLoop()
-{
-    uint ups = 0;
-    uint fps = 0;
-    uint currentUpdate = 0;
-    uint currentFrame = 0;
-    double unprocessedTime = 0;
-    double newTime = 0;
-    double lastTime;
-
-    Running = true;
-    Stopwatch debugTimer = Stopwatch.StartNew();
-    Stopwatch loopTimer = Stopwatch.StartNew();
-    lastTime = loopTimer.ElapsedTicks;
-
-    while (Running)
-    {
-        //Keeps track of time between updates.
-        newTime = loopTimer.ElapsedTicks;
-        unprocessedTime += (newTime - lastTime) / TimeSpan.TicksPerMillisecond;
-        lastTime = newTime;
-
-        //Debug tracker.
-        if (debugTimer.ElapsedMilliseconds / MS_PER_SECOND >= 1)
-        {
-            debugTimer.Restart();
-#if DEBUG
-            Console.Write($"\rups: {ups}, fps: {fps}");
-#endif
-            ups = fps = 0;
-        }
-
-        //Maintains target FPS.
-        if (unprocessedTime < UpdateInterval) continue;
-
-        //Update and loop if lagging.
-        do
-        {
-            ups++;
-            currentUpdate++;
-            unprocessedTime -= UpdateInterval;
-            Update(currentUpdate);
-        }
-        while (unprocessedTime >= UpdateInterval && Running);
-
-        //Update and draw frame.
-        fps++;
-        currentFrame++;
-        FrameUpdate(currentUpdate, currentFrame);
-    }
-}
-#endif
-
-#endregion
-
-#endif
