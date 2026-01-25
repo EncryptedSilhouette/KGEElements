@@ -1,30 +1,32 @@
+using System.Buffers;
 using SFML.Graphics;
 using SFML.System;
 
 namespace Elements.Rendering
 {
-    public record struct KTextLayer(int Handle, byte FontID, byte FontSize); 
+    public record struct KTextLayer(int RenderLayer, int BufferRegion, byte FontID, byte FontSize); 
     public record struct KTextBox(FloatRect bounds, KGlyphHandle[] glyphs);
     public record struct KGlyphHandle(byte FontID, char Chr, byte Size, bool Bold);
     
-    public class KTextManager
+    public class KTextHandler
     {
         private Dictionary<KGlyphHandle, Glyph> _glyphCache = new(52);
+        private HashSet<KTextBox> _cache = new();
 
         public Font[] Fonts;
         public KTextLayer[] TextLayers;
         public event Action<KGlyphHandle>? GlyphCacheUpdated; //int: fontID
 
-        public KTextManager()
+        public KTextHandler()
         {
             TextLayers = [];
             Fonts = [];
         }
 
-        public KTextManager(KTextLayer[] textLayers, Font[] fonts)
+        public void Init(Font[] fonts, KTextLayer[] textLayers)
         {
-            TextLayers = textLayers;
             Fonts = fonts;
+            TextLayers = textLayers;
         }
         
         public void Update()
@@ -42,11 +44,28 @@ namespace Elements.Rendering
             {
                 font = Fonts[TextLayers[i].FontID];
 
-                
-
                 renderer.DrawLayers[TextLayers[i].Handle].RenderFrame(
                     new RenderStates(font.GetTexture(TextLayers[i].FontSize)));
             }
+        }
+
+        public void DrawTextBox(KTextBox textBox, int layer = 0)
+        {
+            var buffer = ArrayPool<Vertex>.Shared.Rent(textBox.glyphs.Length * 6);
+
+            for (int i = 0; i < textBox.glyphs.Length; i++)
+            {
+                var handle = textBox.glyphs[i];
+                var glyph = GetGlyphFromCache(handle);
+                
+            }
+
+            ArrayPool<Vertex>.Shared.Return(buffer);
+        }
+
+        public void Draw(string text, int layer = 0)
+        {
+            
         }
 
         public KTextBox CreateTextBox(byte fontID, byte fontSize, string text, Vector2f position, Color color, 
@@ -74,8 +93,6 @@ namespace Elements.Rendering
                 }
 
                 var glyph = GetGlyphFromCache(handle);
-
-                buffer[i] = new KGlyphHandle(fontID, chars[i], fontSize, bold);
 
                 if (wrapThreshold > 0 && bounds.Size.X + glyph.Advance > wrapThreshold)
                 {

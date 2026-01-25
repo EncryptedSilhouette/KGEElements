@@ -64,7 +64,7 @@ namespace Elements.Game
             View.Move(panAmount);
         }
 
-        public void ZoomCamera(KInputManager inputManager, KRenderManager renderManager, in KDrawLayer layer)
+        public void ZoomCamera(KInputManager inputManager, KRenderManager renderManager, in KRenderLayer layer)
         {
             if (inputManager.ScrollDelta == 0) return;
 

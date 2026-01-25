@@ -38,7 +38,6 @@ using System.Diagnostics;
 public record struct KTextureAtlas(Texture Texture, KSprite[] Sprites);
 public record struct KSprite(string ID, Vector2f Rotocenter, FloatRect TextureCoords);
 
-
 public static class KProgram
 {
     //Other values are initialized in the static constructor for this class.
@@ -120,7 +119,7 @@ public static class KProgram
 
         //Managers
         InputManager = new();
-        RenderManager = new(Window, new VertexBuffer(4096, PrimitiveType.Triangles, VertexBuffer.UsageSpecifier.Stream));
+        RenderManager = new(Window, new VertexBuffer(2_999_988, PrimitiveType.Triangles, VertexBuffer.UsageSpecifier.Stream));
         GameManager = new(RenderManager, InputManager);
         LogManager = new();
     }
@@ -280,29 +279,40 @@ public static class KProgram
 
         OnLoad?.Invoke();
 
-        #region Draw layers
+        #region Rendering Initialization
 
-        var drawLayers = new KDrawLayer[2]; //Draw layers.
+        KBufferRegion[] bufferRegions =
+        [
+            new KBufferRegion(0,       499_998), //Region 0
+            new KBufferRegion(499_998, 499_998), //Region 1
+            new KBufferRegion(999_996, 499_998), //Region 2
+        ];
 
-        drawLayers[0] = new KDrawLayer //Default render layer.
-        {
-            Buffer = new VertexBuffer(16384, PrimitiveType.Triangles, VertexBuffer.UsageSpecifier.Dynamic),
-            States = new(TextureAtlases[0].Texture),
-            RenderTexture = new(Window.Size),
-            DrawBounds = new((0, 0), (Vector2f) Window.Size)
-        };
+        KRenderLayer[] renderLayers =
+        [
+            new KRenderLayer //Default render layer.
+            {
+                BufferRegion = 1,
+                RenderStates = new(TextureAtlases[0].Texture),
+                RenderTexture = new(Window.Size),
+                DrawBounds = new((0, 0), (Vector2f) Window.Size)
+            },
+        ];
 
-        drawLayers[1] = new KDrawLayer //Default text layer.
-        {
-            Buffer = new VertexBuffer(16384, PrimitiveType.Triangles, VertexBuffer.UsageSpecifier.Dynamic),
-            States = new(Fonts[0].GetTexture(12)),
-            RenderTexture = new(Window.Size),
-            DrawBounds = new((0, 0), (Vector2f)Window.Size)
-        };
+        KTextLayer[] textLayers =
+        [
+            new KTextLayer {
+                RenderLayer = 0,
+                BufferRegion = 2,
+                FontID = 0,
+                FontSize = 16
+            }
+        ];
+
+        RenderManager.Init(bufferRegions, renderLayers, Fonts, textLayers);
 
         #endregion
 
-        RenderManager.Init(drawLayers, Fonts);
         InputManager.Init(Window);
         GameManager.Init();
 
