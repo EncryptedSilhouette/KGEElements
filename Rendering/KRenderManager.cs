@@ -25,6 +25,14 @@ namespace Elements.Rendering
 
     public class KRenderManager
     {
+        //Render using PrimitiveType.TriangleStrip for quads. It only uses 4 vertices instead of 6.
+        //  _____   The order of vertices is different though as we're still drawing 2 triangles.
+        // |A   B|  The usual order for Quads is ABCD.
+        // |     |  For Triangles its ABD-BCD. 
+        // |D___C|  For TriangleStrip its ABDC, Swapping points C & D.
+
+        //Rendering with a single large vertex buffer allows up to avoid OpenGL context switching.
+
         private View _view;
         private VertexBuffer _vertexBuffer;
         private Vertex[] _drawBuffer;
@@ -135,16 +143,11 @@ namespace Elements.Rendering
 
         public void DrawRect(Vector2f a, Vector2f b, Color color, int layer = 0)
         {
-            //ABD
             _drawBuffer[0] = new Vertex(a, color);
             _drawBuffer[1] = new Vertex((b.X, a.Y), color);
             _drawBuffer[2] = new Vertex((a.X, b.Y), color);
-            //BCD
-            _drawBuffer[3] = new Vertex((b.X, a.Y), color);
-            _drawBuffer[4] = new Vertex((b.X, b.Y), color);
-            _drawBuffer[5] = new Vertex((a.X, b.Y), color);
-            
-            DrawBuffer();
+            _drawBuffer[3] = new Vertex((b.X, b.Y), color);
+            DrawBuffer(_drawBuffer, 4, layer);
         }
 
         public void DrawRect(FloatRect rect, Color color, int layer = 0) => 
@@ -157,27 +160,14 @@ namespace Elements.Rendering
             _drawBuffer[0] = new Vertex(rec.Position, dat.Color, dat.Sprite.TopLeft);
             _drawBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
             _drawBuffer[2] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
-            //BCD
-            _drawBuffer[3] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
             _drawBuffer[4] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
-            _drawBuffer[5] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
-
-            DrawBuffer(_drawBuffer, 6);
+            DrawBuffer(_drawBuffer, 4, layer);
         }
 
-        //public void DrawRect(in KDrawData dat, in KRectangle rec, int layer = 0)
-        //{
-        //    //ABD
-        //    _drawBuffer[0] = new Vertex(rec.TopLeft, dat.Color, dat.Sprite.TopLeft);
-        //    _drawBuffer[1] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
-        //    _drawBuffer[2] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);
-        //    //BCD
-        //    _drawBuffer[3] = new Vertex(rec.TopRight, dat.Color, dat.Sprite.TopRight);
-        //    _drawBuffer[4] = new Vertex(rec.BottomRight, dat.Color, dat.Sprite.BottomRight);
-        //    _drawBuffer[5] = new Vertex(rec.BottomLeft, dat.Color, dat.Sprite.BottomLeft);
-
-        //    RenderLayers[layer].(_drawBuffer, 6);
-        //}
+        public void DrawText()
+        {
+            
+        }
 
         private void ResizeView(object? _, SizeEventArgs e)
         {

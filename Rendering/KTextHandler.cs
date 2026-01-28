@@ -73,7 +73,6 @@ namespace Elements.Rendering
 
         private KRenderManager _renderer;
         private Dictionary<KGlyphHandle, Glyph> _glyphCache;
-        //private HashSet<KTextBox> _cache;
 
         public Font[] Fonts;
         public KTextLayer[] TextLayers;
@@ -83,7 +82,6 @@ namespace Elements.Rendering
         {
             _renderer = renderer;
             _glyphCache = new(52);
-            //_cache = new();
             TextLayers = [];
             Fonts = [];
         }
@@ -104,7 +102,7 @@ namespace Elements.Rendering
                 
             for (int i = 0; i < TextLayers.Length; i++)
             {
-                //renderer.RenderLayers[TextLayers[i].Handle].RenderFrame(TextLayers[i].RenderStates);
+                
             }
         }
 
@@ -130,7 +128,6 @@ namespace Elements.Rendering
 
                 var glyph = GetGlyphFromCache(handle);
 
-                //ABD
                 buffer[i * 6] = new Vertex 
                 { 
                     Position = pos + glyph.Bounds.Position,
@@ -149,24 +146,11 @@ namespace Elements.Rendering
                     Color = color,
                     TexCoords = (glyph.TextureRect.Left, glyph.TextureRect.Top + glyph.TextureRect.Height),
                 };
-                //BCD
-                buffer[i * 6  + 3] = new Vertex 
-                { 
-                    Position = (pos.X + glyph.Bounds.Left + glyph.Bounds.Width, pos.Y + glyph.Bounds.Top),
-                    Color = color,
-                    TexCoords = (glyph.TextureRect.Left + glyph.TextureRect.Width, glyph.TextureRect.Top),
-                };
-                buffer[i * 6 + 4] = new Vertex 
+                buffer[i * 6 + 3] = new Vertex 
                 { 
                     Position = (pos.X + glyph.Bounds.Left + glyph.Bounds.Width, pos.Y + glyph.Bounds.Top + glyph.Bounds.Height),
                     Color = color,
                     TexCoords = (glyph.TextureRect.Left + glyph.TextureRect.Width, glyph.TextureRect.Top + glyph.TextureRect.Height),
-                };
-                buffer[i * 6 + 5] = new Vertex 
-                { 
-                    Position = (pos.X + glyph.Bounds.Left, pos.Y + glyph.Bounds.Top + glyph.Bounds.Height),
-                    Color = color,
-                    TexCoords = (glyph.TextureRect.Left, glyph.TextureRect.Top + glyph.TextureRect.Height),
                 };
 
                 if (wrapThreshold > 0 && bounds.Size.X + glyph.Advance > wrapThreshold)
