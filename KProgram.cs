@@ -119,7 +119,7 @@ public static class KProgram
 
         //Managers
         InputManager = new();
-        RenderManager = new(Window, new VertexBuffer(2_999_988, PrimitiveType.Triangles, VertexBuffer.UsageSpecifier.Stream));
+        RenderManager = new(Window, new VertexBuffer(2_999_988, PrimitiveType.TriangleStrip, VertexBuffer.UsageSpecifier.Stream));
         GameManager = new(RenderManager, InputManager);
         LogManager = new();
     }
@@ -292,9 +292,9 @@ public static class KProgram
         [
             new KRenderLayer //Default render layer.
             {
-                BufferRegion = 1,
+                BufferRegion = 0,
                 RenderStates = new(TextureAtlases[0].Texture),
-                RenderTexture = new(Window.Size),
+                RenderTarget = Window,
                 DrawBounds = new((0, 0), (Vector2f) Window.Size)
             },
         ];

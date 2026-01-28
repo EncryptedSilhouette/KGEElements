@@ -7,13 +7,15 @@ namespace Elements.Rendering
     public struct KTextLayer
     {
         public RenderStates RenderStates;
-        public int Handle; 
+        public byte RenderLayer;
+        public byte BufferRegion;
         public byte FontID; 
         public byte FontSize; 
 
-        public KTextLayer(int handle, byte fontID, byte fontSize, RenderStates states)
+        public KTextLayer(byte renderLayer, byte bufferRegion, byte fontID, byte fontSize, RenderStates states)
         {
-            Handle = handle;
+            RenderLayer = renderLayer;
+            BufferRegion = bufferRegion;
             FontID = fontID;
             FontSize = fontSize;
             RenderStates = states;
@@ -71,7 +73,7 @@ namespace Elements.Rendering
 
         private KRenderManager _renderer;
         private Dictionary<KGlyphHandle, Glyph> _glyphCache;
-        private HashSet<KTextBox> _cache;
+        //private HashSet<KTextBox> _cache;
 
         public Font[] Fonts;
         public KTextLayer[] TextLayers;
@@ -81,9 +83,14 @@ namespace Elements.Rendering
         {
             _renderer = renderer;
             _glyphCache = new(52);
-            _cache = new();
+            //_cache = new();
             TextLayers = [];
             Fonts = [];
+        }
+
+        public void Init(Font[] fonts, KTextLayer[] layers)
+        {
+            
         }
         
         public void Update()
@@ -97,7 +104,7 @@ namespace Elements.Rendering
                 
             for (int i = 0; i < TextLayers.Length; i++)
             {
-                renderer.DrawLayers[TextLayers[i].Handle].RenderFrame(TextLayers[i].RenderStates);
+                //renderer.RenderLayers[TextLayers[i].Handle].RenderFrame(TextLayers[i].RenderStates);
             }
         }
 
@@ -169,7 +176,7 @@ namespace Elements.Rendering
                 }
             }
 
-            _renderer.DrawBufferToLayer(buffer, (uint)chars.Length * 6);
+            //_renderer.DrawBufferToLayer(buffer, (uint)chars.Length * 6);
 
             ArrayPool<Vertex>.Shared.Return(buffer);
         }

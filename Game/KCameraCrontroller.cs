@@ -33,10 +33,10 @@ namespace Elements.Game
 
         public void FrameUpdate(KInputManager inputManager, KRenderManager renderManager)
         {
-            ref var layer = ref renderManager.DrawLayers[0];
-            ZoomCamera(inputManager, renderManager, in layer);
-            PanCamera(inputManager, renderManager);
-            layer.RenderTexture.SetView(View);
+            //ref var layer = ref renderManager.DrawLayers[0];
+            //ZoomCamera(inputManager, renderManager, in layer);
+            //PanCamera(inputManager, renderManager);
+            //layer.RenderTexture.SetView(View);
         }
 
         public void PanCamera(KInputManager inputManager, KRenderManager renderManager)
@@ -71,7 +71,7 @@ namespace Elements.Game
             _zoomLevel += (inputManager.ScrollDelta > 0) ? -_zoomStrength : _zoomStrength;
             if (_zoomLevel <= 0) _zoomLevel = 0.1f;
 
-            var baseRes = layer.RenderTexture.Size;
+            var baseRes = layer.RenderTarget.Size;
             var newSize = new Vector2f(_zoomLevel * renderManager.Window.Size.X, _zoomLevel * renderManager.Window.Size.Y);
 
             var screenRatio = new Vector2f
