@@ -92,38 +92,29 @@ namespace Elements.Rendering
         {
             Window.Clear(BackgroundColor);
 
-            for (int i = 0; i < RenderLayers.Length; i++)
+            _drawBuffer[0] = new Vertex((0,0), Color.White);
+            _drawBuffer[1] = new Vertex((100,0), Color.Red);
+            _drawBuffer[2] = new Vertex((0,100), Color.Green);
+            _drawBuffer[3] = new Vertex((100,100), Color.Blue);
+            DrawBuffer(_drawBuffer, 4, 0);
+            
+            for (int i = 0; i < RenderLayers.Length; i++) //Iterates from the last index to
             {
-                switch (RenderLayers[i].RenderTarget)
+                ref var layer = ref RenderLayers[i];
+                ref var buffer = ref BufferRegions[layer.BufferRegion];
+
+                _vertexBuffer.Draw(layer.RenderTarget, buffer.Offset, buffer.Count, layer.RenderStates);
+
+                if (layer.RenderTarget is RenderTexture rt)
                 {
-                    case RenderWindow win:
-                    
-                    break;
+                    var b = layer.DrawBounds;
 
-                    case RenderTexture rt:
-                        ref var layer = ref RenderLayers[i];
-                        ref var region = ref BufferRegions[layer.BufferRegion];
+                    _drawBuffer[0] = new Vertex(b.Position, Color.White, (0, 0));
+                    _drawBuffer[1] = new Vertex((b.Position.X + b.Size.X, b.Position.Y), Color.White, (rt.Size.X, 0));
+                    _drawBuffer[2] = new Vertex((b.Position.X, b.Position.Y + b.Size.Y), Color.White, (0,rt.Size.Y));
+                    _drawBuffer[3] = new Vertex(b.Position + b.Size, Color.White, (Vector2f)rt.Size);
 
-                        rt.Clear(layer.ClearColor);
-
-                        _vertexBuffer.Draw(rt, region.Offset, region.Count, layer.RenderStates);
-                        region.Count = 0; //Reset buffer region.
-
-                        rt.Display();
-
-                        //ABDC
-                        _drawBuffer[0] = new Vertex((layer.DrawBounds.Left, layer.DrawBounds.Top), Color.White, 
-                                                    (0, 0)); 
-                        _drawBuffer[1] = new Vertex((layer.DrawBounds.Left + layer.DrawBounds.Width, layer.DrawBounds.Top), Color.White, 
-                                                    (rt.Texture.Size.X, 0)); 
-                        _drawBuffer[2] = new Vertex((layer.DrawBounds.Left, layer.DrawBounds.Top + layer.DrawBounds.Height), Color.White, 
-                                                    (0, rt.Texture.Size.Y)); 
-                        _drawBuffer[3] = new Vertex((layer.DrawBounds.Left + layer.DrawBounds.Width, layer.DrawBounds.Top + layer.DrawBounds.Height), Color.White, 
-                                                    (rt.Texture.Size.X, rt.Texture.Size.Y)); 
-
-                        layer.RenderStates.Texture = rt.Texture;
-                        Window.Draw(_drawBuffer, PrimitiveType.TriangleStrip, layer.RenderStates);
-                    break;
+                    Window.Draw(_drawBuffer, PrimitiveType.TriangleFan, new RenderStates(rt.Texture));
                 }
             }
 
@@ -135,8 +126,8 @@ namespace Elements.Rendering
         //Draw to screen. 
         public void DrawBuffer(Vertex[] vertices, uint vCount, int layer = 0)
         {
-            var region = BufferRegions[RenderLayers[layer].BufferRegion];
-            if (vCount > region.Count) vCount = region.Count;
+            ref var region = ref BufferRegions[RenderLayers[layer].BufferRegion];
+            if (vCount + region.Count > region.Max) vCount = region.Max - region.Count;
             _vertexBuffer.Update(vertices, vCount, region.Offset);
             region.Count += vCount;
         }

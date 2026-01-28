@@ -294,6 +294,13 @@ public static class KProgram
             {
                 BufferRegion = 0,
                 RenderStates = new(TextureAtlases[0].Texture),
+                RenderTarget = new RenderTexture(Window.Size),
+                DrawBounds = new((0, 0), (Vector2f) Window.Size)
+            },
+            new KRenderLayer //Default render layer.
+            {
+                BufferRegion = 1,
+                RenderStates = new(TextureAtlases[0].Texture),
                 RenderTarget = Window,
                 DrawBounds = new((0, 0), (Vector2f) Window.Size)
             },

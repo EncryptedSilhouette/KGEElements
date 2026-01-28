@@ -91,48 +91,48 @@ namespace Elements.Game
             GameMap.FrameUpdate(renderer);
             ResetWindowButton.FrameUpdate(renderer);
             
-            //Select
-            if (InputManager.IsMouseDown(KMouseStates.Mouse_1))
-            {
-                if (!SelectionBox.Selected)
-                {
-                    SelectionBox.Selected = true;
-                    SelectionBox.A = (InputManager.MousePosX, InputManager.MousePosY);
-                }
+            ////Select
+            //if (InputManager.IsMouseDown(KMouseStates.Mouse_1))
+            //{
+            //    if (!SelectionBox.Selected)
+            //    {
+            //        SelectionBox.Selected = true;
+            //        SelectionBox.A = (InputManager.MousePosX, InputManager.MousePosY);
+            //    }
 
-                SelectionBox.B = (InputManager.MousePosX, InputManager.MousePosY);
-                renderer.DrawRectToScreen(SelectionBox.A, SelectionBox.B, new(0, 0, 200, 100));
-            }
-            else if (SelectionBox.Selected)
-            {
-                SelectionBox.Selected = false;
-                SelectedUnits = new(Units.Length);
+            //    SelectionBox.B = (InputManager.MousePosX, InputManager.MousePosY);
+            //    renderer.DrawRect(SelectionBox.A, SelectionBox.B, new(0, 0, 200, 100));
+            //}
+            //else if (SelectionBox.Selected)
+            //{
+            //    SelectionBox.Selected = false;
+            //    SelectedUnits = new(Units.Length);
 
-                var pointAWorld = KProgram.MapPixelToCoords((Vector2i)SelectionBox.A, renderer.DrawLayers[0].RenderTexture.GetView());
-                var selectionSizeWorld = KProgram.MapPixelToCoords((Vector2i)SelectionBox.B, renderer.DrawLayers[0].RenderTexture.GetView()) -
-                    pointAWorld;
-                for (int i = 0; i < Units.Length; i++)
-                {
-                    var sBoxWorld = new FloatRect(pointAWorld, selectionSizeWorld); 
-                    if (KProgram.CheckRectPointCollision(sBoxWorld, Units[i].Bounds.Transform.Position))
-                    {
-                        SelectedUnits.Add(i);
-                    }
-                }
+            //    var pointAWorld = KProgram.MapPixelToCoords((Vector2i)SelectionBox.A, renderer.DrawLayers[0].RenderTexture.GetView());
+            //    var selectionSizeWorld = KProgram.MapPixelToCoords((Vector2i)SelectionBox.B, renderer.DrawLayers[0].RenderTexture.GetView()) -
+            //        pointAWorld;
+            //    for (int i = 0; i < Units.Length; i++)
+            //    {
+            //        var sBoxWorld = new FloatRect(pointAWorld, selectionSizeWorld); 
+            //        if (KProgram.CheckRectPointCollision(sBoxWorld, Units[i].Bounds.Transform.Position))
+            //        {
+            //            SelectedUnits.Add(i);
+            //        }
+            //    }
                 
-                Console.WriteLine($"Selected units:{SelectedUnits.Count}");
+            //    Console.WriteLine($"Selected units:{SelectedUnits.Count}");
 
-                for (int i = 0; i < SelectedUnits.Count; i++)
-                {
-                    Console.Write($"{i}, ");
-                }
-                Console.WriteLine();
-            }
+            //    for (int i = 0; i < SelectedUnits.Count; i++)
+            //    {
+            //        Console.Write($"{i}, ");
+            //    }
+            //    Console.WriteLine();
+            //}
 
-            for (int i = 0; i < _unitCount; i++)
-            {
-                renderer.DrawRect(Units[i].DrawData, Units[i].Bounds);
-            }
+            //for (int i = 0; i < _unitCount; i++)
+            //{
+            //    renderer.DrawRect(Units[i].DrawData, Units[i].Bounds);
+            //}
         }
     }
 }
