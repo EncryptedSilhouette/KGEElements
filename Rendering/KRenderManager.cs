@@ -25,14 +25,7 @@ namespace Elements.Rendering
 
     public class KRenderManager
     {
-        //Render using PrimitiveType.TriangleStrip for quads. It only uses 4 vertices instead of 6.
-        //  _____   The order of vertices is different though as we're still drawing 2 triangles.
-        // |A   B|  The usual order for Quads is ABCD.
-        // |     |  For Triangles its ABD-BCD. 
-        // |D___C|  For TriangleStrip its ABDC, Swapping points C & D.
-
         //Rendering with a single large vertex buffer allows up to avoid OpenGL context switching.
-
         private View _view;
         private VertexBuffer _vertexBuffer;
         private Vertex[] _drawBuffer;
@@ -90,14 +83,13 @@ namespace Elements.Rendering
 
         public void FrameUpdate()
         {
-            Window.Clear(BackgroundColor);
 
             _drawBuffer[0] = new Vertex((0,0), Color.White);
             _drawBuffer[1] = new Vertex((100,0), Color.Red);
-            _drawBuffer[2] = new Vertex((0,100), Color.Green);
-            _drawBuffer[3] = new Vertex((100,100), Color.Blue);
+            _drawBuffer[2] = new Vertex((100,100), Color.Blue);
+            _drawBuffer[3] = new Vertex((0,100), Color.Green);
             DrawBuffer(_drawBuffer, 4, 0);
-            
+
             for (int i = 0; i < RenderLayers.Length; i++) //Iterates from the last index to
             {
                 ref var layer = ref RenderLayers[i];
@@ -108,12 +100,13 @@ namespace Elements.Rendering
                 if (layer.RenderTarget is RenderTexture rt)
                 {
                     var b = layer.DrawBounds;
+                    rt.Display();
 
                     _drawBuffer[0] = new Vertex(b.Position, Color.White, (0, 0));
                     _drawBuffer[1] = new Vertex((b.Position.X + b.Size.X, b.Position.Y), Color.White, (rt.Size.X, 0));
-                    _drawBuffer[2] = new Vertex((b.Position.X, b.Position.Y + b.Size.Y), Color.White, (0,rt.Size.Y));
-                    _drawBuffer[3] = new Vertex(b.Position + b.Size, Color.White, (Vector2f)rt.Size);
-
+                    _drawBuffer[2] = new Vertex(b.Position + b.Size, Color.White, (Vector2f)rt.Size);
+                    _drawBuffer[3] = new Vertex((b.Position.X, b.Position.Y + b.Size.Y), Color.White, (0,rt.Size.Y));
+                                        
                     Window.Draw(_drawBuffer, PrimitiveType.TriangleFan, new RenderStates(rt.Texture));
                 }
             }
