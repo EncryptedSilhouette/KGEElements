@@ -104,6 +104,7 @@ namespace Elements.Rendering
             {
                 
             }
+
         }
 
         public void DrawText(Vector2f pos, string text, byte fontID, byte fontSize, bool bold, Color color,
@@ -111,6 +112,8 @@ namespace Elements.Rendering
             byte wrapThreshold = 0)
         {
             var chars = text.AsSpan();
+
+            
             var buffer = ArrayPool<Vertex>.Shared.Rent(chars.Length * 6); 
 
             for (int i = 0; i < chars.Length; i++)

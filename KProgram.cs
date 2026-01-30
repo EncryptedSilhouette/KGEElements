@@ -55,9 +55,9 @@ public static class KProgram
     public static RenderWindow Window;
     public static Random RNG;
     public static KInputManager InputManager;       //Needs a rework.
-    public static KRenderManager RenderManager;     //Finished. 
+    public static KRenderManager RenderManager;     //WIP
     public static KGameManager GameManager;         //WIP
-    public static KLogManager LogManager;           //Unfinished.
+    public static KLogManager LogManager;           //WIP
     public static VideoMode[] VideoModes;
     public static Font[] Fonts = [];
     public static KTextureAtlas[] TextureAtlases = [];
@@ -69,6 +69,7 @@ public static class KProgram
     public static event Action? OnStop;
     public static event Action? OnDeinit;
 
+    //VSync conflicts with FrameLimit, will need better handling between the two.
     public static bool VSync
     {
         get => s_vSync;
@@ -80,11 +81,12 @@ public static class KProgram
         }
     }
 
-    public static uint FrameLimit
+    public static uint FrameLimit 
     {
         get => s_frameLimit;
         set
         {
+            //Ensures frame limit is never set below update target.
             s_frameLimit = value > UpdateTarget ? value : UpdateTarget;
             if (!s_vSync) Window.SetFramerateLimit(value);
         }
@@ -102,12 +104,12 @@ public static class KProgram
 
     static KProgram() //Static constructor; initializes static members.
     {
-        RNG = new();
+        RNG = new(); 
         Window = new(VideoMode.DesktopMode, s_title);
-        Window.Closed += (_, _) => Running = false;
-        VideoModes = VideoMode.FullscreenModes;
+        Window.Closed += (_, _) => Running = false; //Stop's the game loop when the window is closed.
+        VideoModes = VideoMode.FullscreenModes; //Currently unused, will be used for changing resolution options later.
 
-        //configs
+        //configs (values will be overridden by the values in config.csv if it exists)
         s_configPath = "config.csv";
         Title = "Elements";
         UpdateTarget = 30;
@@ -119,12 +121,12 @@ public static class KProgram
 
         //Managers
         InputManager = new();
-        RenderManager = new(Window, new VertexBuffer(2_999_988, PrimitiveType.TriangleStrip, VertexBuffer.UsageSpecifier.Stream));
+        RenderManager = new(Window, new VertexBuffer(2_999_988, PrimitiveType.Triangles, VertexBuffer.UsageSpecifier.Stream));
         GameManager = new(RenderManager, InputManager);
         LogManager = new();
     }
 
-    public static void Main(string[] args) //Program entry coords.
+    public static void Main(string[] args) //Program entry point.
     {
         InitAndLoad();
 
@@ -163,18 +165,17 @@ public static class KProgram
             unprocessedTime += delta;
             lastTime = newTime;
 
-            //Debug tracker.
-            if (debugTimer.ElapsedMilliseconds / MS_PER_SECOND >= 1)
-            {
-                debugTimer.Restart();
-//#if DEBUG
+//             //Debug update tracker.
+//             if (debugTimer.ElapsedMilliseconds / MS_PER_SECOND >= 1)
+//             {
+//                 debugTimer.Restart();
+// #if DEBUG
 //                Console.Write($"\r\rups: {ups}, fps: {fps}");
-//#endif
-                ups = fps = 0;
-            }
+// #endif
+//                 ups = fps = 0;
+//             }
 
-            //Loops when lagging behind on updates.
-            //These updates are not rendered. 
+            //Loops when lagging behind on updates. This will skip rendering for these updates.
             while (unprocessedTime >= UpdateInterval && Running)
             {
                 ups++;
@@ -194,7 +195,6 @@ public static class KProgram
 
     private static void InitAndLoad()
     {
-        //Loading
         #region Load Configs
 
         var lines = File.ReadAllLines(s_configPath);
@@ -351,7 +351,19 @@ public static class KProgram
         //Reads from texture data file.
         var lines = File.ReadAllLines(filePath);
 
-        //Loads the whole atlas as a sprite at index 0.
+        #region Data entry legend
+        //This is how data is layed out in csv texture data files:
+        //index 0: sprite name
+        //index 1: sprite id
+        //index 2: sprite pos x1
+        //index 3: sprite pos y1
+        //index 4: sprite y2
+        //index 5: sprite y2
+        //index 6: sprite rotation center x1
+        //index 7: sprite rotation center y1
+        #endregion
+
+        //Loads the whole atlas as a sprite at the first line.
         Texture texture = new(lines[0]);
         List<KSprite> sprites =
         [
@@ -371,19 +383,8 @@ public static class KProgram
             }
         ];
 
-        #region Data entry legend
-        //This is how data is layed out in csv texture data files:
-        //index 0: sprite name
-        //index 1: sprite id
-        //index 2: sprite pos x1
-        //index 3: sprite pos y1
-        //index 4: sprite y2
-        //index 5: sprite y2
-        //index 6: sprite rotation center x1
-        //index 7: sprite rotation center y1
-        #endregion
-
-        for (int i = 1; i < lines.Length; i++) //Iterate over lines
+        //Loads data from the CSV. Skips the first line.
+        for (int i = 1; i < lines.Length; i++)
         {
             var contents = lines[i].Split(','); //Split line into values
 
@@ -455,6 +456,7 @@ public static class KProgram
         pos.X >= rectangle.Left && pos.X <= rectangle.Left + rectangle.Width &&
         pos.Y >= rectangle.Top && pos.Y <= rectangle.Top + rectangle.Height;
 
+    //Exists here to remove window dependency. 
     public static Vector2i MapCoordsToPixel(float x, float y, View view) => Window.MapCoordsToPixel((x, y), view);
     public static Vector2i MapCoordsToPixel(Vector2f coords, View view) => Window.MapCoordsToPixel(coords, view);
 

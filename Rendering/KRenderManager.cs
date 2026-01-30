@@ -21,6 +21,8 @@ namespace Elements.Rendering
             RenderStates = RenderStates.Default;
             DrawBounds = new();
         }
+
+        public void Clear() => RenderTarget.Clear(ClearColor);
     }
 
     public class KRenderManager
@@ -76,37 +78,31 @@ namespace Elements.Rendering
             Init(regions, layers, fonts, textLayers);   
         }
 
-        public void Deinit()
-        {
-            Window.Resized -= ResizeView;
-        }
+        public void Deinit() => Window.Resized -= ResizeView;
 
         public void FrameUpdate()
         {
-
-            _drawBuffer[0] = new Vertex((0,0), Color.White);
-            _drawBuffer[1] = new Vertex((100,0), Color.Red);
-            _drawBuffer[2] = new Vertex((100,100), Color.Blue);
-            _drawBuffer[3] = new Vertex((0,100), Color.Green);
-            DrawBuffer(_drawBuffer, 4, 0);
-
             for (int i = 0; i < RenderLayers.Length; i++) //Iterates from the last index to
             {
                 ref var layer = ref RenderLayers[i];
                 ref var buffer = ref BufferRegions[layer.BufferRegion];
 
+                layer.Clear();
                 _vertexBuffer.Draw(layer.RenderTarget, buffer.Offset, buffer.Count, layer.RenderStates);
 
-                if (layer.RenderTarget is RenderTexture rt)
+                if (layer.RenderTarget is RenderTexture rt) //If the RenderTarget is a RenderTexture, draw to window.
                 {
                     var b = layer.DrawBounds;
-                    rt.Display();
 
                     _drawBuffer[0] = new Vertex(b.Position, Color.White, (0, 0));
                     _drawBuffer[1] = new Vertex((b.Position.X + b.Size.X, b.Position.Y), Color.White, (rt.Size.X, 0));
-                    _drawBuffer[2] = new Vertex(b.Position + b.Size, Color.White, (Vector2f)rt.Size);
-                    _drawBuffer[3] = new Vertex((b.Position.X, b.Position.Y + b.Size.Y), Color.White, (0,rt.Size.Y));
+                    _drawBuffer[2] = new Vertex((b.Position.X, b.Position.Y + b.Size.Y), Color.White, (0,rt.Size.Y));
                                         
+                    _drawBuffer[3] = new Vertex((b.Position.X + b.Size.X, b.Position.Y), Color.White, (rt.Size.X, 0));
+                    _drawBuffer[4] = new Vertex(b.Position + b.Size, Color.White, (Vector2f)rt.Size);
+                    _drawBuffer[5] = new Vertex((b.Position.X, b.Position.Y + b.Size.Y), Color.White, (0,rt.Size.Y));
+
+                    rt.Display();
                     Window.Draw(_drawBuffer, PrimitiveType.TriangleFan, new RenderStates(rt.Texture));
                 }
             }
@@ -129,9 +125,12 @@ namespace Elements.Rendering
         {
             _drawBuffer[0] = new Vertex(a, color);
             _drawBuffer[1] = new Vertex((b.X, a.Y), color);
-            _drawBuffer[2] = new Vertex((a.X, b.Y), color);
-            _drawBuffer[3] = new Vertex((b.X, b.Y), color);
-            DrawBuffer(_drawBuffer, 4, layer);
+            _drawBuffer[2] = new Vertex((b.X, b.Y), color);
+
+            _drawBuffer[3] = new Vertex((b.X, a.Y), color);
+            _drawBuffer[4] = new Vertex((a.X, b.Y), color);
+            _drawBuffer[5] = new Vertex((b.X, b.Y), color);
+            DrawBuffer(_drawBuffer, 6, layer);
         }
 
         public void DrawRect(FloatRect rect, Color color, int layer = 0) => 
@@ -140,12 +139,14 @@ namespace Elements.Rendering
         ////Draw w/ texture data.
         public void DrawRect(in KDrawData dat, in FloatRect rec, int layer = 0)
         {
-            //ABD
             _drawBuffer[0] = new Vertex(rec.Position, dat.Color, dat.Sprite.TopLeft);
             _drawBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
-            _drawBuffer[2] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
-            _drawBuffer[4] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
-            DrawBuffer(_drawBuffer, 4, layer);
+            _drawBuffer[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
+
+            _drawBuffer[3] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
+            _drawBuffer[4] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
+            _drawBuffer[5] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
+            DrawBuffer(_drawBuffer, 6, layer);
         }
 
         public void DrawText()
