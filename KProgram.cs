@@ -281,28 +281,18 @@ public static class KProgram
 
         #region Rendering Initialization
 
-        KBufferRegion[] bufferRegions =
+        KBufferRegion.CreateBufferRegions(
         [
-            new KBufferRegion(0,       499_998), //Region 0
-            new KBufferRegion(499_998, 499_998), //Region 1
-            new KBufferRegion(999_996, 499_998), //Region 2
-        ];
+            
+        ]);
 
         KRenderLayer[] renderLayers =
         [
             new KRenderLayer //Default render layer.
             {
-                BufferRegion = 0,
                 RenderStates = new(TextureAtlases[0].Texture),
-                RenderTarget = new RenderTexture(Window.Size),
-                DrawBounds = new((0, 0), (Vector2f) Window.Size)
-            },
-            new KRenderLayer //Default render layer.
-            {
-                BufferRegion = 1,
-                RenderStates = new(TextureAtlases[0].Texture),
-                RenderTarget = Window,
-                DrawBounds = new((0, 0), (Vector2f) Window.Size)
+                RenderTexture = new RenderTexture(Window.Size),
+                Bounds = new((0, 0), (Vector2f) Window.Size)
             },
         ];
 

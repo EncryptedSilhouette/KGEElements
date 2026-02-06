@@ -76,7 +76,7 @@ namespace Elements.Rendering
 
         public Font[] Fonts;
         public KTextLayer[] TextLayers;
-        public event Action<KTextHandler, KGlyphHandle>? GlyphCacheUpdated; //int: fontID
+        public event Action<KTextHandler, KGlyphHandle>? GlyphCacheUpdated;
 
         public KTextHandler(KRenderManager renderer)
         {
@@ -88,12 +88,8 @@ namespace Elements.Rendering
 
         public void Init(Font[] fonts, KTextLayer[] layers)
         {
-            
-        }
-        
-        public void Update()
-        {
-            
+            Fonts = fonts;
+            TextLayers = layers;
         }
 
         public void FrameUpdate(KRenderManager renderer)
@@ -102,9 +98,9 @@ namespace Elements.Rendering
                 
             for (int i = 0; i < TextLayers.Length; i++)
             {
+                ref var region = ref TextLayers[i].BufferRegion;
                 
             }
-
         }
 
         public void DrawText(Vector2f pos, string text, byte fontID, byte fontSize, bool bold, Color color,

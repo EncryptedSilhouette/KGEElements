@@ -71,7 +71,7 @@ namespace Elements.Game
             _zoomLevel += (inputManager.ScrollDelta > 0) ? -_zoomStrength : _zoomStrength;
             if (_zoomLevel <= 0) _zoomLevel = 0.1f;
 
-            var baseRes = layer.RenderTarget.Size;
+            var baseRes = layer.RenderTexture.Size;
             var newSize = new Vector2f(_zoomLevel * renderManager.Window.Size.X, _zoomLevel * renderManager.Window.Size.Y);
 
             var screenRatio = new Vector2f

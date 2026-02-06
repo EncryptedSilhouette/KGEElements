@@ -1,32 +1,76 @@
-﻿using SFML.Graphics;
+﻿using Elements.Core;
+using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 
 namespace Elements.Rendering
 {
-    public record struct KBufferRegion(uint Offset, uint Max, uint Count = 0);
+    public struct KBufferRegion
+    {
+        public static KBufferRegion[] CreateBufferRegions(uint[] bufferSizes)
+        {
+            uint offset = 0;
+            KBufferRegion[] regions = new KBufferRegion[bufferSizes.Length];
+
+            for (int i = 0; i < regions.Length; i++)
+            {
+                regions[i] = new(offset, bufferSizes[i]);
+                offset += bufferSizes[i];
+            }
+
+            return regions;
+        }
+
+        public uint Offset; 
+        public uint Capacity; 
+        public uint Count = 0;
+    
+        public KBufferRegion() { }
+
+        public KBufferRegion(uint offset, uint max)
+        {
+            Count = 0;
+            Offset = offset;
+            Capacity = max;
+        }
+    }
 
     public struct KRenderLayer
     {
-        public int BufferRegion;
         public Color ClearColor;
-        public FloatRect DrawBounds;
+        public FloatRect Bounds;
         public RenderStates RenderStates;
-        required public IRenderTarget RenderTarget;
+        public KBufferRegion BufferRegion;
+        required public RenderTexture RenderTexture;
 
         public KRenderLayer()
         {
-            BufferRegion = 0;
             ClearColor = Color.Transparent;
             RenderStates = RenderStates.Default;
-            DrawBounds = new();
+            Bounds = new();
         }
 
-        public void Clear() => RenderTarget.Clear(ClearColor);
+        public void Clear() => RenderTexture.Clear(ClearColor);
+
+        public void Draw(VertexBuffer vertexBuffer) => vertexBuffer.Draw(RenderTexture, BufferRegion.Offset, BufferRegion.Count, RenderStates);
+    }
+
+    public struct KDrawData
+    {
+        public Color Color;
+        public KRectangle Sprite;
+
+        public KDrawData()
+        {
+            Color = Color.White;
+            Sprite = new KRectangle();
+        }
     }
 
     public class KRenderManager
     {
+        public const int SCREEN_LAYER = -1; 
+
         //Rendering with a single large vertex buffer allows up to avoid OpenGL context switching.
         private View _view;
         private VertexBuffer _vertexBuffer;
@@ -36,7 +80,7 @@ namespace Elements.Rendering
         public RenderStates RenderStates;
         public RenderWindow Window;
         public KTextHandler TextHandler;
-        public KBufferRegion[] BufferRegions;
+        public KBufferRegion BufferRegion;
         public KRenderLayer[] RenderLayers;
 
         public float ScreenLeft => 0;
@@ -53,112 +97,115 @@ namespace Elements.Rendering
         {
             _view = window.DefaultView;
             _vertexBuffer = vertexBuffer;
-            _drawBuffer = new Vertex[16];
+            _drawBuffer = new Vertex[6];
 
             TextHandler = new(this);
             BackgroundColor = Color.Black;
             RenderStates = RenderStates.Default;
             Window = window;
-            BufferRegions = [];
             RenderLayers = [];
         }
 
         //use during scene swapping if additional layers/cameras are needed.
-        public void Init(KBufferRegion[] regions, KRenderLayer[] layers, Font[] fonts, KTextLayer[] textLayers)
+        public void Init(KBufferRegion windowBuffer, KRenderLayer[] layers, Font[] fonts, KTextLayer[] textLayers)
         {
-            BufferRegions = regions;
+            BufferRegion = windowBuffer;
             RenderLayers = layers;
             TextHandler.Init(fonts, textLayers);
             Window.Resized += ResizeView;
-        }
-
-        public void Init(VertexBuffer vertexBuffer, KBufferRegion[] regions, KRenderLayer[] layers, Font[] fonts, KTextLayer[] textLayers)
-        {
-            _vertexBuffer = vertexBuffer;
-            Init(regions, layers, fonts, textLayers);   
         }
 
         public void Deinit() => Window.Resized -= ResizeView;
 
         public void FrameUpdate()
         {
-            for (int i = 0; i < RenderLayers.Length; i++) //Iterates from the last index to
+            Window.Clear(BackgroundColor);
+
+            for (int i = 0; i < RenderLayers.Length; i++)
             {
                 ref var layer = ref RenderLayers[i];
-                ref var buffer = ref BufferRegions[layer.BufferRegion];
 
+                if (layer.BufferRegion.Count == 0) continue;
+
+                var rt = layer.RenderTexture; 
                 layer.Clear();
-                _vertexBuffer.Draw(layer.RenderTarget, buffer.Offset, buffer.Count, layer.RenderStates);
+                layer.Draw(_vertexBuffer);
+                rt.Display();
 
-                if (layer.RenderTarget is RenderTexture rt) //If the RenderTarget is a RenderTexture, draw to window.
-                {
-                    var b = layer.DrawBounds;
+                _drawBuffer[0] = new Vertex(layer.Bounds.Position, Color.White, (0, 0));
+                _drawBuffer[1] = new Vertex((layer.Bounds.Position.X + layer.Bounds.Size.X, layer.Bounds.Position.Y), Color.White, (rt.Size.X, 0));
+                _drawBuffer[2] = new Vertex((layer.Bounds.Position.X, layer.Bounds.Position.Y + layer.Bounds.Size.Y), Color.White, (0,rt.Size.Y));
+                                    
+                _drawBuffer[3] = new Vertex((layer.Bounds.Position.X + layer.Bounds.Size.X, layer.Bounds.Position.Y), Color.White, (rt.Size.X, 0));
+                _drawBuffer[4] = new Vertex(layer.Bounds.Position + layer.Bounds.Size, Color.White, (Vector2f)rt.Size);
+                _drawBuffer[5] = new Vertex((layer.Bounds.Position.X, layer.Bounds.Position.Y + layer.Bounds.Size.Y), Color.White, (0,rt.Size.Y));
 
-                    _drawBuffer[0] = new Vertex(b.Position, Color.White, (0, 0));
-                    _drawBuffer[1] = new Vertex((b.Position.X + b.Size.X, b.Position.Y), Color.White, (rt.Size.X, 0));
-                    _drawBuffer[2] = new Vertex((b.Position.X, b.Position.Y + b.Size.Y), Color.White, (0,rt.Size.Y));
-                                        
-                    _drawBuffer[3] = new Vertex((b.Position.X + b.Size.X, b.Position.Y), Color.White, (rt.Size.X, 0));
-                    _drawBuffer[4] = new Vertex(b.Position + b.Size, Color.White, (Vector2f)rt.Size);
-                    _drawBuffer[5] = new Vertex((b.Position.X, b.Position.Y + b.Size.Y), Color.White, (0,rt.Size.Y));
-
-                    rt.Display();
-                    Window.Draw(_drawBuffer, PrimitiveType.TriangleFan, new RenderStates(rt.Texture));
-                }
+                Window.Draw(_drawBuffer, PrimitiveType.Triangles, new RenderStates(layer.RenderTexture.Texture));
             }
 
-            TextHandler.FrameUpdate(this);
+            if (BufferRegion.Count > 1) _vertexBuffer.Draw(Window, BufferRegion.Offset, BufferRegion.Count, RenderStates);
 
-            Window.Display();
+            Window.Display();   
         }
 
-        //Draw to screen. 
-        public void DrawBuffer(Vertex[] vertices, uint vCount, int layer = 0)
+        public void DrawToWindow(Vertex[] vertices, uint vCount)
         {
-            ref var region = ref BufferRegions[RenderLayers[layer].BufferRegion];
-            if (vCount + region.Count > region.Max) vCount = region.Max - region.Count;
-            _vertexBuffer.Update(vertices, vCount, region.Offset);
-            region.Count += vCount;
+            if (BufferRegion.Count + vCount > BufferRegion.Capacity) vCount = BufferRegion.Capacity - BufferRegion.Count;
+            _vertexBuffer.Update(vertices, vCount, BufferRegion.Offset);
+            BufferRegion.Count += vCount;
         }
 
-        public void DrawRect(Vector2f a, Vector2f b, Color color, int layer = 0)
+        public void DrawToLayer(Vertex[] vertices, uint vCount, int layer = 0)
         {
-            _drawBuffer[0] = new Vertex(a, color);
-            _drawBuffer[1] = new Vertex((b.X, a.Y), color);
-            _drawBuffer[2] = new Vertex((b.X, b.Y), color);
-
-            _drawBuffer[3] = new Vertex((b.X, a.Y), color);
-            _drawBuffer[4] = new Vertex((a.X, b.Y), color);
-            _drawBuffer[5] = new Vertex((b.X, b.Y), color);
-            DrawBuffer(_drawBuffer, 6, layer);
+            ref var l = ref RenderLayers[layer];
+            if (l.BufferRegion.Count + vCount > l.BufferRegion.Capacity) vCount = l.BufferRegion.Capacity - l.BufferRegion.Count;
+            _vertexBuffer.Update(vertices, vCount, l.BufferRegion.Offset);
+            l.BufferRegion.Count += vCount;
         }
 
-        public void DrawRect(FloatRect rect, Color color, int layer = 0) => 
-            DrawRect(rect.Position, rect.Size, color, layer);
-
-        ////Draw w/ texture data.
-        public void DrawRect(in KDrawData dat, in FloatRect rec, int layer = 0)
+        public void DrawRect(Vector2f pointA, Vector2f pointB, Color color, int layer = 0)
         {
-            _drawBuffer[0] = new Vertex(rec.Position, dat.Color, dat.Sprite.TopLeft);
-            _drawBuffer[1] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
-            _drawBuffer[2] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
+            _drawBuffer[0] = new Vertex(pointA, color);
+            _drawBuffer[1] = new Vertex((pointB.X, pointA.Y), color);
+            _drawBuffer[2] = new Vertex((pointA.X, pointB.Y), color);
+                                    
+            _drawBuffer[3] = new Vertex((pointB.X, pointA.Y), color);
+            _drawBuffer[4] = new Vertex(pointB, color);
+            _drawBuffer[5] = new Vertex((pointA.X, pointB.Y), color);
 
-            _drawBuffer[3] = new Vertex((rec.Left + rec.Width, rec.Top), dat.Color, dat.Sprite.TopRight);
-            _drawBuffer[4] = new Vertex((rec.Left, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomLeft);
-            _drawBuffer[5] = new Vertex((rec.Left + rec.Width, rec.Top + rec.Height), dat.Color, dat.Sprite.BottomRight);
-            DrawBuffer(_drawBuffer, 6, layer);
+            if (layer < 0) DrawToWindow(_drawBuffer, 6);
+            else DrawToLayer(_drawBuffer, 6, layer);
         }
 
-        public void DrawText()
-        {
-            
-        }
+        public void DrawRect(FloatRect rect, Color color, int layer = 0) => DrawRect(rect.Position, rect.Position + rect.Size, color, layer);
+
+        // public void DrawRect(KDrawData drawData, int layer = 0)
+        // {
+        //     _drawBuffer[0] = new Vertex(pointA, color);
+        //     _drawBuffer[1] = new Vertex((pointB.X, pointA.Y), color);
+        //     _drawBuffer[2] = new Vertex((pointA.X, pointB.Y), color);
+                                    
+        //     _drawBuffer[3] = new Vertex((pointB.X, pointA.Y), color);
+        //     _drawBuffer[4] = new Vertex(pointB, color);
+        //     _drawBuffer[5] = new Vertex((pointA.X, pointB.Y), color);
+
+        //     if (layer < 0) DrawToWindow(_drawBuffer, 6);
+        //     else DrawToLayer(_drawBuffer, 6, layer);
+        // }
 
         private void ResizeView(object? _, SizeEventArgs e)
         {
             _view.Size = (Vector2f)e.Size;
             _view.Center = _view.Size / 2;
             Window.SetView(_view);
+        }
+
+        public void ResizeBuffer(uint newSize)
+        {
+            var buffer = new VertexBuffer(newSize, _vertexBuffer.PrimitiveType, _vertexBuffer.Usage);
+            buffer.Update(_vertexBuffer);   //Copy old buffer contents to new buffer.
+            _vertexBuffer.Dispose();        //Dispose old object.
+            _vertexBuffer = buffer;         //Assign refrence to new object.
         }
     }
 }
